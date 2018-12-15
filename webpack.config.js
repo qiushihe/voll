@@ -7,7 +7,6 @@ const babelRc = require("./.babelrc");
 
 module.exports = function () {
   return {
-    mode: "production",
     target: "electron-main",
     entry: {
       bundle: path.resolve(__dirname, "src/index"),
@@ -46,6 +45,7 @@ module.exports = function () {
     },
     plugins: [
       new HtmlWebpackPlugin({
+        excludeChunks: ["main"],
         template: path.resolve(__dirname, "templates", "index.html")
       }),
       new CopyWebpackPlugin([{

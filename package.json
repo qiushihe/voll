@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "clean": "shx rm -fr ./dist/* ./build/*",
-    "build": "webpack -p",
-    "dev": "electron ./build",
+    "build-dev": "webpack --mode development",
+    "build-prod": "webpack -p --mode production",
+    "start": "electron ./build",
     "package": "electron-packager ./build --out=./dist"
   },
   "dependencies": {},
