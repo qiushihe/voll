@@ -15,7 +15,7 @@ class WebviewContainer extends PureComponent {
     return (
       <Base>
         <webview
-          autosize={true}
+          autosize="on"
           style={{
             display: "flex",
             flexDirection: "column",
