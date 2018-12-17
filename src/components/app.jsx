@@ -2,7 +2,7 @@ import { PureComponent } from "react";
 import styled from "styled-components";
 
 import Tray from "/src/components/tray";
-import WebviewContainer from "/src/components/webview-container";
+import Webviews from "/src/components/webviews";
 
 const Base = styled.div`
   display: flex;
@@ -13,11 +13,15 @@ const Base = styled.div`
 `;
 
 class App extends PureComponent {
+  componentDidMount() {
+    // TODO: Add test sites
+  }
+
   render() {
     return (
       <Base>
         <Tray />
-        <WebviewContainer srcUrl={"https://bonobos.com"} />
+        <Webviews />
       </Base>
     );
   }
