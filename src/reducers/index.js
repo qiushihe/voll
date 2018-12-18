@@ -1,9 +1,11 @@
 import { combineReducers } from "redux";
 
 import sites from "./sites.reducer";
+import webviews from "./webviews.reducer";
 
 const combinedReducer = combineReducers({
-  sites
+  sites,
+  webviews
 });
 
 export default (state = {}, action) => {

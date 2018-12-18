@@ -37,10 +37,10 @@ const Label = styled.div`
 
 class BaseSite extends PureComponent {
   render() {
-    const { label, renderIcon } = this.props;
+    const { label, renderIcon, onClick } = this.props;
 
     return (
-      <Base>
+      <Base onClick={onClick}>
         <Icon>{renderIcon()}</Icon>
         <Label>{label}</Label>
       </Base>
@@ -50,12 +50,14 @@ class BaseSite extends PureComponent {
 
 BaseSite.propTypes = {
   label: PropTypes.node,
-  renderIcon: PropTypes.func
+  renderIcon: PropTypes.func,
+  onClick: PropTypes.func
 };
 
 BaseSite.defaultProps = {
   label: "",
-  renderIcon: (() => {})
+  renderIcon: (() => {}),
+  onClick: (() => {})
 };
 
 export default BaseSite;

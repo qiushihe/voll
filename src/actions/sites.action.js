@@ -1,14 +1,14 @@
 import { createAction } from "redux-actions";
 
-export const ADD_SITE = "ADD_SITE";
-export const ADD_SITES = "ADD_SITES";
+export const SITES_ADD_ONE = "SITES_ADD_ONE";
+export const SITES_ADD_MANY = "SITES_ADD_MANY";
 
-export const addSite = createAction(
-  ADD_SITE,
+export const addOne = createAction(
+  SITES_ADD_ONE,
   ({ name, url }) => ({ name, url })
 );
 
-export const addSites = createAction(
-  ADD_SITES,
+export const addMany = createAction(
+  SITES_ADD_MANY,
   ({ sites }) => ({ sites })
 );

@@ -31,7 +31,7 @@ ipcMain.on("app", (evt) => {
   evt.sender.send("populate-sites", {
     sites: [
       { name: "Google", url: "https://www.google.com" },
-      { name: "Yahoo", url: "https://www.yahoo.com" },
+      { name: "Walmart", url: "https://www.walmart.com" },
       { name: "Bonobos", url: "https://bonobos.com" }
     ]
   });

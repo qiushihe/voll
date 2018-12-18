@@ -10,6 +10,8 @@ export const site = createSelector(
   (siteId, sites) => find({ id: siteId })(sites)
 );
 
+export const id = createSelector(site, get("id"));
+
 export const name = createSelector(site, get("name"));
 
 export const url = createSelector(site, get("url"));

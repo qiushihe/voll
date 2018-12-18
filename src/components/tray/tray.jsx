@@ -11,7 +11,7 @@ const Base = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
-  max-width: 200px;
+  width: 200px;
   background-color: #efefef;
 `;
 

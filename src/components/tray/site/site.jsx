@@ -22,7 +22,7 @@ const IconContainer = styled.div`
 
 class Site extends PureComponent {
   render() {
-    const { name } = this.props;
+    const { name, activateSite } = this.props;
 
     return (
       <BaseSite
@@ -32,17 +32,20 @@ class Site extends PureComponent {
             <FontAwesomeIcon icon={faGlobeAfrica} />
           </IconContainer>
         )}
+        onClick={activateSite}
       />
     );
   }
 }
 
 Site.propTypes = {
-  name: PropTypes.string
+  name: PropTypes.string,
+  activateSite: PropTypes.func
 };
 
 Site.defaultProps = {
-  name: "A Site"
+  name: "A Site",
+  activateSite: (() => {})
 };
 
 export default Site;

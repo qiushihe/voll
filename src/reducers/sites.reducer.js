@@ -1,18 +1,18 @@
 import { handleActions } from "redux-actions";
 
 import {
-  ADD_SITE,
-  ADD_SITES
+  SITES_ADD_ONE,
+  SITES_ADD_MANY
 } from "/src/actions/sites.action";
 
-import addSite from "./sites/add-site";
-import addSites from "./sites/add-sites";
+import addOne from "./sites/add-one";
+import addMany from "./sites/add-many";
 
 import withPayload from "./with-payload";
 
 const initialState = {};
 
 export default handleActions({
-  [ADD_SITE]: withPayload(addSite),
-  [ADD_SITES]: withPayload(addSites)
+  [SITES_ADD_ONE]: withPayload(addOne),
+  [SITES_ADD_MANY]: withPayload(addMany)
 }, initialState);
