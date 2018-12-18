@@ -1,4 +1,4 @@
-import { PureComponent } from "react";
+import { PureComponent, createRef } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 
@@ -13,12 +13,34 @@ const Base = styled.div`
 `;
 
 class Webview extends PureComponent {
+  constructor(...args) {
+    super(...args);
+
+    this.webviewRef = createRef();
+  }
+
+  componentDidMount() {
+    const { isUrlInternal, onExternalUrlClick } = this.props;
+
+    this.webviewRef.current.addEventListener("will-navigate", (evt) => {
+      evt.preventDefault();
+    });
+
+    this.webviewRef.current.getWebContents().on("will-navigate", (evt, url) => {
+      if (!isUrlInternal(url)) {
+        evt.preventDefault();
+        onExternalUrlClick({ url });
+      }
+    });
+  }
+
   render() {
     const { url, isActive, partition, useragent } = this.props;
 
     return (
       <Base isActive={isActive}>
         <webview
+          ref={this.webviewRef}
           autosize="on"
           style={{ display: "flex", width: "100%", height: "100%" }}
           src={url}
@@ -34,14 +56,18 @@ Webview.propTypes = {
   url: PropTypes.string,
   partition: PropTypes.string,
   useragent: PropTypes.string,
-  isActive: PropTypes.bool
+  isActive: PropTypes.bool,
+  isUrlInternal: PropTypes.func,
+  onExternalUrlClick: PropTypes.func,
 };
 
 Webview.defaultProps = {
   url: "",
   partition: null,
   useragent: null,
-  isActive: false
+  isActive: false,
+  isUrlInternal: (() => true),
+  onExternalUrlClick: (() => {})
 };
 
 export default Webview;

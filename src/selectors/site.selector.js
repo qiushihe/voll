@@ -17,3 +17,5 @@ export const name = createSelector(site, get("name"));
 export const url = createSelector(site, get("url"));
 
 export const sessionId = createSelector(site, get("sessionId"));
+
+export const urlPatterns = createSelector(site, get("urlPatterns"));
