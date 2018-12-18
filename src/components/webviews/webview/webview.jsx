@@ -25,7 +25,8 @@ class Webview extends PureComponent {
           autosize="on"
           style={{ display: "flex", width: "100%", height: "100%" }}
           src={url}
-          useragent={IPHONE_UA}
+          useragent={CHROME_UA}
+          partition={`persist:${this.props.url}`}
         />
       </Base>
     );
