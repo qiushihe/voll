@@ -119,8 +119,8 @@ app.on("activate", () => {
 ipcMain.on("app", (evt) => {
   evt.sender.send("populate-sites", {
     sites: [
-      { name: "Reddit", url: "https://www.reddit.com" },
-      { name: "Walmart", url: "https://www.walmart.com" },
+      { name: "Reddit", url: "https://www.reddit.com", sessionId: "reddit" },
+      { name: "Notification", url: "https://www.bennish.net/web-notifications.html" },
       { name: "Bonobos", url: "https://bonobos.com" }
     ]
   });

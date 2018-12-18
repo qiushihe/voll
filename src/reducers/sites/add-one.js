@@ -1,6 +1,6 @@
 import uuidv4 from "uuid/v4";
 
-export default (state = {}, { site: { name, url } }) => {
+export default (state = {}, { site: { name, url, sessionId } }) => {
   const siteUuid = uuidv4();
 
   return {
@@ -8,7 +8,8 @@ export default (state = {}, { site: { name, url } }) => {
     [siteUuid]: {
       id: siteUuid,
       name,
-      url
+      url,
+      sessionId
     }
   };
 };

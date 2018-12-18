@@ -5,7 +5,7 @@ export const SITES_ADD_MANY = "SITES_ADD_MANY";
 
 export const addOne = createAction(
   SITES_ADD_ONE,
-  ({ name, url }) => ({ name, url })
+  ({ name, url, sessionId }) => ({ name, url, sessionId })
 );
 
 export const addMany = createAction(
