@@ -1,1 +1,1 @@
-export { default } from "./tray";
+export { default } from "./tray.connect";

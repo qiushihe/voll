@@ -8,6 +8,11 @@ const Base = styled.div`
   align-items: center;
   padding: 3px 0;
   cursor: pointer;
+  color: #4e4e4e;
+
+  &:hover {
+    color: #000000;
+  }
 `;
 
 const Icon = styled.div`
@@ -16,17 +21,9 @@ const Icon = styled.div`
   height: 48px;
   align-items: center;
   justify-content: center;
-  background-color: #dcdcdc;
-  border-radius: 6px;
   margin: 0 6px;
-  overflow: hidden;
   cursor: pointer;
   user-select: none;
-`;
-
-const IconImage = styled.img`
-  width: 100%;
-  height: 100%;
 `;
 
 const Label = styled.div`
@@ -38,31 +35,27 @@ const Label = styled.div`
   user-select: none;
 `;
 
-class Site extends PureComponent {
+class BaseSite extends PureComponent {
   render() {
-    const { name, iconUrl } = this.props;
+    const { label, renderIcon } = this.props;
 
     return (
       <Base>
-        <Icon>
-          <IconImage src={iconUrl} />
-        </Icon>
-        <Label>{name}</Label>
+        <Icon>{renderIcon()}</Icon>
+        <Label>{label}</Label>
       </Base>
     );
   }
 }
 
-Site.propTypes = {
-  id: PropTypes.string,
-  name: PropTypes.string,
-  iconUrl: PropTypes.string
+BaseSite.propTypes = {
+  label: PropTypes.node,
+  renderIcon: PropTypes.func
 };
 
-Site.defaultProps = {
-  id: "",
-  name: "",
-  iconUrl: ""
+BaseSite.defaultProps = {
+  label: "",
+  renderIcon: (() => {})
 };
 
-export default Site;
+export default BaseSite;

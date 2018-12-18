@@ -1,4 +1,5 @@
 import { PureComponent } from "react";
+import PropTypes from "prop-types";
 import styled from "styled-components";
 
 import Tray from "/src/components/tray";
@@ -14,7 +15,7 @@ const Base = styled.div`
 
 class App extends PureComponent {
   componentDidMount() {
-    // TODO: Add test sites
+    this.props.onMount();
   }
 
   render() {
@@ -26,5 +27,13 @@ class App extends PureComponent {
     );
   }
 }
+
+App.propTypes = {
+  onMount: PropTypes.func
+};
+
+App.defaultProps = {
+  onMount: (() => {})
+};
 
 export default App;

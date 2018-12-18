@@ -1,9 +1,10 @@
-import { PureComponent } from "react";
+import { PureComponent, Children } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
+import isEmpty from "lodash/fp/isEmpty";
+import map from "lodash/fp/map";
 
-import addSiteImage from "/src/images/add-site.png";
-
+import AddSite from "./add-site";
 import Site from "./site";
 
 const Base = styled.div`
@@ -14,23 +15,28 @@ const Base = styled.div`
   background-color: #efefef;
 `;
 
+const renderSite = ({ id }) => (
+  <Site siteId={id} />
+);
+
+const renderSites = map(renderSite);
+
 class Tray extends PureComponent {
   render() {
+    const { sites } = this.props;
+
     return (
       <Base>
-        <Site id={""} name={"Add Site"} iconUrl={addSiteImage} />
-        <Site id={""} name={"Add Site"} iconUrl={addSiteImage} />
-        <Site id={""} name={"Add Site"} iconUrl={addSiteImage} />
+        {isEmpty(sites)
+          ? <AddSite />
+          : Children.toArray(renderSites(sites))}
       </Base>
     );
   }
 }
 
 Tray.propTypes = {
-  sites: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string,
-    name: PropTypes.string
-  }))
+  sites: PropTypes.array
 };
 
 Tray.defaultProps = {

@@ -1,9 +1,12 @@
 import uuidv4 from "uuid/v4";
 
-export default (state = {}, { payload: { name, url } }) => {
+export default (state = {}, { site: { name, url } }) => {
+  const siteUuid = uuidv4();
+
   return {
     ...state,
-    [uuidv4()]: {
+    [siteUuid]: {
+      id: siteUuid,
       name,
       url
     }

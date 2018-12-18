@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, ipcMain, BrowserWindow } from "electron";
 
 let mainWindow = null;
 
@@ -25,4 +25,14 @@ app.on("activate", () => {
   if (mainWindow === null) {
     createMainWindow();
   }
+});
+
+ipcMain.on("app", (evt) => {
+  evt.sender.send("populate-sites", {
+    sites: [
+      { name: "Google", url: "https://www.google.com" },
+      { name: "Yahoo", url: "https://www.yahoo.com" },
+      { name: "Bonobos", url: "https://bonobos.com" }
+    ]
+  });
 });
