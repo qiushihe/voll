@@ -6,15 +6,19 @@ import some from "lodash/fp/some";
 import isEmpty from "lodash/fp/isEmpty";
 import UA from "useragent-generator";
 
-import { id, url, sessionId, urlPatterns } from "/src/selectors/site.selector";
+import { id, url, sessionId, persistentSessionId, externalUrlPatterns, internalUrlPatterns } from "/src/selectors/site.selector";
 import { activeSiteId } from "/src/selectors/webviews.selector";
 
 import Webview from "./webview";
 
-const getPartition = ({ sessionId }) => {
+const getPartition = ({ sessionId, persistentSessionId }) => {
   const sessionIdString = `${sessionId}`.trim();
-  if (!isEmpty(sessionIdString)) {
-    return `persist:${sessionIdString}`;
+  const persistentSessionIdString = `${persistentSessionId}`.trim();
+
+  if (!isEmpty(persistentSessionIdString)) {
+    return `persist:${persistentSessionIdString}`;
+  } else if (!isEmpty(sessionIdString)) {
+    return sessionIdString;
   } else {
     return null;
   }
@@ -22,15 +26,30 @@ const getPartition = ({ sessionId }) => {
 
 const newRegExp = (exp) => new RegExp(exp);
 
-const regExpMatch = (url) => (exp) => exp.test(url);
+const matchRegExp = (url) => (exp) => exp.test(url);
 
-const getInternalUrlChecker = ({ patterns }) => {
-  if (!isEmpty(patterns)) {
-    const exps = map(newRegExp)(patterns);
-    return (url) => some(regExpMatch(url))(exps);
-  } else {
-    return () => true;
-  }
+const matchSomeRegExps = (url) => some(matchRegExp(url));
+
+const getInternalUrlChecker = ({ externalUrlPatterns, internalUrlPatterns }) => {
+  const externalExps = map(newRegExp)(externalUrlPatterns || []);
+  const internalExps = map(newRegExp)(internalUrlPatterns || []);
+
+  return (url) => {
+    const matchesSomeUrls = matchSomeRegExps(url);
+
+    // If the URL *matches any* external URL pattern, then it's external.
+    if (!isEmpty(externalExps) && matchesSomeUrls(externalExps)) {
+      return false;
+    }
+
+    // If the URL *did not match any* internal URL pattern, then it's also external.
+    if (!isEmpty(internalExps) && !matchesSomeUrls(internalExps)) {
+      return false;
+    }
+
+    // Otherwise the URL is internal.
+    return true;
+  };
 };
 
 export default connect(
@@ -38,11 +57,13 @@ export default connect(
     id,
     url,
     sessionId,
-    urlPatterns,
+    persistentSessionId,
+    externalUrlPatterns,
+    internalUrlPatterns,
     activeSiteId
   }),
   () => ({
-    onExternalUrlClick: ({ url }) => {
+    openExternalUrl: ({ url }) => {
       ipcRenderer.send("open-external-url", url);
     }
   }),
@@ -50,9 +71,15 @@ export default connect(
     ...ownProps,
     ...stateProps,
     ...dispatchProps,
-    partition: getPartition({ sessionId: stateProps.sessionId }),
+    partition: getPartition({
+      sessionId: stateProps.sessionId,
+      persistentSessionId: stateProps.sessionId
+    }),
     useragent: UA.chrome(71), // TODO: Implement component width detection and switch to a mobile device's UA
-    isUrlInternal: getInternalUrlChecker({ patterns: stateProps.urlPatterns }),
+    isUrlInternal: getInternalUrlChecker({
+      externalUrlPatterns: stateProps.externalUrlPatterns,
+      internalUrlPatterns: stateProps.internalUrlPatterns
+    }),
     isActive: stateProps.id === stateProps.activeSiteId
   })
 )(Webview);

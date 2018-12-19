@@ -18,4 +18,8 @@ export const url = createSelector(site, get("url"));
 
 export const sessionId = createSelector(site, get("sessionId"));
 
-export const urlPatterns = createSelector(site, get("urlPatterns"));
+export const persistentSessionId = createSelector(site, get("persistentSessionId"));
+
+export const externalUrlPatterns = createSelector(site, get("externalUrlPatterns"));
+
+export const internalUrlPatterns = createSelector(site, get("internalUrlPatterns"));

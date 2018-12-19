@@ -20,16 +20,29 @@ class Webview extends PureComponent {
   }
 
   componentDidMount() {
-    const { isUrlInternal, onExternalUrlClick } = this.props;
+    const { isUrlInternal, openExternalUrl } = this.props;
 
-    this.webviewRef.current.addEventListener("will-navigate", (evt) => {
-      evt.preventDefault();
+    const webview = this.webviewRef.current;
+    const webContent = webview.getWebContents();
+
+    webview.addEventListener("new-window", (evt) => {
+      if (isUrlInternal(evt.url)) {
+        window.open(evt.url);
+      } else {
+        openExternalUrl({ url: evt.url });
+      }
     });
 
-    this.webviewRef.current.getWebContents().on("will-navigate", (evt, url) => {
+    webContent.on("will-navigate", (evt, url) => {
       if (!isUrlInternal(url)) {
+        // In theory calling `preventDefault` on the event should be enough to stop navigation from happening
+        // (See. https://electronjs.org/docs/api/web-contents#event-will-navigate). However in practice that part
+        // is just not working. So we have to call `stop` on the webContent as well.
+        webContent.stop();
         evt.preventDefault();
-        onExternalUrlClick({ url });
+
+        // Tell the main app to open the external URL externally.
+        openExternalUrl({ url });
       }
     });
   }
@@ -41,11 +54,12 @@ class Webview extends PureComponent {
       <Base isActive={isActive}>
         <webview
           ref={this.webviewRef}
-          autosize="on"
           style={{ display: "flex", width: "100%", height: "100%" }}
           src={url}
           partition={partition}
           useragent={useragent}
+          autosize="on"
+          allowpopups="on"
         />
       </Base>
     );
@@ -58,7 +72,7 @@ Webview.propTypes = {
   useragent: PropTypes.string,
   isActive: PropTypes.bool,
   isUrlInternal: PropTypes.func,
-  onExternalUrlClick: PropTypes.func,
+  openExternalUrl: PropTypes.func
 };
 
 Webview.defaultProps = {
@@ -67,7 +81,7 @@ Webview.defaultProps = {
   useragent: null,
   isActive: false,
   isUrlInternal: (() => true),
-  onExternalUrlClick: (() => {})
+  openExternalUrl: (() => {})
 };
 
 export default Webview;

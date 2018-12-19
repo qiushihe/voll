@@ -117,21 +117,25 @@ app.on("activate", () => {
 });
 
 ipcMain.on("open-external-url", (evt, url) => {
-  console.log("open-external-url", url);
+  shell.openExternal(url);
 });
 
 ipcMain.on("app", (evt) => {
   evt.sender.send("populate-sites", {
     sites: [{
       name: "Reddit",
-      url: "https://www.reddit.com",
-      sessionId: "reddit",
-      urlPatterns: ["^https?://([^\\.]+\\.)*reddit.com"]
+      url: "https://old.reddit.com",
+      persistentSessionId: "reddit-123",
+      externalUrlPatterns: [
+        "^https?://alb.reddit.com",
+        "^https?://out.reddit.com"
+      ],
+      internalUrlPatterns: ["^https?://([^\\.]+\\.)*reddit.com"]
     }, {
       name: "Hacker News",
       url: "https://news.ycombinator.com",
       sessionId: "hackernews",
-      urlPatterns: ["^https?://news.ycombinator.com"]
+      internalUrlPatterns: ["^https?://news.ycombinator.com"]
     }, {
       name: "Notification",
       url: "https://www.bennish.net/web-notifications.html"
