@@ -11,8 +11,10 @@ const Base = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
-  width: 200px;
+  width: ${({ showSiteName }) => showSiteName ? "200px" : "60px"}
   background-color: #efefef;
+  box-sizing: border-box;
+  border-right: 1px solid black;
 `;
 
 const renderSite = ({ id }) => (
@@ -23,10 +25,10 @@ const renderSites = map(renderSite);
 
 class Tray extends PureComponent {
   render() {
-    const { sites } = this.props;
+    const { showSiteName, sites } = this.props;
 
     return (
-      <Base>
+      <Base showSiteName={showSiteName}>
         {isEmpty(sites)
           ? <AddSite />
           : Children.toArray(renderSites(sites))}
@@ -36,10 +38,12 @@ class Tray extends PureComponent {
 }
 
 Tray.propTypes = {
+  showSiteName: PropTypes.bool,
   sites: PropTypes.array
 };
 
 Tray.defaultProps = {
+  showSiteName: false,
   sites: []
 };
 

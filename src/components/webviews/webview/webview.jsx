@@ -3,7 +3,8 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 
 const Base = styled.div`
-  display: block;
+  display: flex;
+  flex-direction: column;
   position: absolute;
   top: 0;
   left: ${({ isActive }) => isActive ? "0" : "110%"};
@@ -12,9 +13,19 @@ const Base = styled.div`
   visibility: ${({ isActive }) => isActive ? "visible" : "hidden"};
 `;
 
+const StatusBar = styled.div`
+  background-color: #efefef;
+  white-space: nowrap;
+  overflow: hidden;
+`;
+
 class Webview extends PureComponent {
   constructor(...args) {
     super(...args);
+
+    this.state = {
+      currentUrl: null
+    };
 
     this.webviewRef = createRef();
   }
@@ -45,13 +56,25 @@ class Webview extends PureComponent {
         openExternalUrl({ url });
       }
     });
+
+    webview.addEventListener("did-navigate", (evt) => {
+      this.setState({ currentUrl: evt.url });
+    });
+
+    webview.addEventListener("did-navigate-in-page", (evt) => {
+      this.setState({ currentUrl: evt.url });
+    });
   }
 
   render() {
-    const { url, isActive, partition, useragent } = this.props;
+    const { url, isActive, partition, useragent, showUrl } = this.props;
+    const { currentUrl } = this.state;
 
     return (
       <Base isActive={isActive}>
+        {showUrl && (
+          <StatusBar>{currentUrl}</StatusBar>
+        )}
         <webview
           ref={this.webviewRef}
           style={{ display: "flex", width: "100%", height: "100%" }}
@@ -71,6 +94,7 @@ Webview.propTypes = {
   partition: PropTypes.string,
   useragent: PropTypes.string,
   isActive: PropTypes.bool,
+  showUrl: PropTypes.bool,
   isUrlInternal: PropTypes.func,
   openExternalUrl: PropTypes.func
 };
@@ -80,6 +104,7 @@ Webview.defaultProps = {
   partition: null,
   useragent: null,
   isActive: false,
+  showUrl: false,
   isUrlInternal: (() => true),
   openExternalUrl: (() => {})
 };

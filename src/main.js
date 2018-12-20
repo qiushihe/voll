@@ -1,4 +1,10 @@
 import { app, ipcMain, shell, BrowserWindow, Menu } from "electron";
+import { join as joinPath } from "path";
+import { readFile } from "graceful-fs";
+import request from "request";
+import isEmpty from "lodash/fp/isEmpty";
+import get from "lodash/fp/get";
+import getOr from "lodash/fp/getOr";
 
 let mainWindow = null;
 
@@ -99,9 +105,60 @@ const createMainMenu = () => {
   }
 };
 
+const readSettings = () => new Promise((resolve, reject) => {
+  readFile(joinPath(app.getPath("userData"), "settings.json"), "utf8", (err, data) => {
+    if (err) {
+      console.error("Error reading app settings.", err);
+      reject(err);
+    } else {
+      resolve(JSON.parse(data));
+    }
+  });
+});
+
+const applySettings = (settings) => new Promise((resolve, reject) => {
+  console.log("Got settings", JSON.stringify(settings));
+
+  const settingsJsonUrl = get("settingsJsonUrl")(settings);
+
+  if (isEmpty(settingsJsonUrl)) {
+    resolve();
+  } else {
+    request.get(settingsJsonUrl, (err, res, body) => {
+      if (err) {
+        console.error("Error fetching settings JSON.", err);
+        reject(err);
+      } else {
+        try {
+          resolve(JSON.parse(body));
+        } catch (err) {
+          console.error("Error parsing fetched settings JSON.", err);
+          reject(err);
+        }
+      }
+    });
+  }
+});
+
 app.on("ready", () => {
-  createMainWindow();
-  createMainMenu();
+  readSettings().then(applySettings).then((settings) => {
+    console.log("Got settings", JSON.stringify(settings));
+
+    ipcMain.on("app", (evt, msg) => {
+      if (msg === "did-mount") {
+        evt.sender.send("set-preferences", {
+          preferences: getOr({}, "preferences")(settings)
+        });
+
+        evt.sender.send("populate-sites", {
+          sites: getOr([], "sites")(settings)
+        });
+      }
+    });
+
+    createMainWindow();
+    createMainMenu();
+  });
 });
 
 app.on("window-all-closed", () => {
@@ -118,27 +175,4 @@ app.on("activate", () => {
 
 ipcMain.on("open-external-url", (evt, url) => {
   shell.openExternal(url);
-});
-
-ipcMain.on("app", (evt) => {
-  evt.sender.send("populate-sites", {
-    sites: [{
-      name: "Reddit",
-      url: "https://old.reddit.com",
-      persistentSessionId: "reddit-123",
-      externalUrlPatterns: [
-        "^https?://alb.reddit.com",
-        "^https?://out.reddit.com"
-      ],
-      internalUrlPatterns: ["^https?://([^\\.]+\\.)*reddit.com"]
-    }, {
-      name: "Hacker News",
-      url: "https://news.ycombinator.com",
-      sessionId: "hackernews",
-      internalUrlPatterns: ["^https?://news.ycombinator.com"]
-    }, {
-      name: "Notification",
-      url: "https://www.bennish.net/web-notifications.html"
-    }]
-  });
 });

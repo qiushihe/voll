@@ -9,9 +9,11 @@ const Base = styled.div`
   padding: 3px 0;
   cursor: pointer;
   color: #4e4e4e;
+  opacity: ${({ isActive }) => isActive ? "1" : "0.7"};
 
   &:hover {
     color: #000000;
+    opacity: 1;
   }
 `;
 
@@ -33,16 +35,20 @@ const Label = styled.div`
   margin-left: 3px;
   cursor: pointer;
   user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
 `;
 
 class BaseSite extends PureComponent {
   render() {
-    const { label, renderIcon, onClick } = this.props;
+    const { label, showSiteName, isActive, renderIcon, onClick } = this.props;
 
     return (
-      <Base onClick={onClick}>
+      <Base onClick={onClick} isActive={isActive}>
         <Icon>{renderIcon()}</Icon>
-        <Label>{label}</Label>
+        {showSiteName && (
+          <Label>{label}</Label>
+        )}
       </Base>
     );
   }
@@ -50,12 +56,16 @@ class BaseSite extends PureComponent {
 
 BaseSite.propTypes = {
   label: PropTypes.node,
+  showSiteName: PropTypes.bool,
+  isActive: PropTypes.bool,
   renderIcon: PropTypes.func,
   onClick: PropTypes.func
 };
 
 BaseSite.defaultProps = {
   label: "",
+  showSiteName: false,
+  isActive: false,
   renderIcon: (() => {}),
   onClick: (() => {})
 };

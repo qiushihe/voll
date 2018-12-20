@@ -6,7 +6,16 @@ import some from "lodash/fp/some";
 import isEmpty from "lodash/fp/isEmpty";
 import UA from "useragent-generator";
 
-import { id, url, sessionId, persistentSessionId, externalUrlPatterns, internalUrlPatterns } from "/src/selectors/site.selector";
+import {
+  id,
+  url,
+  sessionId,
+  persistentSessionId,
+  externalUrlPatterns,
+  internalUrlPatterns,
+  showUrl
+} from "/src/selectors/site.selector";
+
 import { activeSiteId } from "/src/selectors/webviews.selector";
 
 import Webview from "./webview";
@@ -60,7 +69,8 @@ export default connect(
     persistentSessionId,
     externalUrlPatterns,
     internalUrlPatterns,
-    activeSiteId
+    activeSiteId,
+    showUrl
   }),
   () => ({
     openExternalUrl: ({ url }) => {

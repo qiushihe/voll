@@ -16,6 +16,8 @@ export const name = createSelector(site, get("name"));
 
 export const url = createSelector(site, get("url"));
 
+export const iconSrc = createSelector(site, get("iconSrc"));
+
 export const sessionId = createSelector(site, get("sessionId"));
 
 export const persistentSessionId = createSelector(site, get("persistentSessionId"));
@@ -23,3 +25,5 @@ export const persistentSessionId = createSelector(site, get("persistentSessionId
 export const externalUrlPatterns = createSelector(site, get("externalUrlPatterns"));
 
 export const internalUrlPatterns = createSelector(site, get("internalUrlPatterns"));
+
+export const showUrl = createSelector(site, get("showUrl"));
