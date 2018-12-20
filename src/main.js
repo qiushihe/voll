@@ -141,24 +141,27 @@ const applySettings = (settings) => new Promise((resolve, reject) => {
 });
 
 app.on("ready", () => {
-  readSettings().then(applySettings).then((settings) => {
-    console.log("Got settings", JSON.stringify(settings));
+  readSettings()
+    .catch(() => ({})) // Proceed with empty settings object if failed to read from disk
+    .then(applySettings)
+    .then((settings) => {
+      console.log("Got settings", JSON.stringify(settings));
 
-    ipcMain.on("app", (evt, msg) => {
-      if (msg === "did-mount") {
-        evt.sender.send("set-preferences", {
-          preferences: getOr({}, "preferences")(settings)
-        });
+      ipcMain.on("app", (evt, msg) => {
+        if (msg === "did-mount") {
+          evt.sender.send("set-preferences", {
+            preferences: getOr({}, "preferences")(settings)
+          });
 
-        evt.sender.send("populate-sites", {
-          sites: getOr([], "sites")(settings)
-        });
-      }
+          evt.sender.send("populate-sites", {
+            sites: getOr([], "sites")(settings)
+          });
+        }
+      });
+
+      createMainWindow();
+      createMainMenu();
     });
-
-    createMainWindow();
-    createMainMenu();
-  });
 });
 
 app.on("window-all-closed", () => {
