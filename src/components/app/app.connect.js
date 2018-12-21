@@ -2,7 +2,7 @@ import { connect } from "react-redux";
 import { ipcRenderer } from "electron";
 
 import { setPreferences } from "/src/actions/preferences.action";
-import { addMany } from "/src/actions/sites.action";
+import { addSites } from "/src/actions/sites.action";
 
 import App from "./app";
 
@@ -13,7 +13,7 @@ export default connect(
       dispatch(setPreferences({ preferences }))
     },
     populateSites: (evt, { sites }) => {
-      dispatch(addMany({ sites }))
+      dispatch(addSites({ sites }))
     }
   }),
   (stateProps, dispatchProps, ownProps) => ({

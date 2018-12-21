@@ -5,14 +5,14 @@ import {
   SITES_ADD_MANY
 } from "/src/actions/sites.action";
 
-import addOne from "./sites/add-one";
-import addMany from "./sites/add-many";
+import { withPayload } from "/src/helpers/reducer.helper";
 
-import withPayload from "./with-payload";
+import addSite from "./sites/add-site";
+import addSites from "./sites/add-sites";
 
 const initialState = {};
 
 export default handleActions({
-  [SITES_ADD_ONE]: withPayload(addOne),
-  [SITES_ADD_MANY]: withPayload(addMany)
+  [SITES_ADD_ONE]: withPayload(addSite),
+  [SITES_ADD_MANY]: withPayload(addSites)
 }, initialState);

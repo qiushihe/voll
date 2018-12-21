@@ -1,15 +1,14 @@
 import { createAction } from "redux-actions";
-import flow from "lodash/fp/flow";
-import pick from "lodash/fp/pick";
-import map from "lodash/fp/map";
-import { convert as convertReduce } from "lodash/fp/reduce";
 
-const uncappedReduce = convertReduce({ cap: false });
+import {
+  pickObjectWithAttributes,
+  pickArrayObjectWithAttributes
+} from "/src/helpers/pick.helper";
 
 export const SITES_ADD_ONE = "SITES_ADD_ONE";
 export const SITES_ADD_MANY = "SITES_ADD_MANY";
 
-export const siteAttributes = pick([
+export const siteAttributes = [
   "name",
   "url",
   "iconSrc",
@@ -18,30 +17,14 @@ export const siteAttributes = pick([
   "externalUrlPatterns",
   "internalUrlPatterns",
   "showUrl"
-]);
+];
 
-export const addOne = createAction(
+export const addSite = createAction(
   SITES_ADD_ONE,
-  flow([
-    pick(["site"]),
-    uncappedReduce((result, value, key) => ({
-      ...result,
-      [key]: key === "site"
-        ? siteAttributes(value)
-        : value
-    }), {})
-  ])
+  pickObjectWithAttributes("site", siteAttributes)
 );
 
-export const addMany = createAction(
+export const addSites = createAction(
   SITES_ADD_MANY,
-  flow([
-    pick(["sites"]),
-    uncappedReduce((result, value, key) => ({
-      ...result,
-      [key]: key === "sites"
-        ? map(siteAttributes)(value)
-        : value
-    }), {})
-  ])
+  pickArrayObjectWithAttributes("sites", siteAttributes)
 );

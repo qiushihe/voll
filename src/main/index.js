@@ -1,11 +1,9 @@
-import { app, ipcMain, shell, BrowserWindow, Menu } from "electron";
-import { join as joinPath } from "path";
-import uuidv4 from "uuid/v4";
+import { app, ipcMain, shell, BrowserWindow } from "electron";
 import { readFile } from "graceful-fs";
-import request from "request";
-import isEmpty from "lodash/fp/isEmpty";
-import get from "lodash/fp/get";
 import getOr from "lodash/fp/getOr";
+
+import { getSettings } from "./settings";
+import { create as createMainMenu } from "./menu";
 
 let mainWindow = null;
 
@@ -26,153 +24,25 @@ const createMainWindow = () => {
   });
 };
 
-const createMainMenu = () => {
-  const aboutVoll = {
-    label: "Voll?",
-    click: () => { shell.openExternal("https://pathofexile.gamepedia.com/Voll,_Emperor_of_Purity#Lore") }
-  };
+app.on("ready", () => {
+  getSettings().then((settings) => {
+    console.log("Got settings", JSON.stringify(settings));
 
-  const editMenu = {
-    label: "Edit",
-    submenu: [
-      { role: "undo" },
-      { role: "redo" },
-      { type: "separator" },
-      { role: "cut" },
-      { role: "copy" },
-      { role: "paste" },
-      { role: "pasteandmatchstyle" },
-      { role: "delete" },
-      { role: "selectall" }
-    ]
-  };
+    ipcMain.on("app", (evt, msg) => {
+      if (msg === "did-mount") {
+        evt.sender.send("set-preferences", {
+          preferences: getOr({}, "preferences")(settings)
+        });
 
-  const viewMenu = {
-    label: "View",
-    submenu: [
-      { role: "reload" },
-      { role: "forcereload" },
-      { role: "toggledevtools" },
-      { type: "separator" },
-      { role: "resetzoom" },
-      { role: "zoomin" },
-      { role: "zoomout" },
-      { type: "separator" },
-      { role: "togglefullscreen" }
-    ]
-  };
-
-  const windowMenu = {
-    role: "window",
-    submenu: [
-      { role: "minimize" },
-      { role: "close" }
-    ]
-  };
-
-  const helpMenu = {
-    role: "help",
-    submenu: [
-      aboutVoll
-    ]
-  };
-
-  if (process.platform === "darwin") {
-    const applicationMenu = {
-      label: app.getName(),
-      submenu: [
-        { role: "about" },
-        { type: "separator" },
-        { role: "quit" }
-      ]
-    };
-
-    Menu.setApplicationMenu(Menu.buildFromTemplate([
-      applicationMenu,
-      editMenu,
-      viewMenu,
-      windowMenu,
-      helpMenu
-    ]));
-  } else {
-    const fileMenu = {
-      label: "File",
-      submenu: [
-        { role: "about" },
-        { type: "separator" },
-        { role: "quit" }
-      ]
-    };
-
-    Menu.setApplicationMenu(Menu.buildFromTemplate([
-      fileMenu,
-      editMenu,
-      viewMenu,
-      windowMenu,
-      helpMenu
-    ]));
-  }
-};
-
-const readSettings = () => new Promise((resolve, reject) => {
-  readFile(joinPath(app.getPath("userData"), "settings.json"), "utf8", (err, data) => {
-    if (err) {
-      console.error("Error reading app settings.", err);
-      reject(err);
-    } else {
-      resolve(JSON.parse(data));
-    }
-  });
-});
-
-const applySettings = (settings) => new Promise((resolve, reject) => {
-  console.log("Got settings", JSON.stringify(settings));
-
-  const settingsJsonUrl = get("settingsJsonUrl")(settings);
-
-  if (isEmpty(settingsJsonUrl)) {
-    resolve();
-  } else {
-    const fetchUrl = `${settingsJsonUrl}?${uuidv4()}`;
-    console.log("Fetching from", fetchUrl);
-    request.get(fetchUrl, (err, res, body) => {
-      if (err) {
-        console.error("Error fetching settings JSON.", err);
-        reject(err);
-      } else {
-        try {
-          resolve(JSON.parse(body));
-        } catch (err) {
-          console.error("Error parsing fetched settings JSON.", err);
-          reject(err);
-        }
+        evt.sender.send("populate-sites", {
+          sites: getOr([], "sites")(settings)
+        });
       }
     });
-  }
-});
 
-app.on("ready", () => {
-  readSettings()
-    .catch(() => ({})) // Proceed with empty settings object if failed to read from disk
-    .then(applySettings)
-    .then((settings) => {
-      console.log("Got settings", JSON.stringify(settings));
-
-      ipcMain.on("app", (evt, msg) => {
-        if (msg === "did-mount") {
-          evt.sender.send("set-preferences", {
-            preferences: getOr({}, "preferences")(settings)
-          });
-
-          evt.sender.send("populate-sites", {
-            sites: getOr([], "sites")(settings)
-          });
-        }
-      });
-
-      createMainWindow();
-      createMainMenu();
-    });
+    createMainWindow();
+    createMainMenu();
+  });
 });
 
 app.on("window-all-closed", () => {

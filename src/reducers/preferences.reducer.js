@@ -4,9 +4,9 @@ import {
   PREFERENCES_SET_PREFERENCES
 } from "/src/actions/preferences.action";
 
-import setPreferences from "./preferences/set-preferences";
+import { withPayload } from "/src/helpers/reducer.helper";
 
-import withPayload from "./with-payload";
+import setPreferences from "./preferences/set-preferences";
 
 const initialState = {
   showSiteNameInTray: false

@@ -1,4 +1,5 @@
 import uuidv4 from "uuid/v4";
+import pick from "lodash/fp/pick";
 
 import { siteAttributes } from "/src/actions/sites.action";
 
@@ -9,7 +10,7 @@ export default (state = {}, { site }) => {
     ...state,
     [siteUuid]: {
       id: siteUuid,
-      ...siteAttributes(site)
+      ...pick(siteAttributes)(site)
     }
   };
 };

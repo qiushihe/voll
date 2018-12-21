@@ -5,10 +5,10 @@ import {
   WEBVIEWS_DEACTIVATE_SITE
 } from "/src/actions/webviews.action";
 
+import { withPayload } from "/src/helpers/reducer.helper";
+
 import activateSite from "./webviews/activate-site";
 import deactivateSite from "./webviews/deactivate-site";
-
-import withPayload from "./with-payload";
 
 const initialState = {
   activeSiteId: null
