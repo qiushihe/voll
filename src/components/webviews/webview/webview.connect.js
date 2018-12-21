@@ -74,7 +74,7 @@ export default connect(
   }),
   () => ({
     openExternalUrl: ({ url }) => {
-      ipcRenderer.send("open-external-url", url);
+      ipcRenderer.send("open-external-url", { url });
     }
   }),
   (stateProps, dispatchProps, ownProps) => ({

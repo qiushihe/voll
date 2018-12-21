@@ -34,14 +34,12 @@ class Webview extends PureComponent {
     const { isUrlInternal, openExternalUrl } = this.props;
 
     const webview = this.webviewRef.current;
-    const webContent = webview.getWebContents();
+    const webContents = webview.getWebContents();
 
-    webContent.on("will-navigate", (evt, url) => {
+    // TODO: This is not the right place for internal/external detection/blocking. See main.js for more.
+    webContents.on("will-navigate", (evt, url) => {
       if (!isUrlInternal(url)) {
-        // In theory calling `preventDefault` on the event should be enough to stop navigation from happening
-        // (See. https://electronjs.org/docs/api/web-contents#event-will-navigate). However in practice that part
-        // is just not working. So we have to call `stop` on the webContent as well.
-        webContent.stop();
+        webContents.stop();
         evt.preventDefault();
 
         // Tell the main app to open the external URL externally.
