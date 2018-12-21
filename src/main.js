@@ -1,5 +1,6 @@
 import { app, ipcMain, shell, BrowserWindow, Menu } from "electron";
 import { join as joinPath } from "path";
+import uuidv4 from "uuid/v4";
 import { readFile } from "graceful-fs";
 import request from "request";
 import isEmpty from "lodash/fp/isEmpty";
@@ -132,7 +133,9 @@ const applySettings = (settings) => new Promise((resolve, reject) => {
   if (isEmpty(settingsJsonUrl)) {
     resolve();
   } else {
-    request.get(settingsJsonUrl, (err, res, body) => {
+    const fetchUrl = `${settingsJsonUrl}?${uuidv4()}`;
+    console.log("Fetching from", fetchUrl);
+    request.get(fetchUrl, (err, res, body) => {
       if (err) {
         console.error("Error fetching settings JSON.", err);
         reject(err);
