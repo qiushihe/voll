@@ -9,7 +9,7 @@ module.exports = function () {
   return {
     target: "electron-main",
     entry: {
-      bundle: path.resolve(__dirname, "src/index"),
+      bundle: path.resolve(__dirname, "src/renderer"),
       main: path.resolve(__dirname, "src/main")
     },
     output: {
