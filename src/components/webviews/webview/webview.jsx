@@ -36,14 +36,6 @@ class Webview extends PureComponent {
     const webview = this.webviewRef.current;
     const webContent = webview.getWebContents();
 
-    webview.addEventListener("new-window", (evt) => {
-      if (isUrlInternal(evt.url)) {
-        window.open(evt.url);
-      } else {
-        openExternalUrl({ url: evt.url });
-      }
-    });
-
     webContent.on("will-navigate", (evt, url) => {
       if (!isUrlInternal(url)) {
         // In theory calling `preventDefault` on the event should be enough to stop navigation from happening

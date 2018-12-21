@@ -9,8 +9,16 @@ import getOr from "lodash/fp/getOr";
 let mainWindow = null;
 
 const createMainWindow = () => {
-  mainWindow = new BrowserWindow({ width: 800, height: 600 });
-  mainWindow.loadFile('index.html');
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      // Fix issue with certain site's popup (i.e. gmail notifications)
+      nativeWindowOpen: true
+    }
+  });
+
+  mainWindow.loadFile("index.html");
 
   mainWindow.on("closed", () => {
     mainWindow = null;
