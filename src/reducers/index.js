@@ -1,10 +1,12 @@
 import { combineReducers } from "redux";
 
+import app from "./app.reducer";
 import sites from "./sites.reducer";
 import webviews from "./webviews.reducer";
 import preferences from "./preferences.reducer";
 
 const combinedReducer = combineReducers({
+  app,
   sites,
   webviews,
   preferences

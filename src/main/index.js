@@ -1,9 +1,19 @@
 import { app, ipcMain, shell, BrowserWindow } from "electron";
 import { readFile } from "graceful-fs";
+import uuidv4 from "uuid/v4";
+import flow from "lodash/fp/flow";
+import get from "lodash/fp/get";
+import negate from "lodash/fp/negate";
 import getOr from "lodash/fp/getOr";
+import forEach from "lodash/fp/forEach";
+import values from "lodash/fp/values";
+import filter from "lodash/fp/filter";
+import size from "lodash/fp/size";
+import lte from "lodash/fp/lte";
 
 import { getSettings } from "./settings";
 import { create as createMainMenu } from "./menu";
+import { getInternalUrlChecker } from "./url-checker";
 
 let mainWindow = null;
 
@@ -24,25 +34,12 @@ const createMainWindow = () => {
   });
 };
 
+const getReplier = (sender) => (...args) => sender.send(...args);
+
 app.on("ready", () => {
-  getSettings().then((settings) => {
-    console.log("Got settings", JSON.stringify(settings));
-
-    ipcMain.on("app", (evt, msg) => {
-      if (msg === "did-mount") {
-        evt.sender.send("set-preferences", {
-          preferences: getOr({}, "preferences")(settings)
-        });
-
-        evt.sender.send("populate-sites", {
-          sites: getOr([], "sites")(settings)
-        });
-      }
-    });
-
-    createMainWindow();
-    createMainMenu();
-  });
+  getSettings(); // Settings will be cached by the time we need them.
+  createMainWindow();
+  createMainMenu();
 });
 
 app.on("window-all-closed", () => {
@@ -57,45 +54,80 @@ app.on("activate", () => {
   }
 });
 
-/*
-// TODO: This is the proper place to perform internal/external URL detection/blocking ...
-//
-// Instead of doing it in the componentDidMount function of `WebView` component (which doesn't work well and requires
-// an extra `webContents.stop()`).
-//
-// However doing it here is very difficult because it's not clear, by the time a event happens, what the associated
-// metadata and configuration for that `contents` object is.
-//
-// So one way doing it is this:
-//
-// * Signal the renderer process to create a single site
-// * Wait for the `web-contents-created` event and now we can be sure about the metadata association
-//   of the just created `contents`
-// * Repeat for the rest of the sites, one at a time
-//
-// ... and possibly display some sort of overlay/loading-spinner while this process is going on.
+const allSites = {};
+const allWebContents = {};
 
-app.on("web-contents-created", (_, contents) => {
-  if (contents.getType() === "webview") {
-    console.log("created webview");
-
-    contents.on("dom-ready", (evt) => {
-      console.log("dom-ready", contents.getURL());
-    });
-
-    contents.on("new-window", (evt, url) => {
-      // evt.preventDefault();
-      console.log("new-window", url);
-    });
-
-    contents.on("will-navigate", (evt, url) => {
-      // evt.preventDefault();
-      console.log("will-navigate", url);
-    });
-  }
+app.on("web-contents-created", (_, webContents) => {
+  allWebContents[webContents.id] = webContents;
 });
-*/
 
-ipcMain.on("open-external-url", (evt, { url }) => {
-  shell.openExternal(url);
+ipcMain.on("web-contents-created", (evt, { siteId, webContentId }) => {
+  const sendReply = getReplier(evt.sender);
+
+  const site = allSites[siteId];
+  const webContents = allWebContents[webContentId];
+
+  const isUrlInternal = getInternalUrlChecker({
+    externalUrlPatterns: site.externalUrlPatterns,
+    internalUrlPatterns: site.internalUrlPatterns
+  });
+
+  webContents.on("new-window", (evt, url) => {
+    if (!isUrlInternal(url)) {
+      evt.preventDefault();
+      shell.openExternal(url);
+    }
+  });
+
+  webContents.on("will-navigate", (evt, url) => {
+    if (!isUrlInternal(url)) {
+      evt.preventDefault();
+      shell.openExternal(url);
+    }
+  });
+
+  site.webContentsReady = true;
+
+  flow([
+    values,
+    filter(negate(get("webContentsReady"))),
+    size,
+    lte(0),
+    (ready) => {
+      if (ready) {
+        sendReply("set-app-states", {
+          states: {
+            isAppReady: true
+          }
+        });
+      }
+    }
+  ])(allSites);
+});
+
+ipcMain.on("app-did-mount", (evt) => {
+  const sendReply = getReplier(evt.sender);
+
+  getSettings().then((settings) => {
+    console.log("Got settings", JSON.stringify(settings));
+
+    sendReply("set-preferences", {
+      preferences: getOr({}, "preferences")(settings)
+    });
+
+    flow([
+      getOr([], "sites"),
+      forEach((site) => {
+        const siteId = uuidv4();
+
+        allSites[siteId] = {
+          ...site,
+          id: siteId,
+          webContentsReady: false
+        };
+
+        sendReply("add-site", { site: allSites[siteId] });
+      })
+    ])(settings);
+  });
 });

@@ -31,21 +31,10 @@ class Webview extends PureComponent {
   }
 
   componentDidMount() {
-    const { isUrlInternal, openExternalUrl } = this.props;
+    const { onMount } = this.props;
 
     const webview = this.webviewRef.current;
     const webContents = webview.getWebContents();
-
-    // TODO: This is not the right place for internal/external detection/blocking. See main.js for more.
-    webContents.on("will-navigate", (evt, url) => {
-      if (!isUrlInternal(url)) {
-        webContents.stop();
-        evt.preventDefault();
-
-        // Tell the main app to open the external URL externally.
-        openExternalUrl({ url });
-      }
-    });
 
     webview.addEventListener("did-navigate", (evt) => {
       this.setState({ currentUrl: evt.url });
@@ -54,6 +43,8 @@ class Webview extends PureComponent {
     webview.addEventListener("did-navigate-in-page", (evt) => {
       this.setState({ currentUrl: evt.url });
     });
+
+    onMount({ webContentId: webContents.id })
   }
 
   render() {
@@ -85,8 +76,7 @@ Webview.propTypes = {
   useragent: PropTypes.string,
   isActive: PropTypes.bool,
   showUrl: PropTypes.bool,
-  isUrlInternal: PropTypes.func,
-  openExternalUrl: PropTypes.func
+  onMount: PropTypes.func
 };
 
 Webview.defaultProps = {
@@ -95,8 +85,7 @@ Webview.defaultProps = {
   useragent: null,
   isActive: false,
   showUrl: false,
-  isUrlInternal: (() => true),
-  openExternalUrl: (() => {})
+  onMount: (() => {})
 };
 
 export default Webview;

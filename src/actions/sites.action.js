@@ -1,14 +1,11 @@
 import { createAction } from "redux-actions";
 
-import {
-  pickObjectWithAttributes,
-  pickArrayObjectWithAttributes
-} from "/src/helpers/pick.helper";
+import { pickObjectWithAttributes } from "/src/helpers/pick.helper";
 
-export const SITES_ADD_ONE = "SITES_ADD_ONE";
-export const SITES_ADD_MANY = "SITES_ADD_MANY";
+export const SITES_ADD_SITE = "SITES_ADD_SITE";
 
 export const siteAttributes = [
+  "id",
   "name",
   "url",
   "iconSrc",
@@ -20,11 +17,6 @@ export const siteAttributes = [
 ];
 
 export const addSite = createAction(
-  SITES_ADD_ONE,
+  SITES_ADD_SITE,
   pickObjectWithAttributes("site", siteAttributes)
-);
-
-export const addSites = createAction(
-  SITES_ADD_MANY,
-  pickArrayObjectWithAttributes("sites", siteAttributes)
 );
