@@ -9,7 +9,8 @@ import { withPayload } from "/src/helpers/reducer.helper";
 import setPreferences from "./preferences/set-preferences";
 
 const initialState = {
-  showSiteNameInTray: false
+  showSiteNameInTray: false,
+  showSiteUrl: false
 };
 
 export default handleActions({

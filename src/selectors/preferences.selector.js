@@ -7,3 +7,8 @@ export const showSiteNameInTray = createSelector(
   preferences,
   get("showSiteNameInTray")
 );
+
+export const showSiteUrl = createSelector(
+  preferences,
+  get("showSiteUrl")
+);

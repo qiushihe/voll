@@ -8,11 +8,11 @@ import {
   id,
   url,
   sessionId,
-  persistentSessionId,
-  showUrl
+  persistentSessionId
 } from "/src/selectors/site.selector";
 
 import { activeSiteId } from "/src/selectors/webviews.selector";
+import { showSiteUrl } from "/src/selectors/preferences.selector";
 
 import Webview from "./webview";
 
@@ -36,7 +36,7 @@ export default connect(
     sessionId,
     persistentSessionId,
     activeSiteId,
-    showUrl
+    showUrl: showSiteUrl
   }),
   () => ({}),
   (stateProps, dispatchProps, ownProps) => ({

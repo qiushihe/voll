@@ -12,8 +12,7 @@ export const siteAttributes = [
   "sessionId",
   "persistentSessionId",
   "externalUrlPatterns",
-  "internalUrlPatterns",
-  "showUrl"
+  "internalUrlPatterns"
 ];
 
 export const addSite = createAction(

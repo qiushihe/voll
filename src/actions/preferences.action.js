@@ -5,7 +5,8 @@ import { pickObjectWithAttributes } from "/src/helpers/pick.helper";
 export const PREFERENCES_SET_PREFERENCES = "PREFERENCES_SET_PREFERENCES";
 
 export const preferencesAttributes = [
-  "showSiteNameInTray"
+  "showSiteNameInTray",
+  "showSiteUrl"
 ];
 
 export const setPreferences = createAction(
