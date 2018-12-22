@@ -8,13 +8,11 @@ const Base = styled.div`
   align-items: center;
   padding: 3px 0;
   cursor: pointer;
-  color: #4e4e4e;
-  opacity: ${({ isActive }) => isActive ? "1" : "0.7"};
-
-  &:hover {
-    color: #000000;
-    opacity: 1;
-  }
+  min-height: 48px;
+  color: ${({ isActive }) => isActive ? "black" : "white"};
+  background-color: ${({ isActive }) => isActive ? "white" : "transparent"};
+  border-right: ${({ isActive }) => isActive ? "1px solid #eeeeee" : "none"};
+  box-shadow: ${({ isActive }) => isActive ? "0px 3px 3px 0px black" : "none"};
 `;
 
 const Icon = styled.div`
@@ -40,12 +38,43 @@ const Label = styled.div`
 `;
 
 class BaseSite extends PureComponent {
+  constructor(...args) {
+    super(...args);
+
+    this.state = {
+      isHover: false
+    };
+
+    this.handleMouseEnter = this.handleMouseEnter.bind(this);
+    this.handleMouseLeave = this.handleMouseLeave.bind(this);
+  }
+
+  handleMouseEnter() {
+    this.setState({ isHover: true });
+  }
+
+  handleMouseLeave() {
+    this.setState({ isHover: false });
+  }
+
   render() {
     const { label, showSiteName, isActive, renderIcon, onClick } = this.props;
+    const { isHover } = this.state;
 
     return (
-      <Base onClick={onClick} isActive={isActive}>
-        <Icon>{renderIcon()}</Icon>
+      <Base
+        onClick={onClick}
+        onMouseEnter={this.handleMouseEnter}
+        onMouseLeave={this.handleMouseLeave}
+        isActive={isActive}
+        isHover={isHover}
+      >
+        <Icon>
+          {renderIcon({
+            isActive,
+            isHover
+          })}
+        </Icon>
         {showSiteName && (
           <Label>{label}</Label>
         )}

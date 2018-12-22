@@ -24,7 +24,8 @@ const LoadingBackdrop = styled.div`
   right: 0;
   bottom: 0;
   background: white;
-  opacity: 0.5;
+  font-size: 24px;
+  letter-spacing: 10px;
 `;
 
 class App extends PureComponent {
@@ -41,7 +42,7 @@ class App extends PureComponent {
         <Webviews />
         {!isAppReady && (
           <LoadingBackdrop>
-            Loading ...
+            ... Loading ...
           </LoadingBackdrop>
         )}
       </Base>

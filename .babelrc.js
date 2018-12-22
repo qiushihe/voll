@@ -1,5 +1,6 @@
 module.exports = {
   "plugins": [
+    "babel-plugin-styled-components",
     "@babel/plugin-syntax-object-rest-spread",
     "@babel/plugin-proposal-object-rest-spread",
     ["provide-modules", { "react": "React" }],

@@ -31,21 +31,33 @@ const IconImage = styled.img`
 `;
 
 class Site extends PureComponent {
+  constructor(...args) {
+    super(...args);
+
+    this.renderIcon = this.renderIcon.bind(this);
+  }
+
+  renderIcon({ isActive, isHover }) {
+    const { iconSrc } = this.props;
+
+    return (
+      <IconContainer isActive={isActive} isHover={isHover}>
+        {isEmpty(iconSrc) ? (
+          <FontAwesomeIcon icon={faGlobeAfrica} />
+        ) : (
+          <IconImage src={iconSrc} />
+        )}
+      </IconContainer>
+    );
+  }
+
   render() {
-    const { name, iconSrc, showSiteName, isActive, activateSite } = this.props;
+    const { name, showSiteName, isActive, activateSite } = this.props;
 
     return (
       <BaseSite
         label={name}
-        renderIcon={() => (
-          <IconContainer>
-            {isEmpty(iconSrc) ? (
-              <FontAwesomeIcon icon={faGlobeAfrica} />
-            ) : (
-              <IconImage src={iconSrc} />
-            )}
-          </IconContainer>
-        )}
+        renderIcon={this.renderIcon}
         onClick={activateSite}
         showSiteName={showSiteName}
         isActive={isActive}

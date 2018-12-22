@@ -1,20 +1,19 @@
 import { PureComponent, Children } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import isEmpty from "lodash/fp/isEmpty";
 import map from "lodash/fp/map";
 
-import AddSite from "./add-site";
 import Site from "./site";
 
 const Base = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
-  width: ${({ showSiteName }) => showSiteName ? "200px" : "60px"}
-  background-color: #efefef;
+  min-width: ${({ showSiteName }) => showSiteName ? "200px" : "60px"};
   box-sizing: border-box;
-  border-right: 1px solid black;
+  background-color: #1d1838;
+  box-shadow: inset -10px 0px 10px -10px black;
+  overflow-y: auto;
 `;
 
 const renderSite = ({ id }) => (
@@ -29,9 +28,7 @@ class Tray extends PureComponent {
 
     return (
       <Base showSiteName={showSiteName}>
-        {isEmpty(sites)
-          ? <AddSite />
-          : Children.toArray(renderSites(sites))}
+        {Children.toArray(renderSites(sites))}
       </Base>
     );
   }
