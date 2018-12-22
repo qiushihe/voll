@@ -10,6 +10,7 @@ import values from "lodash/fp/values";
 import filter from "lodash/fp/filter";
 import size from "lodash/fp/size";
 import lte from "lodash/fp/lte";
+import isEmpty from "lodash/fp/isEmpty";
 
 import { getSettings } from "./settings";
 import { create as createMainMenu } from "./menu";
@@ -115,8 +116,15 @@ ipcMain.on("app-did-mount", (evt) => {
       preferences: getOr({}, "preferences")(settings)
     });
 
-    flow([
-      getOr([], "sites"),
+    const sites = getOr([], "sites")(settings);
+
+    if (isEmpty(sites)) {
+      sendReply("set-app-states", {
+        states: {
+          isAppReady: true
+        }
+      });
+    } else {
       forEach((site) => {
         const siteId = uuidv4();
 
@@ -127,7 +135,7 @@ ipcMain.on("app-did-mount", (evt) => {
         };
 
         sendReply("add-site", { site: allSites[siteId] });
-      })
-    ])(settings);
+      })(sites);
+    }
   });
 });
