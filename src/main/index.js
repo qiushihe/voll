@@ -5,7 +5,6 @@ import flow from "lodash/fp/flow";
 import get from "lodash/fp/get";
 import negate from "lodash/fp/negate";
 import getOr from "lodash/fp/getOr";
-import forEach from "lodash/fp/forEach";
 import values from "lodash/fp/values";
 import filter from "lodash/fp/filter";
 import size from "lodash/fp/size";

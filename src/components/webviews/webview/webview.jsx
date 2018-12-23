@@ -1,7 +1,6 @@
 import { PureComponent, createRef } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import {preloadUrl} from "/src/selectors/site.selector";
 
 const Base = styled.div`
   display: flex;
@@ -32,7 +31,7 @@ class Webview extends PureComponent {
   }
 
   componentDidMount() {
-    const { onMount } = this.props;
+    const { onMount, onIpcAction } = this.props;
 
     const webview = this.webviewRef.current;
     const webContents = webview.getWebContents();
@@ -46,7 +45,7 @@ class Webview extends PureComponent {
     });
 
     webview.addEventListener("ipc-message", (evt) => {
-      console.log("ipc-message", evt);
+      onIpcAction({ evtName: evt.channel, evtArgs: evt.args});
     });
 
     onMount({ webContentId: webContents.id })
@@ -83,7 +82,8 @@ Webview.propTypes = {
   preloadUrl: PropTypes.string,
   isActive: PropTypes.bool,
   showUrl: PropTypes.bool,
-  onMount: PropTypes.func
+  onMount: PropTypes.func,
+  onIpcAction: PropTypes.func,
 };
 
 Webview.defaultProps = {
@@ -93,7 +93,8 @@ Webview.defaultProps = {
   preloadUrl: null,
   isActive: false,
   showUrl: false,
-  onMount: (() => {})
+  onMount: (() => {}),
+  onIpcAction: (() => {})
 };
 
 export default Webview;

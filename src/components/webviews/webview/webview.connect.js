@@ -15,6 +15,8 @@ import {
 import { activeSiteId } from "/src/selectors/webviews.selector";
 import { showSiteUrl } from "/src/selectors/preferences.selector";
 
+import { dispatchIpcAction } from "/src/actions/ipc.action";
+
 import Webview from "./webview";
 
 const getPartition = ({ sessionId, persistentSessionId }) => {
@@ -40,7 +42,9 @@ export default connect(
     activeSiteId,
     showUrl: showSiteUrl
   }),
-  () => ({}),
+  (dispatch) => ({
+    onIpcAction: ({ evtName, evtArgs }) => dispatch(dispatchIpcAction({ evtName, evtArgs }))
+  }),
   (stateProps, dispatchProps, ownProps) => ({
     ...ownProps,
     ...stateProps,

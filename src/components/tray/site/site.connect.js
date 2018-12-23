@@ -18,9 +18,7 @@ export default connect(
     activeSiteId
   }),
   (dispatch) => ({
-    activateSite: ({ siteId }) => {
-      dispatch(activateSite({ siteId }))
-    }
+    activateSite: ({ siteId }) => dispatch(activateSite({ siteId }))
   }),
   (stateProps, dispatchProps, ownProps) => ({
     ...ownProps,

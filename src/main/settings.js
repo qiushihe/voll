@@ -3,6 +3,7 @@ import { readFile } from "graceful-fs";
 import { join as joinPath } from "path";
 import uuidv4 from "uuid/v4";
 import request from "request";
+import once from "lodash/fp/once";
 import get from "lodash/fp/get";
 import isEmpty from "lodash/fp/isEmpty";
 import identity from "lodash/fp/identity";
@@ -55,9 +56,9 @@ const writeCache = (settings) => {
   return Promise.resolve(cachedSettings);
 };
 
-export const getSettings = () => readCache().then(
+export const getSettings = once(() => readCache().then(
   ifNull(
     () => (read().catch(() => ({})).then(apply).then(writeCache)),
     identity
   )
-);
+));
