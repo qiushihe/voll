@@ -13,6 +13,7 @@ import lte from "lodash/fp/lte";
 import isEmpty from "lodash/fp/isEmpty";
 
 import { getSettings } from "./settings";
+import { preparePreloads, setupPreload } from "./preload";
 import { create as createMainMenu } from "./menu";
 import { getInternalUrlChecker } from "./url-checker";
 
@@ -57,6 +58,27 @@ app.on("activate", () => {
 
 const allSites = {};
 const allWebContents = {};
+
+const addSites = ({ sendReply, sites }) => {
+  if (isEmpty(sites)) {
+    return Promise.resolve();
+  } else {
+    const [currentSite, ...restSites] = sites;
+    const siteId = uuidv4();
+
+    const site = {
+      ...currentSite,
+      id: siteId,
+      webContentsReady: false
+    };
+
+    return setupPreload(site).then((preloadFilePath) => {
+      site.preloadUrl = `file:///${preloadFilePath}`;
+      allSites[siteId] = site;
+      sendReply("add-site", { site });
+    }).then(() => addSites({ sendReply, sites: restSites }));
+  }
+};
 
 app.on("web-contents-created", (_, webContents) => {
   allWebContents[webContents.id] = webContents;
@@ -125,17 +147,7 @@ ipcMain.on("app-did-mount", (evt) => {
         }
       });
     } else {
-      forEach((site) => {
-        const siteId = uuidv4();
-
-        allSites[siteId] = {
-          ...site,
-          id: siteId,
-          webContentsReady: false
-        };
-
-        sendReply("add-site", { site: allSites[siteId] });
-      })(sites);
+      preparePreloads().then(() => addSites({ sendReply, sites }));
     }
   });
 });

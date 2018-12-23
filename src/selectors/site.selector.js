@@ -25,3 +25,5 @@ export const persistentSessionId = createSelector(site, get("persistentSessionId
 export const externalUrlPatterns = createSelector(site, get("externalUrlPatterns"));
 
 export const internalUrlPatterns = createSelector(site, get("internalUrlPatterns"));
+
+export const preloadUrl = createSelector(site, get("preloadUrl"));

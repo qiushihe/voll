@@ -1,6 +1,7 @@
 import { PureComponent, createRef } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
+import {preloadUrl} from "/src/selectors/site.selector";
 
 const Base = styled.div`
   display: flex;
@@ -48,7 +49,7 @@ class Webview extends PureComponent {
   }
 
   render() {
-    const { url, isActive, partition, useragent, showUrl } = this.props;
+    const { url, isActive, partition, useragent, preloadUrl, showUrl } = this.props;
     const { currentUrl } = this.state;
 
     return (
@@ -64,6 +65,7 @@ class Webview extends PureComponent {
           useragent={useragent}
           autosize="on"
           allowpopups="on"
+          preload={preloadUrl}
         />
       </Base>
     );
@@ -74,6 +76,7 @@ Webview.propTypes = {
   url: PropTypes.string,
   partition: PropTypes.string,
   useragent: PropTypes.string,
+  preloadUrl: PropTypes.string,
   isActive: PropTypes.bool,
   showUrl: PropTypes.bool,
   onMount: PropTypes.func
@@ -83,6 +86,7 @@ Webview.defaultProps = {
   url: "",
   partition: null,
   useragent: null,
+  preloadUrl: null,
   isActive: false,
   showUrl: false,
   onMount: (() => {})
