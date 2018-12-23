@@ -45,6 +45,10 @@ class Webview extends PureComponent {
       this.setState({ currentUrl: evt.url });
     });
 
+    webview.addEventListener("ipc-message", (evt) => {
+      console.log("ipc-message", evt);
+    });
+
     onMount({ webContentId: webContents.id })
   }
 

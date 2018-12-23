@@ -3,12 +3,14 @@ import { lstat, mkdir, writeFile } from "graceful-fs";
 import rimraf from "rimraf";
 import { join as joinPath } from "path";
 
+import preloadCore from "raw-loader!/src/templates/preload.js.core";
+
 const getSitePreloadFilePath = ({ id }) => (preloadsDirPath) => joinPath(preloadsDirPath, `${id}.js`);
 
 const writePreload = (code) => (preloadFilePath) => new Promise((resolve, reject) => {
   writeFile(
     preloadFilePath,
-    code,
+    [preloadCore, code].join("\n"),
     "utf8",
     (err) => err ? reject(err) : resolve(preloadFilePath)
   );

@@ -46,10 +46,10 @@ module.exports = function () {
     plugins: [
       new HtmlWebpackPlugin({
         excludeChunks: ["main"],
-        template: path.resolve(__dirname, "templates", "index.html")
+        template: path.resolve(__dirname, "src", "templates", "index.html")
       }),
       new CopyWebpackPlugin([{
-        from: path.resolve(__dirname, "templates", "package.json"), to: path.resolve(__dirname, "build")
+        from: path.resolve(__dirname, "src", "templates", "package.json"), to: path.resolve(__dirname, "build")
       }])
     ]
   };
