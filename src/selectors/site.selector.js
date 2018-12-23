@@ -1,5 +1,6 @@
 import { createSelector } from "reselect";
 import get from "lodash/fp/get";
+import getOr from "lodash/fp/getOr";
 import find from "lodash/fp/find";
 
 import { sites } from "./sites.selector";
@@ -27,3 +28,5 @@ export const externalUrlPatterns = createSelector(site, get("externalUrlPatterns
 export const internalUrlPatterns = createSelector(site, get("internalUrlPatterns"));
 
 export const preloadUrl = createSelector(site, get("preloadUrl"));
+
+export const unreadCount = createSelector(site, getOr(0, "unreadCount"));

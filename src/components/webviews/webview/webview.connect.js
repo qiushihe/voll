@@ -43,7 +43,7 @@ export default connect(
     showUrl: showSiteUrl
   }),
   (dispatch) => ({
-    onIpcAction: ({ evtName, evtArgs }) => dispatch(dispatchIpcAction({ evtName, evtArgs }))
+    onIpcAction: ({ siteId, evtName, evtArgs }) => dispatch(dispatchIpcAction({ siteId, evtName, evtArgs }))
   }),
   (stateProps, dispatchProps, ownProps) => ({
     ...ownProps,
@@ -55,6 +55,11 @@ export default connect(
     }),
     useragent: UA.chrome(71), // TODO: Implement component width detection and switch to a mobile device's UA
     isActive: stateProps.id === stateProps.activeSiteId,
+    onIpcAction: ({ evtName, evtArgs }) => dispatchProps.onIpcAction({
+      siteId: stateProps.id,
+      evtName,
+      evtArgs
+    }),
     onMount: ({ webContentId }) => {
       ipcRenderer.send("web-contents-created", {
         siteId: stateProps.id,

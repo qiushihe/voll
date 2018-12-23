@@ -2,7 +2,7 @@ import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 
 import { showSiteNameInTray } from "/src/selectors/preferences.selector";
-import { id, name, iconSrc } from "/src/selectors/site.selector";
+import { id, name, iconSrc, unreadCount } from "/src/selectors/site.selector";
 import { activeSiteId } from "/src/selectors/webviews.selector";
 
 import { activateSite } from "/src/actions/webviews.action";
@@ -14,6 +14,7 @@ export default connect(
     id,
     name,
     iconSrc,
+    unreadCount,
     showSiteName: showSiteNameInTray,
     activeSiteId
   }),

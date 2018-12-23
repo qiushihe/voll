@@ -2,15 +2,16 @@ import { app } from "electron";
 import { lstat, mkdir, writeFile } from "graceful-fs";
 import rimraf from "rimraf";
 import { join as joinPath } from "path";
+import compact from "lodash/fp/compact";
 
 import preloadCore from "raw-loader!/src/templates/preload.js.core";
 
 const getSitePreloadFilePath = ({ id }) => (preloadsDirPath) => joinPath(preloadsDirPath, `${id}.js`);
 
-const writePreload = (code) => (preloadFilePath) => new Promise((resolve, reject) => {
+const writeSitePreloadFile = ({ preloadCode }) => (preloadFilePath) => new Promise((resolve, reject) => {
   writeFile(
     preloadFilePath,
-    [preloadCore, code].join("\n"),
+    compact([preloadCore, preloadCode]).join("\n"),
     "utf8",
     (err) => err ? reject(err) : resolve(preloadFilePath)
   );
@@ -37,4 +38,4 @@ export const preparePreloads = () => Promise
 export const setupPreload = (site) => Promise
   .resolve(PRELOAD_DIR_PATH)
   .then(getSitePreloadFilePath(site))
-  .then(writePreload("var a = 42;"));
+  .then(writeSitePreloadFile(site));

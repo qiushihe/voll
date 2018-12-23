@@ -30,6 +30,18 @@ const IconImage = styled.img`
   left: 0;
 `;
 
+const IconBadge = styled.div`
+  display: inline-block;
+  position: absolute;
+  font-size: 10px;
+  background: red;
+  color: white;
+  border-radius: 99px;
+  padding: 2px 4px;
+  bottom: 2px;
+  right: 2px;
+`;
+
 class Site extends PureComponent {
   constructor(...args) {
     super(...args);
@@ -38,7 +50,7 @@ class Site extends PureComponent {
   }
 
   renderIcon({ isActive, isHover }) {
-    const { iconSrc } = this.props;
+    const { iconSrc, unreadCount } = this.props;
 
     return (
       <IconContainer isActive={isActive} isHover={isHover}>
@@ -47,6 +59,11 @@ class Site extends PureComponent {
         ) : (
           <IconImage src={iconSrc} />
         )}
+        {unreadCount > 0 ? (
+          <IconBadge>
+            {unreadCount > 999 ? "999+" : unreadCount}
+          </IconBadge>
+        ) : null}
       </IconContainer>
     );
   }
@@ -69,6 +86,7 @@ class Site extends PureComponent {
 Site.propTypes = {
   name: PropTypes.string,
   iconSrc: PropTypes.string,
+  unreadCount: PropTypes.number,
   showSiteName: PropTypes.bool,
   isActive: PropTypes.bool,
   activateSite: PropTypes.func
@@ -77,6 +95,7 @@ Site.propTypes = {
 Site.defaultProps = {
   name: "A Site",
   iconSrc: null,
+  unreadCount: 0,
   showSiteName: false,
   isActive: false,
   activateSite: (() => {})
