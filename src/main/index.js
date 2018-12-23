@@ -10,6 +10,8 @@ import filter from "lodash/fp/filter";
 import size from "lodash/fp/size";
 import lte from "lodash/fp/lte";
 import isEmpty from "lodash/fp/isEmpty";
+import map from "lodash/fp/map";
+import sum from "lodash/fp/sum";
 
 import { getSettings } from "./settings";
 import { preparePreloads, setupPreload } from "./preload";
@@ -22,6 +24,7 @@ const createMainWindow = () => {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    title: "Voll",
     webPreferences: {
       // Fix issue with certain site's popup (i.e. gmail notifications)
       nativeWindowOpen: true
@@ -29,6 +32,10 @@ const createMainWindow = () => {
   });
 
   mainWindow.loadFile("index.html");
+
+  mainWindow.on("page-title-updated", (evt) => {
+    evt.preventDefault();
+  });
 
   mainWindow.on("closed", () => {
     mainWindow = null;
@@ -79,10 +86,18 @@ const addSites = ({ sendReply, sites }) => {
   }
 };
 
+// This `web-contents-created` event is fired by Electron itself when *any* WebContents object is created.
+// Here we catch them all because we need reference to some of them and we don't know yet which one is which, but
+// we will in a bit (See the `web-contents-created` handler from `ipcMain`).
 app.on("web-contents-created", (_, webContents) => {
   allWebContents[webContents.id] = webContents;
 });
 
+// This `web-contents-created` event is a custom message sent from the `WebView` component of the app.
+// This is fired fom the `componentDidMount` function after a `<webview />` tag is created.
+// This event includes the same `webContents.id` as the `web-contents-created` on `app` and in addition to that
+// the `siteId` which is needed for us to establish the correct association between some WebContents instances
+// and site metadata and configurations.
 ipcMain.on("web-contents-created", (evt, { siteId, webContentId }) => {
   const sendReply = getReplier(evt.sender);
 
@@ -125,6 +140,24 @@ ipcMain.on("web-contents-created", (evt, { siteId, webContentId }) => {
       }
     }
   ])(allSites);
+});
+
+ipcMain.on("site-unread-count-changed", (evt, { siteId, unreadCount }) => {
+  const site = allSites[siteId];
+  if (site) {
+    site.unreadCount = unreadCount;
+  }
+
+  const totalUnreadCount = flow([
+    map(getOr(0, "unreadCount")),
+    sum
+  ])(allSites);
+
+  if (totalUnreadCount > 0) {
+    mainWindow.setTitle(`Voll (${totalUnreadCount})`);
+  } else {
+    mainWindow.setTitle("Voll");
+  }
 });
 
 ipcMain.on("app-did-mount", (evt) => {

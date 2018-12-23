@@ -1,4 +1,5 @@
 import { connect } from "react-redux";
+import { ipcRenderer } from "electron";
 import { createStructuredSelector } from "reselect";
 
 import { showSiteNameInTray } from "/src/selectors/preferences.selector";
@@ -26,6 +27,12 @@ export default connect(
     ...stateProps,
     ...dispatchProps,
     isActive: stateProps.id === stateProps.activeSiteId,
-    activateSite: () => dispatchProps.activateSite({ siteId: stateProps.id })
+    activateSite: () => dispatchProps.activateSite({ siteId: stateProps.id }),
+    onUnreadCountChange: ({ unreadCount }) => {
+      ipcRenderer.send("site-unread-count-changed", {
+        siteId: stateProps.id,
+        unreadCount
+      });
+    }
   })
 )(Site);
