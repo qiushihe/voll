@@ -29,14 +29,14 @@ const write = (data) => new Promise((resolve, reject) => {
   });
 });
 
-export const getSettings = () => (
+export const getLocalSettings = () => (
   read()
     .catch(() => ({}))
     .then((settings) => settings || {})
 );
 
-export const updateSettings = (updates) => (
-  getSettings()
+export const updateLocalSettings = (updates) => (
+  getLocalSettings()
     .then((settings) => assign({ ...settings })(updates))
     .then(write)
 );

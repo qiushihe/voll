@@ -20,7 +20,11 @@ export default connect(
     activeSiteId
   }),
   (dispatch) => ({
-    activateSite: ({ siteId }) => dispatch(activateSite({ siteId }))
+    activateSite: ({ siteId }) => {
+      const result = dispatch(activateSite({ siteId }));
+      ipcRenderer.send("site-activated", { siteId });
+      return result;
+    }
   }),
   (stateProps, dispatchProps, ownProps) => ({
     ...ownProps,

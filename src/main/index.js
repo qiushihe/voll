@@ -14,24 +14,44 @@ import map from "lodash/fp/map";
 import sum from "lodash/fp/sum";
 import debounce from "lodash/fp/debounce";
 import once from "lodash/fp/once";
+import findIndex from "lodash/fp/findIndex";
+import isNumber from "lodash/fp/isNumber";
+import isFinite from "lodash/fp/isFinite";
 
-import { getSettings, updateSettings, fetchSettings } from "./settings";
+import { getLocalSettings, updateLocalSettings, fetchSettings } from "./settings";
 import { preparePreloads, setupPreload } from "./preload";
 import { create as createMainMenu } from "./menu";
 import { getInternalUrlChecker } from "./url-checker";
 
 let mainWindow = null;
 
-const cachedGetSettings = once(getSettings);
+const allSites = {};
+const allWebContents = {};
+
+const isFiniteNumber = (value) => (isNumber(value) && isFinite(value));
+
+const getReplier = (sender) => (...args) => sender.send(...args);
+
+const cachedGetLocalSettings = once(getLocalSettings);
 
 const cachedGetAllSettings = once(() => (
-  cachedGetSettings()
-    .then(({ settingsJsonUrl }) => fetchSettings(settingsJsonUrl))
+  cachedGetLocalSettings()
+    .then((localSettings) => {
+      const { settingsJsonUrl } = localSettings;
+      return fetchSettings(settingsJsonUrl).then((remoteSettings) => ({
+        _local: localSettings,
+        ...remoteSettings
+      }));
+    })
 ));
 
 const saveMainWindowSizeAndPosition = debounce(1000)(() => {
   const { x: posX, y: posY, width, height } = mainWindow.getBounds();
-  updateSettings({ posX, posY, width, height });
+  updateLocalSettings({ posX, posY, width, height });
+});
+
+const saveActiveSiteIndex = debounce(1000)((index) => {
+  updateLocalSettings({ activeSiteIndex: index });
 });
 
 const createMainWindow = ({ posX, posY, width, height }) => {
@@ -42,6 +62,7 @@ const createMainWindow = ({ posX, posY, width, height }) => {
     height: height || 600,
     title: "Voll",
     webPreferences: {
+      // Force overlay scrollbar
       enableBlinkFeatures: "OverlayScrollbars",
       // Fix issue with certain site's popup (i.e. gmail notifications)
       nativeWindowOpen: true
@@ -61,11 +82,6 @@ const createMainWindow = ({ posX, posY, width, height }) => {
   mainWindow.on("resize", saveMainWindowSizeAndPosition);
   mainWindow.on("move", saveMainWindowSizeAndPosition);
 };
-
-const getReplier = (sender) => (...args) => sender.send(...args);
-
-const allSites = {};
-const allWebContents = {};
 
 const addSites = ({ sendReply, sites }) => {
   if (isEmpty(sites)) {
@@ -88,12 +104,35 @@ const addSites = ({ sendReply, sites }) => {
   }
 };
 
+// Use `once` because this is called from parallel `web-contents-created` handler calls.
+const onAllSitesWebContentsCreated = once(({ sendReply }) => {
+  cachedGetLocalSettings().then(({ activeSiteIndex }) => {
+    if (isFiniteNumber(activeSiteIndex) && activeSiteIndex >= 0) {
+      const activeSite = flow([
+        values,
+        get(activeSiteIndex)
+      ])(allSites);
+
+      if (activeSite) {
+        console.log("Set active site ID", activeSite.id);
+        sendReply("set-active-site-id", { activeSiteId: activeSite.id });
+      }
+    }
+  });
+
+  sendReply("set-app-states", {
+    states: { isAppReady: true }
+  });
+});
+
 app.on("ready", () => {
   // Settings will be cached by the time we need them later ...
-  cachedGetAllSettings();
+  cachedGetAllSettings().then((allSettings) => {
+    console.log("Got all settings", JSON.stringify(allSettings, null, 2));
+  });
 
   // ... but for now we don't need *all* the settings as we only need the ones in the local settings file.
-  cachedGetSettings().then(({ posX, posY, width, height }) => {
+  cachedGetLocalSettings().then(({ posX, posY, width, height }) => {
     createMainWindow({ posX, posY, width, height });
     createMainMenu();
   });
@@ -157,11 +196,7 @@ ipcMain.on("web-contents-created", (evt, { siteId, webContentId }) => {
     lte(0),
     (ready) => {
       if (ready) {
-        sendReply("set-app-states", {
-          states: {
-            isAppReady: true
-          }
-        });
+        onAllSitesWebContentsCreated({ sendReply });
       }
     }
   ])(allSites);
@@ -188,12 +223,20 @@ ipcMain.on("site-unread-count-changed", (evt, { siteId, unreadCount }) => {
   app.setBadgeCount(totalUnreadCount);
 });
 
+ipcMain.on("site-activated", (evt, { siteId }) => {
+  // We can't store the `siteId` here because it's randomly generated.
+  // So we find the index of the site and store that instead.
+  flow([
+    values,
+    findIndex({ id: siteId }),
+    saveActiveSiteIndex
+  ])(allSites);
+});
+
 ipcMain.on("app-did-mount", (evt) => {
   const sendReply = getReplier(evt.sender);
 
   cachedGetAllSettings().then((settings) => {
-    console.log("Got settings", JSON.stringify(settings));
-
     sendReply("set-preferences", {
       preferences: getOr({}, "preferences")(settings)
     });
@@ -201,13 +244,10 @@ ipcMain.on("app-did-mount", (evt) => {
     const sites = getOr([], "sites")(settings);
 
     if (isEmpty(sites)) {
-      sendReply("set-app-states", {
-        states: {
-          isAppReady: true
-        }
-      });
+      onAllSitesWebContentsCreated({ sendReply });
     } else {
-      preparePreloads().then(() => addSites({ sendReply, sites }));
+      preparePreloads()
+        .then(() => addSites({ sendReply, sites }));
     }
   });
 });
