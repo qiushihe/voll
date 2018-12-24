@@ -26,6 +26,7 @@ const createMainWindow = () => {
     height: 600,
     title: "Voll",
     webPreferences: {
+      enableBlinkFeatures: "OverlayScrollbars",
       // Fix issue with certain site's popup (i.e. gmail notifications)
       nativeWindowOpen: true
     }

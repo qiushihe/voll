@@ -20,7 +20,6 @@ export const pickObjectWithAttributes = (objectName, objectAttributes) => {
 
 export const pickArrayObjectWithAttributes = (arrayObjectName, arrayItemAttributes) => {
   const pickItemAttributes = pick(arrayItemAttributes);
-
   return flow([
     pick([arrayObjectName]),
     uncappedReduce((result, value, key) => ({
