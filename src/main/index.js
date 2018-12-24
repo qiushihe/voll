@@ -159,6 +159,9 @@ ipcMain.on("site-unread-count-changed", (evt, { siteId, unreadCount }) => {
   } else {
     mainWindow.setTitle("Voll");
   }
+
+  // Doesn't work on Windows.
+  app.setBadgeCount(totalUnreadCount);
 });
 
 ipcMain.on("app-did-mount", (evt) => {
