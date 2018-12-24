@@ -1,19 +1,14 @@
 import { app } from "electron";
-import { readFile } from "graceful-fs";
+import { readFile, writeFile } from "graceful-fs";
 import { join as joinPath } from "path";
 import uuidv4 from "uuid/v4";
 import request from "request";
-import once from "lodash/fp/once";
-import get from "lodash/fp/get";
-import isEmpty from "lodash/fp/isEmpty";
-import identity from "lodash/fp/identity";
+import assign from "lodash/fp/assign";
 
-let cachedSettings = null;
-
-const ifNull = (whenNull, whenNotNull) => (value) => (!!value ? whenNotNull(value) : whenNull(value));
+const SETTINGS_FILE_PATH = joinPath(app.getPath("userData"), "settings.json");
 
 const read = () => new Promise((resolve, reject) => {
-  readFile(joinPath(app.getPath("userData"), "settings.json"), "utf8", (err, data) => {
+  readFile(SETTINGS_FILE_PATH, "utf8", (err, data) => {
     if (err) {
       console.error("Error reading app settings.", err);
       reject(err);
@@ -23,42 +18,43 @@ const read = () => new Promise((resolve, reject) => {
   });
 });
 
-const apply = (settings) => new Promise((resolve, reject) => {
-  console.log("Got settings", JSON.stringify(settings));
-
-  const settingsJsonUrl = get("settingsJsonUrl")(settings);
-
-  if (isEmpty(settingsJsonUrl)) {
-    resolve();
-  } else {
-    const fetchUrl = `${settingsJsonUrl}?${uuidv4()}`;
-    console.log("Fetching from", fetchUrl);
-    request.get(fetchUrl, (err, res, body) => {
-      if (err) {
-        console.error("Error fetching settings JSON.", err);
-        reject(err);
-      } else {
-        try {
-          resolve(JSON.parse(body));
-        } catch (err) {
-          console.error("Error parsing fetched settings JSON.", err);
-          reject(err);
-        }
-      }
-    });
-  }
+const write = (data) => new Promise((resolve, reject) => {
+  writeFile(SETTINGS_FILE_PATH, JSON.stringify(data, null, 2), "utf8", (err) => {
+    if (err) {
+      console.error("Error writing app settings.", err);
+      reject(err);
+    } else {
+      resolve(data);
+    }
+  });
 });
 
-const readCache = () => Promise.resolve(cachedSettings);
+export const getSettings = () => (
+  read()
+    .catch(() => ({}))
+    .then((settings) => settings || {})
+);
 
-const writeCache = (settings) => {
-  cachedSettings = settings;
-  return Promise.resolve(cachedSettings);
-};
+export const updateSettings = (updates) => (
+  getSettings()
+    .then((settings) => assign({ ...settings })(updates))
+    .then(write)
+);
 
-export const getSettings = once(() => readCache().then(
-  ifNull(
-    () => (read().catch(() => ({})).then(apply).then(writeCache)),
-    identity
-  )
-));
+export const fetchSettings = (url) => new Promise((resolve, reject) => {
+  const fetchUrl = `${url}?${uuidv4()}`;
+  console.log("Fetching from", fetchUrl);
+  request.get(fetchUrl, (err, res, body) => {
+    if (err) {
+      console.error("Error fetching settings JSON.", err);
+      reject(err);
+    } else {
+      try {
+        resolve(JSON.parse(body));
+      } catch (err) {
+        console.error("Error parsing fetched settings JSON.", err);
+        reject(err);
+      }
+    }
+  });
+});

@@ -12,18 +12,34 @@ import lte from "lodash/fp/lte";
 import isEmpty from "lodash/fp/isEmpty";
 import map from "lodash/fp/map";
 import sum from "lodash/fp/sum";
+import debounce from "lodash/fp/debounce";
+import once from "lodash/fp/once";
 
-import { getSettings } from "./settings";
+import { getSettings, updateSettings, fetchSettings } from "./settings";
 import { preparePreloads, setupPreload } from "./preload";
 import { create as createMainMenu } from "./menu";
 import { getInternalUrlChecker } from "./url-checker";
 
 let mainWindow = null;
 
-const createMainWindow = () => {
+const cachedGetSettings = once(getSettings);
+
+const cachedGetAllSettings = once(() => (
+  cachedGetSettings()
+    .then(({ settingsJsonUrl }) => fetchSettings(settingsJsonUrl))
+));
+
+const saveMainWindowSizeAndPosition = debounce(1000)(() => {
+  const { x: posX, y: posY, width, height } = mainWindow.getBounds();
+  updateSettings({ posX, posY, width, height });
+});
+
+const createMainWindow = ({ posX, posY, width, height }) => {
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    x: posX,
+    y: posY,
+    width: width || 800,
+    height: height || 600,
     title: "Voll",
     webPreferences: {
       enableBlinkFeatures: "OverlayScrollbars",
@@ -41,27 +57,12 @@ const createMainWindow = () => {
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
+
+  mainWindow.on("resize", saveMainWindowSizeAndPosition);
+  mainWindow.on("move", saveMainWindowSizeAndPosition);
 };
 
 const getReplier = (sender) => (...args) => sender.send(...args);
-
-app.on("ready", () => {
-  getSettings(); // Settings will be cached by the time we need them.
-  createMainWindow();
-  createMainMenu();
-});
-
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
-
-app.on("activate", () => {
-  if (mainWindow === null) {
-    createMainWindow();
-  }
-});
 
 const allSites = {};
 const allWebContents = {};
@@ -86,6 +87,29 @@ const addSites = ({ sendReply, sites }) => {
     }).then(() => addSites({ sendReply, sites: restSites }));
   }
 };
+
+app.on("ready", () => {
+  // Settings will be cached by the time we need them later ...
+  cachedGetAllSettings();
+
+  // ... but for now we don't need *all* the settings as we only need the ones in the local settings file.
+  cachedGetSettings().then(({ posX, posY, width, height }) => {
+    createMainWindow({ posX, posY, width, height });
+    createMainMenu();
+  });
+});
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
+});
+
+app.on("activate", () => {
+  if (mainWindow === null) {
+    createMainWindow();
+  }
+});
 
 // This `web-contents-created` event is fired by Electron itself when *any* WebContents object is created.
 // Here we catch them all because we need reference to some of them and we don't know yet which one is which, but
@@ -167,7 +191,7 @@ ipcMain.on("site-unread-count-changed", (evt, { siteId, unreadCount }) => {
 ipcMain.on("app-did-mount", (evt) => {
   const sendReply = getReplier(evt.sender);
 
-  getSettings().then((settings) => {
+  cachedGetAllSettings().then((settings) => {
     console.log("Got settings", JSON.stringify(settings));
 
     sendReply("set-preferences", {
