@@ -8,7 +8,7 @@
     "start": "electron ./build",
     "package": "run-script-os",
     "package:linux": "electron-packager ./build --icon=./build/lolgo-512.png --out=./dist",
-    "package:darwin": "electron-packager ./build --icon=./build/lolgo-512.icns --out=./dist",
+    "package:darwin": "electron-packager ./build --icon=./build/lolgo.icns --out=./dist",
     "package:win32": "electron-packager ./build --icon=./build/lolgo.ico --out=./dist"
   },
   "dependencies": {},

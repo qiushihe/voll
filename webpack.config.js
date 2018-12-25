@@ -52,7 +52,7 @@ module.exports = function () {
         { from: resolvePath(__dirname, "src", "templates", "package.json"), to: resolvePath(__dirname, "build") },
         { from: resolvePath(__dirname, "src", "images", "lolgo-512.png"), to: resolvePath(__dirname, "build") },
         { from: resolvePath(__dirname, "src", "images", "lolgo.ico"), to: resolvePath(__dirname, "build") },
-        { from: resolvePath(__dirname, "src", "images", "lolgo-512.icns"), to: resolvePath(__dirname, "build") }
+        { from: resolvePath(__dirname, "src", "images", "lolgo.icns"), to: resolvePath(__dirname, "build") }
       ])
     ]
   };
