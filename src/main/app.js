@@ -93,9 +93,9 @@ class App {
   }
 
   handleElectronAppWindowAllClosed() {
-    if (process.platform !== "darwin") {
-      electronApp.quit();
-    }
+    // TODO: Implement keep-alive for Mac OS (need to better keep-track/cleanup webContents references).
+    // TODO: Implement minimize-to-tray for Windows/Linux (see https://stackoverflow.com/a/44501184).
+    electronApp.quit();
   }
 
   // This `web-contents-created` event is fired by Electron itself when *any* WebContents object is created.
