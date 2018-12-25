@@ -249,6 +249,7 @@ class App {
         ])(this.allSites);
 
         if (activeSite) {
+          console.log("Restore active site", activeSite.id);
           sendReply("set-active-site-id", { activeSiteId: activeSite.id });
         }
       }

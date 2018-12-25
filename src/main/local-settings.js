@@ -11,12 +11,15 @@ class LocalSettings {
 
   read() {
     return new Promise((resolve, reject) => {
+      console.log("Reading local settings from", this.settingsFilePath);
       readFile(this.settingsFilePath, "utf8", (err, data) => {
         if (err) {
           console.error("Error reading app settings.", err);
           reject(err);
         } else {
-          resolve(JSON.parse(data));
+          const settings = JSON.parse(data);
+          console.log("Got local settings", JSON.stringify(settings, null, 2));
+          resolve(settings);
         }
       });
     });

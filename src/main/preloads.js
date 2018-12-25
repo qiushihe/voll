@@ -12,7 +12,15 @@ class Preloads {
 
   preparePreloads() {
     return new Promise((resolve, reject) => {
-      const madeDir = (err) => err ? reject(err) : resolve(this.preloadsDirPath);
+      const madeDir = (err) => {
+        if (err) {
+          console.error("Error preparing preload path", this.preloadsDirPath);
+          reject(err);
+        } else {
+          console.log("Prepared preload path", this.preloadsDirPath);
+          resolve(this.preloadsDirPath);
+        }
+      };
 
       lstat(this.preloadsDirPath, (err, stat) => {
         if (!stat) {
@@ -33,7 +41,15 @@ class Preloads {
         preloadFilePath,
         compact([PRELOAD_CORE, preloadCode]).join("\n"),
         "utf8",
-        (err) => err ? reject(err) : resolve(preloadFilePath)
+        (err) => {
+          if (err) {
+            console.error("Error setting up preload for site", siteId);
+            reject(err);
+          } else {
+            console.log("Setup preload for site", siteId);
+            resolve(preloadFilePath);
+          }
+        }
       );
     });
   }

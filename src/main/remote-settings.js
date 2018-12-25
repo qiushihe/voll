@@ -9,13 +9,17 @@ class RemoteSettings {
 
   fetch() {
     return new Promise((resolve, reject) => {
-      request.get(`${this.settingsJsonUrl}?${uuidv4()}`, (err, res, body) => {
+      const fetchUrl = `${this.settingsJsonUrl}?${uuidv4()}`;
+      console.log("Fetching remote settings from", fetchUrl);
+      request.get(fetchUrl, (err, res, body) => {
         if (err) {
           console.error("Error fetching settings JSON.", err);
           reject(err);
         } else {
           try {
-            resolve(JSON.parse(body));
+            const settings = JSON.parse(body);
+            console.log("Got remote settings", JSON.stringify(settings, null, 2));
+            resolve(settings);
           } catch (err) {
             console.error("Error parsing fetched settings JSON.", err);
             reject(err);
