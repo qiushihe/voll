@@ -61,6 +61,7 @@ class App {
     this.handleElectronIpcMainSiteActivated = this.handleElectronIpcMainSiteActivated.bind(this);
     this.handleElectronIpcMainAppDidMount = this.handleElectronIpcMainAppDidMount.bind(this);
 
+    this.handleMainWindowClose = this.handleMainWindowClose.bind(this);
     this.saveMainWindowSizeAndPosition = debounce(1000)(this.saveMainWindowSizeAndPosition.bind(this));
     this.saveActiveSiteIndex = debounce(1000)(this.saveActiveSiteIndex.bind(this));
 
@@ -202,13 +203,15 @@ class App {
   createMainWindow() {
     this.localSettings.getSettings().then(({ posX, posY, width, height }) => {
       this.mainWindow = new MainWindow({ posX, posY, width, height });
-
-      this.mainWindow.on("closed", () => {
-        this.mainWindow = null;
-      });
-
+      this.mainWindow.on("closed", this.handleMainWindowClose);
       this.mainWindow.on("resize-move", this.saveMainWindowSizeAndPosition);
     });
+  }
+
+  handleMainWindowClose() {
+    this.mainWindow.removeListener("closed", this.handleMainWindowClose);
+    this.mainWindow.removeListener("resize-move", this.saveMainWindowSizeAndPosition);
+    this.mainWindow = null;
   }
 
   saveMainWindowSizeAndPosition({ posX, posY, width, height }) {
