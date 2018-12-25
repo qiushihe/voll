@@ -1,4 +1,4 @@
-const path = require("path");
+const resolvePath = require("path").resolve;
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
@@ -9,18 +9,18 @@ module.exports = function () {
   return {
     target: "electron-main",
     entry: {
-      bundle: path.resolve(__dirname, "src/renderer"),
-      main: path.resolve(__dirname, "src/main")
+      bundle: resolvePath(__dirname, "src/renderer"),
+      main: resolvePath(__dirname, "src/main")
     },
     output: {
       filename: "[name].js",
       sourceMapFilename: "[name].js.map",
-      path: path.resolve(__dirname, "build")
+      path: resolvePath(__dirname, "build")
     },
     resolve: {
       extensions: [".js", ".jsx"],
       alias: {
-        "/src": path.resolve(__dirname, 'src')
+        "/src": resolvePath(__dirname, 'src')
       }
     },
     module: {
@@ -46,11 +46,14 @@ module.exports = function () {
     plugins: [
       new HtmlWebpackPlugin({
         excludeChunks: ["main"],
-        template: path.resolve(__dirname, "src", "templates", "index.html")
+        template: resolvePath(__dirname, "src", "templates", "index.html")
       }),
-      new CopyWebpackPlugin([{
-        from: path.resolve(__dirname, "src", "templates", "package.json"), to: path.resolve(__dirname, "build")
-      }])
+      new CopyWebpackPlugin([
+        { from: resolvePath(__dirname, "src", "templates", "package.json"), to: resolvePath(__dirname, "build") },
+        { from: resolvePath(__dirname, "src", "images", "lolgo.png"), to: resolvePath(__dirname, "build") },
+        { from: resolvePath(__dirname, "src", "images", "lolgo.ico"), to: resolvePath(__dirname, "build") },
+        { from: resolvePath(__dirname, "src", "images", "lolgo.icns"), to: resolvePath(__dirname, "build") }
+      ])
     ]
   };
 };

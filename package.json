@@ -6,7 +6,9 @@
     "build-dev": "webpack --mode development",
     "build-prod": "webpack -p --mode production",
     "start": "electron ./build",
-    "package": "electron-packager ./build --out=./dist"
+    "package-linux": "electron-packager ./build --icon=./build/lolgo.png --out=./dist",
+    "package-osx": "electron-packager ./build --icon=./build/lolgo.icns --out=./dist",
+    "package-windows": "electron-packager ./build --icon=./build/lolgo.ico --out=./dist"
   },
   "dependencies": {},
   "devDependencies": {

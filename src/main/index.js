@@ -1,4 +1,5 @@
 import { app, ipcMain, shell, BrowserWindow } from "electron";
+import { join as joinPath } from "path";
 import { readFile } from "graceful-fs";
 import uuidv4 from "uuid/v4";
 import flow from "lodash/fp/flow";
@@ -54,6 +55,18 @@ const saveActiveSiteIndex = debounce(1000)((index) => {
   updateLocalSettings({ activeSiteIndex: index });
 });
 
+// These path are relative to the `build` directory and those icon images are copied into the build directory
+// by CopyWebpackPlugin during the build phase.
+const getIconPath = () => {
+  if (process.platform === "win32") {
+    return joinPath(__dirname, "lolgo.ico");
+  } else if (process.platform === "darwin") {
+    return joinPath(__dirname, "lolgo.icns");
+  } else {
+    return joinPath(__dirname, "lolgo.png");
+  }
+};
+
 const createMainWindow = ({ posX, posY, width, height }) => {
   mainWindow = new BrowserWindow({
     x: posX,
@@ -61,6 +74,9 @@ const createMainWindow = ({ posX, posY, width, height }) => {
     width: width || 800,
     height: height || 600,
     title: "Voll",
+    // Setting icon here technically only work for Linux. For Mac and Windows the icon is actually set by
+    // electron-packaer ... because having consistency would be too easy, right? LOL
+    icon: getIconPath(),
     webPreferences: {
       // Force overlay scrollbar
       enableBlinkFeatures: "OverlayScrollbars",
