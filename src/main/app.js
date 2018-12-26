@@ -20,6 +20,8 @@ import Preloads from "./preloads";
 import Menus from "./menus";
 import MainWindow from "./main-window";
 
+const uncappedMap = map.convert({ cap: false });
+
 class App {
   constructor() {
     this.mainWindow = null;
@@ -62,12 +64,13 @@ class App {
     }).then((settings) => {
       return flow([
         getOr([], "sites"),
-        map((currentSite) => {
+        uncappedMap((_site, index) => {
           const siteId = uuidv4();
 
           const site = {
-            ...currentSite,
+            ..._site,
             id: siteId,
+            index,
             webContentsReady: false // TODO: This needs to be kept track separately.
           };
 

@@ -11,6 +11,7 @@ import values from "lodash/fp/values";
 import filter from "lodash/fp/filter";
 import negate from "lodash/fp/negate";
 import get from "lodash/fp/get";
+import sortBy from "lodash/fp/sortBy";
 import size from "lodash/fp/size";
 import lte from "lodash/fp/lte";
 import isNumber from "lodash/fp/isNumber";
@@ -168,7 +169,7 @@ class MainWindow extends EventEmitter {
 
       flow([
         values,
-        // TODO: Fix ordering issue
+        sortBy(get("index")),
         map((site) => sendReply("add-site", { site }))
       ])(this.allSites);
     });
