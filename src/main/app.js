@@ -9,7 +9,6 @@ import uuidv4 from "uuid/v4";
 import flow from "lodash/fp/flow";
 import getOr from "lodash/fp/getOr";
 import values from "lodash/fp/values";
-import isEmpty from "lodash/fp/isEmpty";
 import map from "lodash/fp/map";
 import sum from "lodash/fp/sum";
 import debounce from "lodash/fp/debounce";
@@ -20,8 +19,6 @@ import RemoteSettings from "./remote-settings";
 import Preloads from "./preloads";
 import Menus from "./menus";
 import MainWindow from "./main-window";
-
-const getReplier = (sender) => (...args) => sender.send(...args);
 
 class App {
   constructor() {
@@ -44,7 +41,6 @@ class App {
 
     this.handleElectronIpcMainSiteUnreadCountChanged = this.handleElectronIpcMainSiteUnreadCountChanged.bind(this);
     this.handleElectronIpcMainSiteActivated = this.handleElectronIpcMainSiteActivated.bind(this);
-    this.handleElectronIpcMainAppDidMount = this.handleElectronIpcMainAppDidMount.bind(this);
 
     this.handleMainWindowClose = this.handleMainWindowClose.bind(this);
     this.saveMainWindowSizeAndPosition = debounce(1000)(this.saveMainWindowSizeAndPosition.bind(this));
@@ -58,12 +54,63 @@ class App {
 
     electronIpcMain.on("site-unread-count-changed", this.handleElectronIpcMainSiteUnreadCountChanged);
     electronIpcMain.on("site-activated", this.handleElectronIpcMainSiteActivated);
-    electronIpcMain.on("app-did-mount", this.handleElectronIpcMainAppDidMount);
+  }
+
+  setupSites() {
+    return Promise.resolve().then(() => {
+      return this.remoteSettings.getSettings();
+    }).then((settings) => {
+      return flow([
+        getOr([], "sites"),
+        map((currentSite) => {
+          const siteId = uuidv4();
+
+          const site = {
+            ...currentSite,
+            id: siteId,
+            webContentsReady: false // TODO: This needs to be kept track separately.
+          };
+
+          return this.preloads.setupPreload({ site }).then((preloadFilePath) => {
+            site.preloadUrl = `file:///${preloadFilePath}`;
+            this.allSites[siteId] = site;
+          });
+        }),
+        (promises) => Promise.all(promises)
+      ])(settings);
+    });
+  }
+
+  createMainWindow() {
+    this.localSettings.getSettings().then(({ posX, posY, width, height }) => {
+      this.mainWindow = new MainWindow({
+        localSettings: this.localSettings,
+        remoteSettings: this.remoteSettings,
+        allSites: this.allSites,
+        posX,
+        posY,
+        width,
+        height
+      });
+      this.mainWindow.on("closed", this.handleMainWindowClose);
+      this.mainWindow.on("resize-move", this.saveMainWindowSizeAndPosition);
+    });
   }
 
   handleElectronAppReady() {
     ElectronMenu.setApplicationMenu(Menus.createMainMenu());
-    this.createMainWindow();
+
+    this.localSettings.getSettings().then((localSettings) => {
+      const { settingsJsonUrl } = localSettings;
+      this.remoteSettings = new RemoteSettings({ settingsJsonUrl });
+      return this.remoteSettings.getSettings();
+    }).then(() => {
+      return this.preloads.preparePreloads();
+    }).then(() => {
+      return this.setupSites();
+    }).then(() => {
+      this.createMainWindow();
+    });
   }
 
   handleElectronAppActivate() {
@@ -110,44 +157,6 @@ class App {
     ])(this.allSites);
   }
 
-  handleElectronIpcMainAppDidMount(evt) {
-    const sendReply = getReplier(evt.sender);
-
-    this.localSettings.getSettings().then((localSettings) => {
-      const { settingsJsonUrl } = localSettings;
-      this.remoteSettings = new RemoteSettings({ settingsJsonUrl });
-      return this.remoteSettings.getSettings();
-    }).then((settings) => {
-      sendReply("set-preferences", {
-        preferences: getOr({}, "preferences")(settings)
-      });
-
-      const sites = getOr([], "sites")(settings);
-
-      if (isEmpty(sites)) {
-        this.onAllSitesWebContentsCreated({ sendReply });
-      } else {
-        this.preloads.preparePreloads()
-          .then(() => this.addSites({ sendReply, sites }));
-      }
-    });
-  }
-
-  createMainWindow() {
-    this.localSettings.getSettings().then(({ posX, posY, width, height }) => {
-      this.mainWindow = new MainWindow({
-        localSettings: this.localSettings,
-        allSites: this.allSites,
-        posX,
-        posY,
-        width,
-        height
-      });
-      this.mainWindow.on("closed", this.handleMainWindowClose);
-      this.mainWindow.on("resize-move", this.saveMainWindowSizeAndPosition);
-    });
-  }
-
   handleMainWindowClose() {
     this.mainWindow.removeListener("closed", this.handleMainWindowClose);
     this.mainWindow.removeListener("resize-move", this.saveMainWindowSizeAndPosition);
@@ -160,27 +169,6 @@ class App {
 
   saveActiveSiteIndex(index) {
     this.localSettings.updateSettings({ activeSiteIndex: index });
-  }
-
-  addSites({ sendReply, sites }) {
-    if (isEmpty(sites)) {
-      return Promise.resolve();
-    } else {
-      const [currentSite, ...restSites] = sites;
-      const siteId = uuidv4();
-
-      const site = {
-        ...currentSite,
-        id: siteId,
-        webContentsReady: false
-      };
-
-      return this.preloads.setupPreload({ site }).then((preloadFilePath) => {
-        site.preloadUrl = `file:///${preloadFilePath}`;
-        this.allSites[siteId] = site;
-        sendReply("add-site", { site });
-      }).then(() => this.addSites({ sendReply, sites: restSites }));
-    }
   }
 }
 
