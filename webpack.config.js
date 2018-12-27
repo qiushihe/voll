@@ -50,9 +50,11 @@ module.exports = function () {
       }),
       new CopyWebpackPlugin([
         { from: resolvePath(__dirname, "src", "templates", "package.json"), to: resolvePath(__dirname, "build") },
-        { from: resolvePath(__dirname, "src", "images", "lolgo-512.png"), to: resolvePath(__dirname, "build") },
         { from: resolvePath(__dirname, "src", "images", "lolgo.ico"), to: resolvePath(__dirname, "build") },
-        { from: resolvePath(__dirname, "src", "images", "lolgo.icns"), to: resolvePath(__dirname, "build") }
+        { from: resolvePath(__dirname, "src", "images", "lolgo.icns"), to: resolvePath(__dirname, "build") },
+        { from: resolvePath(__dirname, "src", "images", "lolgo-512.png"), to: resolvePath(__dirname, "build", "lolgo.png") },
+        { from: resolvePath(__dirname, "src", "images", "lolgo-16.png"), to: resolvePath(__dirname, "build", "lolgo-tray.png") },
+        { from: resolvePath(__dirname, "src", "images", "lolgo-32.png"), to: resolvePath(__dirname, "build", "lolgo-tray@2x.png") }
       ])
     ]
   };

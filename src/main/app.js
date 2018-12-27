@@ -110,7 +110,7 @@ class App {
   }
 
   createTrayIcon() {
-    this.trayIcon = new TrayIcon({ iconPath: Icon.getIconPath() });
+    this.trayIcon = new TrayIcon({ iconPath: Icon.getTrayIconPath() });
     this.trayIcon.on("show-main-window", () => {
       this.activate();
     });

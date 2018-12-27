@@ -10,7 +10,17 @@ export default {
     } else if (process.platform === "darwin") {
       return joinPath(electronApp.getAppPath(), "lolgo.icns");
     } else {
-      return joinPath(electronApp.getAppPath(), "lolgo.png");
+      return joinPath(electronApp.getAppPath(), "lolgo-512.png");
+    }
+  },
+
+  // Due to the unique way Electron is built, the `Tray` icon for Mac OS and Linux  can't use the same `*.icns` file
+  // that the app otherwise uses for its main icon.
+  getTrayIconPath: () => {
+    if (process.platform === "win32") {
+      return joinPath(electronApp.getAppPath(), "lolgo.ico");
+    } else {
+      return joinPath(electronApp.getAppPath(), "lolgo-tray.png");
     }
   }
 };
