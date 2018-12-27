@@ -7,12 +7,11 @@ import {
 import { join as joinPath } from "path";
 import uuidv4 from "uuid/v4";
 import flow from "lodash/fp/flow";
+import get from "lodash/fp/get";
 import getOr from "lodash/fp/getOr";
-import values from "lodash/fp/values";
 import map from "lodash/fp/map";
 import sum from "lodash/fp/sum";
 import debounce from "lodash/fp/debounce";
-import findIndex from "lodash/fp/findIndex";
 
 import LocalSettings from "./local-settings";
 import RemoteSettings from "./remote-settings";
@@ -154,8 +153,8 @@ class App {
     // We can't store the `siteId` here because it's randomly generated.
     // So we find the index of the site and store that instead.
     flow([
-      values,
-      findIndex({ id: siteId }),
+      get(siteId),
+      get("index"),
       this.saveActiveSiteIndex
     ])(this.allSites);
   }
