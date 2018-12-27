@@ -1,9 +1,18 @@
 const resolvePath = require("path").resolve;
+const flow = require("lodash/fp/flow");
+const get = require("lodash/fp/get");
+const find = require("lodash/fp/find");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 const babelRc = require("./.babelrc");
+
+const moduleResolverAlias = flow([
+  get("plugins"),
+  find(function (plugin) { return plugin[0] === "module-resolver"; }),
+  get("1.alias")
+])(babelRc);
 
 module.exports = function () {
   return {
@@ -19,9 +28,7 @@ module.exports = function () {
     },
     resolve: {
       extensions: [".js", ".jsx"],
-      alias: {
-        "/src": resolvePath(__dirname, 'src')
-      }
+      alias: moduleResolverAlias
     },
     module: {
       rules: [{

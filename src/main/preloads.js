@@ -3,7 +3,7 @@ import { lstat, mkdir, writeFile } from "graceful-fs";
 import rimraf from "rimraf";
 import compact from "lodash/fp/compact";
 
-import PRELOAD_CORE from "raw-loader!/src/templates/preload.js.core";
+import PRELOAD_CORE from "raw-loader!/templates/preload.js.core";
 
 class Preloads {
   constructor({ preloadsDirPath }) {

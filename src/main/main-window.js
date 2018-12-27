@@ -22,7 +22,7 @@ import getOr from "lodash/fp/getOr";
 import map from "lodash/fp/map";
 import every from "lodash/fp/every";
 
-import { getInternalUrlChecker } from "/src/main/url-checker";
+import { getInternalUrlChecker } from "/main/url-checker";
 
 import Icon from "./icon";
 

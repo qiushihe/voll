@@ -2,9 +2,9 @@ import { handleActions } from "redux-actions";
 
 import {
   APP_SET_STATES
-} from "/src/actions/app.action";
+} from "/renderer/actions/app.action";
 
-import { withPayload } from "/src/helpers/reducer.helper";
+import { withPayload } from "/renderer/helpers/reducer.helper";
 
 import setStates from "./app/set-states";
 

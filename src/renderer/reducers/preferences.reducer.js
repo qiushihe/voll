@@ -2,9 +2,9 @@ import { handleActions } from "redux-actions";
 
 import {
   PREFERENCES_SET_PREFERENCES
-} from "/src/actions/preferences.action";
+} from "/renderer/actions/preferences.action";
 
-import { withPayload } from "/src/helpers/reducer.helper";
+import { withPayload } from "/renderer/helpers/reducer.helper";
 
 import setPreferences from "./preferences/set-preferences";
 

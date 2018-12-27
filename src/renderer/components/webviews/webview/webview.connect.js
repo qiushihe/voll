@@ -10,12 +10,12 @@ import {
   sessionId,
   persistentSessionId,
   preloadUrl
-} from "/src/selectors/site.selector";
+} from "/renderer/selectors/site.selector";
 
-import { activeSiteId } from "/src/selectors/webviews.selector";
-import { showSiteUrl } from "/src/selectors/preferences.selector";
+import { activeSiteId } from "/renderer/selectors/webviews.selector";
+import { showSiteUrl } from "/renderer/selectors/preferences.selector";
 
-import { dispatchIpcAction } from "/src/actions/ipc.action";
+import { dispatchIpcAction } from "/renderer/actions/ipc.action";
 
 import Webview from "./webview";
 

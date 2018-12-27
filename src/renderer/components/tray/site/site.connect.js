@@ -2,11 +2,11 @@ import { connect } from "react-redux";
 import { ipcRenderer } from "electron";
 import { createStructuredSelector } from "reselect";
 
-import { showSiteNameInTray } from "/src/selectors/preferences.selector";
-import { id, name, iconSrc, unreadCount } from "/src/selectors/site.selector";
-import { activeSiteId } from "/src/selectors/webviews.selector";
+import { showSiteNameInTray } from "/renderer/selectors/preferences.selector";
+import { id, name, iconSrc, unreadCount } from "/renderer/selectors/site.selector";
+import { activeSiteId } from "/renderer/selectors/webviews.selector";
 
-import { activateSite } from "/src/actions/webviews.action";
+import { activateSite } from "/renderer/actions/webviews.action";
 
 import Site from "./site";
 

@@ -3,9 +3,9 @@ import { handleActions } from "redux-actions";
 import {
   WEBVIEWS_ACTIVATE_SITE,
   WEBVIEWS_DEACTIVATE_SITE
-} from "/src/actions/webviews.action";
+} from "/renderer/actions/webviews.action";
 
-import { withPayload } from "/src/helpers/reducer.helper";
+import { withPayload } from "/renderer/helpers/reducer.helper";
 
 import activateSite from "./webviews/activate-site";
 import deactivateSite from "./webviews/deactivate-site";

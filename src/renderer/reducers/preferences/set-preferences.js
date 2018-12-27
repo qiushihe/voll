@@ -1,6 +1,6 @@
 import pick from "lodash/fp/pick";
 
-import { preferencesAttributes } from "/src/actions/preferences.action";
+import { preferencesAttributes } from "/renderer/actions/preferences.action";
 
 export default (state = {}, { preferences }) => {
   return {

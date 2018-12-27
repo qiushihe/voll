@@ -1,6 +1,6 @@
 import { createAction } from "redux-actions";
 
-import { pickObjectWithAttributes } from "/src/helpers/pick.helper";
+import { pickObjectWithAttributes } from "/renderer/helpers/pick.helper";
 
 export const APP_SET_STATES = "APP_SET_STATES";
 

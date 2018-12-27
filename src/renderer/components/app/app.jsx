@@ -2,8 +2,8 @@ import { PureComponent } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 
-import Tray from "/src/components/tray";
-import Webviews from "/src/components/webviews";
+import Tray from "/renderer/components/tray";
+import Webviews from "/renderer/components/webviews";
 
 const Base = styled.div`
   display: flex;

@@ -2,12 +2,12 @@ import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 import { ipcRenderer } from "electron";
 
-import { getIsAppReady } from "/src/selectors/app.selector";
+import { getIsAppReady } from "/renderer/selectors/app.selector";
 
-import { setStates as setAppStates } from "/src/actions/app.action";
-import { addSite } from "/src/actions/sites.action";
-import { setPreferences } from "/src/actions/preferences.action";
-import { activateSite } from "/src/actions/webviews.action";
+import { setStates as setAppStates } from "/renderer/actions/app.action";
+import { addSite } from "/renderer/actions/sites.action";
+import { setPreferences } from "/renderer/actions/preferences.action";
+import { activateSite } from "/renderer/actions/webviews.action";
 
 import App from "./app";
 

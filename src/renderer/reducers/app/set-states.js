@@ -1,6 +1,6 @@
 import pick from "lodash/fp/pick";
 
-import { appStatesAttributes } from "/src/actions/app.action";
+import { appStatesAttributes } from "/renderer/actions/app.action";
 
 export default (state = {}, { states }) => {
   return {

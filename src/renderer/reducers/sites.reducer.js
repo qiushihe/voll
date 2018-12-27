@@ -1,9 +1,9 @@
 import { handleActions } from "redux-actions";
 
-import { SITES_ADD_SITE } from "/src/actions/sites.action";
-import { IPC_SET_UNREAD_COUNT } from "/src/actions/ipc.action";
+import { SITES_ADD_SITE } from "/renderer/actions/sites.action";
+import { IPC_SET_UNREAD_COUNT } from "/renderer/actions/ipc.action";
 
-import { withPayload } from "/src/helpers/reducer.helper";
+import { withPayload } from "/renderer/helpers/reducer.helper";
 
 import addSite from "./sites/add-site";
 import setUnreadCount from "./sites/set-unread-count";
