@@ -41,6 +41,7 @@ class App {
       preloadsDirPath: joinPath(electronApp.getPath("userData"), "site-preloads")
     });
 
+    this.handleElectronAppSecondInstance = this.handleElectronAppSecondInstance.bind(this);
     this.handleElectronAppReady = this.handleElectronAppReady.bind(this);
     this.handleElectronAppActivate = this.handleElectronAppActivate.bind(this);
     this.handleElectronAppWindowAllClosed = this.handleElectronAppWindowAllClosed.bind(this);
@@ -54,6 +55,13 @@ class App {
   }
 
   start() {
+    // Quit if another instance of this app is already running.
+    // See `handleElectronAppSecondInstance` for primary instance action.
+    if (!electronApp.requestSingleInstanceLock()) {
+      electronApp.quit();
+    }
+
+    electronApp.on("second-instance", this.handleElectronAppSecondInstance);
     electronApp.on("ready", this.handleElectronAppReady);
     electronApp.on("activate", this.handleElectronAppActivate);
     electronApp.on("window-all-closed", this.handleElectronAppWindowAllClosed);
@@ -114,6 +122,11 @@ class App {
     } else {
       this.mainWindow.show();
     }
+  }
+
+  // Re-activate this primary instance when a second instance is prevented from running.
+  handleElectronAppSecondInstance() {
+    this.activate();
   }
 
   handleElectronAppWindowAllClosed() {
