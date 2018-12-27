@@ -10,7 +10,7 @@ export default {
     } else if (process.platform === "darwin") {
       return joinPath(electronApp.getAppPath(), "lolgo.icns");
     } else {
-      return joinPath(electronApp.getAppPath(), "lolgo-512.png");
+      return joinPath(electronApp.getAppPath(), "lolgo.png");
     }
   },
 
