@@ -70,13 +70,9 @@ class App {
         getOr([], "sites"),
         uncappedMap((_site, index) => {
           const siteId = uuidv4();
+          const site = { ..._site, id: siteId, index };
 
-          const site = {
-            ..._site,
-            id: siteId,
-            index,
-            webContentsReady: false // TODO: This needs to be kept track separately.
-          };
+          console.log("Setup site", siteId, _site.name, _site.url);
 
           return this.preloads.setupPreload({ site }).then((preloadFilePath) => {
             site.preloadUrl = `file:///${preloadFilePath}`;

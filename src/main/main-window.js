@@ -7,6 +7,7 @@ import {
 
 import EventEmitter from "events";
 import flow from "lodash/fp/flow";
+import keys from "lodash/fp/keys";
 import values from "lodash/fp/values";
 import filter from "lodash/fp/filter";
 import negate from "lodash/fp/negate";
@@ -19,6 +20,7 @@ import isFinite from "lodash/fp/isFinite";
 import once from "lodash/fp/once";
 import getOr from "lodash/fp/getOr";
 import map from "lodash/fp/map";
+import every from "lodash/fp/every";
 
 import { getInternalUrlChecker } from "/src/main/url-checker";
 
@@ -26,6 +28,7 @@ import Icon from "./icon";
 
 const isFiniteNumber = (value) => (isNumber(value) && isFinite(value));
 const getReplier = (sender) => (...args) => sender.send(...args);
+const getFrom = (collection) => (key) => get(key)(collection);
 
 class MainWindow extends EventEmitter {
   constructor({
@@ -41,8 +44,10 @@ class MainWindow extends EventEmitter {
 
     this.localSettings = localSettings;
     this.remoteSettings = remoteSettings;
+
     this.allSites = allSites;
     this.allWebContents = {};
+    this.siteReady = {};
 
     this.browserWindow = new ElectronBrowserWindow({
       title: "Voll",
@@ -149,15 +154,14 @@ class MainWindow extends EventEmitter {
       }
     });
 
-    site.webContentsReady = true;
+    this.siteReady[siteId] = true;
 
     flow([
-      values,
-      filter(negate(get("webContentsReady"))),
-      size,
-      lte(0),
-      (ready) => {
-        if (ready) {
+      keys,
+      map(getFrom(this.siteReady)),
+      every(Boolean),
+      (allSitesReady) => {
+        if (allSitesReady) {
           this.onAllSitesWebContentsCreated({ sendReply });
         }
       }
@@ -199,6 +203,7 @@ class MainWindow extends EventEmitter {
     electronIpcMain.removeListener("web-contents-created", this.handleElectronIpcMainWebContentsCreated);
     electronIpcMain.removeListener("app-did-mount", this.handleElectronIpcMainAppDidMount);
 
+    this.siteReady = {};
     this.allWebContents = {};
     this.emit("closed");
   }
