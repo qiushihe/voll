@@ -4,6 +4,7 @@ import {
   Menu as ElectronMenu
 } from "electron";
 
+import { readFile } from "graceful-fs";
 import { join as joinPath } from "path";
 import uuidv4 from "uuid/v4";
 import flow from "lodash/fp/flow";
@@ -13,17 +14,21 @@ import map from "lodash/fp/map";
 import sum from "lodash/fp/sum";
 import debounce from "lodash/fp/debounce";
 
+import Icon from "./icon";
 import LocalSettings from "./local-settings";
 import RemoteSettings from "./remote-settings";
 import Preloads from "./preloads";
 import Menus from "./menus";
 import MainWindow from "./main-window";
+import TrayIcon from './tray-icon';
 
 const uncappedMap = map.convert({ cap: false });
 
 class App {
   constructor() {
     this.mainWindow = null;
+    this.trayIcon = null;
+
     this.allSites = {};
 
     this.localSettings = new LocalSettings({
@@ -43,7 +48,7 @@ class App {
     this.handleElectronIpcMainSiteUnreadCountChanged = this.handleElectronIpcMainSiteUnreadCountChanged.bind(this);
     this.handleElectronIpcMainSiteActivated = this.handleElectronIpcMainSiteActivated.bind(this);
 
-    this.handleMainWindowClose = this.handleMainWindowClose.bind(this);
+    this.handleMainWindowClosed = this.handleMainWindowClosed.bind(this);
     this.saveMainWindowSizeAndPosition = debounce(1000)(this.saveMainWindowSizeAndPosition.bind(this));
     this.saveActiveSiteIndex = debounce(1000)(this.saveActiveSiteIndex.bind(this));
   }
@@ -84,7 +89,7 @@ class App {
   }
 
   createMainWindow() {
-    this.localSettings.getSettings().then(({ posX, posY, width, height }) => {
+    return this.localSettings.getSettings().then(({ posX, posY, width, height }) => {
       this.mainWindow = new MainWindow({
         localSettings: this.localSettings,
         remoteSettings: this.remoteSettings,
@@ -94,37 +99,48 @@ class App {
         width,
         height
       });
-      this.mainWindow.on("closed", this.handleMainWindowClose);
+
+      this.mainWindow.on("closed", this.handleMainWindowClosed);
       this.mainWindow.on("resize-move", this.saveMainWindowSizeAndPosition);
     });
+  }
+
+  createTrayIcon() {
+    this.trayIcon = new TrayIcon({ iconPath: Icon.getIconPath() });
+    this.trayIcon.on("show-main-window", () => {
+      this.activate();
+    });
+  }
+
+  activate() {
+    if (this.mainWindow === null) {
+      this.createMainWindow();
+    } else {
+      this.mainWindow.show();
+    }
+  }
+
+  handleElectronAppWindowAllClosed() {
+    // This event handler has to be here to prevent the app from quiting.
   }
 
   handleElectronAppReady() {
     ElectronMenu.setApplicationMenu(Menus.createMainMenu());
 
-    this.localSettings.getSettings().then((localSettings) => {
-      const { settingsJsonUrl } = localSettings;
-      this.remoteSettings = new RemoteSettings({ settingsJsonUrl });
-      return this.remoteSettings.getSettings();
-    }).then(() => {
-      return this.preloads.preparePreloads();
-    }).then(() => {
-      return this.setupSites();
-    }).then(() => {
-      this.createMainWindow();
-    });
+    this.localSettings.getSettings()
+      .then((localSettings) => {
+        const { settingsJsonUrl } = localSettings;
+        this.remoteSettings = new RemoteSettings({ settingsJsonUrl });
+        return this.remoteSettings.getSettings();
+      })
+      .then(() => this.preloads.preparePreloads())
+      .then(() => this.setupSites())
+      .then(() => this.createMainWindow())
+      .then(() => this.createTrayIcon());
   }
 
   handleElectronAppActivate() {
-    if (this.mainWindow === null) {
-      this.createMainWindow();
-    }
-  }
-
-  handleElectronAppWindowAllClosed() {
-    // TODO: Implement keep-alive for Mac OS (need to better keep-track/cleanup webContents references).
-    // TODO: Implement minimize-to-tray for Windows/Linux (see https://stackoverflow.com/a/44501184).
-    electronApp.quit();
+    this.activate();
   }
 
   handleElectronIpcMainSiteUnreadCountChanged(evt, { siteId, unreadCount }) {
@@ -159,17 +175,19 @@ class App {
     ])(this.allSites);
   }
 
-  handleMainWindowClose() {
-    this.mainWindow.removeListener("closed", this.handleMainWindowClose);
+  handleMainWindowClosed() {
+    this.mainWindow.removeListener("closed", this.handleMainWindowClosed);
     this.mainWindow.removeListener("resize-move", this.saveMainWindowSizeAndPosition);
     this.mainWindow = null;
   }
 
   saveMainWindowSizeAndPosition({ posX, posY, width, height }) {
+    console.log("Save main window size and position", posX, posY, width, height);
     this.localSettings.updateSettings({ posX, posY, width, height });
   }
 
   saveActiveSiteIndex(index) {
+    console.log("Save active site index", index);
     this.localSettings.updateSettings({ activeSiteIndex: index });
   }
 }

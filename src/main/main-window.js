@@ -88,6 +88,10 @@ class MainWindow extends EventEmitter {
     this.onAllSitesWebContentsCreated = once(this.onAllSitesWebContentsCreated.bind(this));
   }
 
+  show() {
+    this.browserWindow.show();
+  }
+
   setTitle(title) {
     this.browserWindow.setTitle(title);
   }
@@ -97,6 +101,7 @@ class MainWindow extends EventEmitter {
       if (isFiniteNumber(activeSiteIndex) && activeSiteIndex >= 0) {
         const activeSite = flow([
           values,
+          sortBy(get("index")),
           get(activeSiteIndex)
         ])(this.allSites);
 
