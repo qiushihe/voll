@@ -9,15 +9,10 @@ import EventEmitter from "events";
 import flow from "lodash/fp/flow";
 import keys from "lodash/fp/keys";
 import values from "lodash/fp/values";
-import filter from "lodash/fp/filter";
-import negate from "lodash/fp/negate";
 import get from "lodash/fp/get";
 import sortBy from "lodash/fp/sortBy";
-import size from "lodash/fp/size";
-import lte from "lodash/fp/lte";
 import isNumber from "lodash/fp/isNumber";
 import isFinite from "lodash/fp/isFinite";
-import once from "lodash/fp/once";
 import getOr from "lodash/fp/getOr";
 import map from "lodash/fp/map";
 import every from "lodash/fp/every";
@@ -45,6 +40,7 @@ class MainWindow extends EventEmitter {
     this.localSettings = localSettings;
     this.remoteSettings = remoteSettings;
 
+    this.pendingSites = []; // Used while adding sites one at a time.
     this.allSites = allSites;
     this.allWebContents = {};
     this.siteReady = {};
@@ -88,9 +84,6 @@ class MainWindow extends EventEmitter {
     electronApp.on("web-contents-created", this.handleElectronAppWebContentsCreated);
     electronIpcMain.on("web-contents-created", this.handleElectronIpcMainWebContentsCreated);
     electronIpcMain.on("app-did-mount", this.handleElectronIpcMainAppDidMount);
-
-    // Use `once` because this is called from parallel `web-contents-created` handler calls.
-    this.onAllSitesWebContentsCreated = once(this.onAllSitesWebContentsCreated.bind(this));
   }
 
   show() {
@@ -99,6 +92,14 @@ class MainWindow extends EventEmitter {
 
   setTitle(title) {
     this.browserWindow.setTitle(title);
+  }
+
+  addOneSite({ sendReply }) {
+    const [site, ...restSites] = this.pendingSites || [];
+    this.pendingSites = restSites || [];
+    if (!!site) {
+      sendReply("add-site", { site });
+    }
   }
 
   onAllSitesWebContentsCreated({ sendReply }) {
@@ -115,16 +116,16 @@ class MainWindow extends EventEmitter {
           sendReply("set-active-site-id", { activeSiteId: activeSite.id });
         }
       }
-    });
 
-    sendReply("set-app-states", {
-      states: { isAppReady: true }
+      sendReply("set-app-states", {
+        states: { isAppReady: true }
+      });
     });
   }
 
   // This `web-contents-created` event is fired by Electron itself when *any* WebContents object is created.
   // Here we catch them all because we need reference to some of them and we don't know yet which one is which, but
-  // we will in a bit (See the `web-contents-created` handler from `electronIpcMain`).
+  // we will in a bit (See the `handleElectronIpcMainWebContentsCreated` handler for `electronIpcMain` below).
   handleElectronAppWebContentsCreated(_, webContents) {
     this.allWebContents[webContents.id] = webContents;
   }
@@ -154,6 +155,10 @@ class MainWindow extends EventEmitter {
       }
     });
 
+    webContents.on("destroyed", () => {
+      this.siteReady[siteId] = false;
+    });
+
     this.siteReady[siteId] = true;
 
     flow([
@@ -163,6 +168,8 @@ class MainWindow extends EventEmitter {
       (allSitesReady) => {
         if (allSitesReady) {
           this.onAllSitesWebContentsCreated({ sendReply });
+        } else {
+          this.addOneSite({ sendReply });
         }
       }
     ])(this.allSites);
@@ -176,11 +183,10 @@ class MainWindow extends EventEmitter {
         preferences: getOr({}, "preferences")(settings)
       });
 
-      flow([
-        values,
-        sortBy(get("index")),
-        map((site) => sendReply("add-site", { site }))
-      ])(this.allSites);
+      // Add sites one at a time so the final `onAllSitesWebContentsCreated` function would be only called by
+      // the final `handleElectronIpcMainWebContentsCreated` function.
+      this.pendingSites = flow([values, sortBy(get("index"))])(this.allSites);
+      this.addOneSite({ sendReply });
     });
   }
 
