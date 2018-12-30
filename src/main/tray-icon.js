@@ -1,9 +1,7 @@
 import EventEmitter from "events";
+import { Tray as ElectronTray } from "electron";
 
-import {
-  Tray as ElectronTray,
-  Menu as ElectronMenu
-} from "electron";
+import Menus from "./menus";
 
 class TrayIcon extends EventEmitter {
   constructor({ iconPath }) {
@@ -11,11 +9,14 @@ class TrayIcon extends EventEmitter {
 
     this.tray = new ElectronTray(iconPath);
 
-    this.tray.setContextMenu(ElectronMenu.buildFromTemplate([
-      { label: "Show Main Window", click: () => { this.emit("show-main-window"); } },
-      { type: "separator" },
-      { role: "quit" }
-    ]));
+    this.tray.setContextMenu(Menus.createTrayMenu({
+      onShowMainWindow: () => {
+        this.emit("show-main-window");
+      },
+      onQuit: () => {
+        this.emit("really-quit");
+      }
+    }));
 
     this.tray.on("click", () => {
       this.emit("show-main-window");
