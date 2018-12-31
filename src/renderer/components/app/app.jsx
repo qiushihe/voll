@@ -2,7 +2,7 @@ import { PureComponent } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 
-import Tray from "/renderer/components/tray";
+import Dock from "/renderer/components/dock";
 import Webviews from "/renderer/components/webviews";
 
 const Base = styled.div`
@@ -38,7 +38,7 @@ class App extends PureComponent {
 
     return (
       <Base>
-        <Tray />
+        <Dock />
         <Webviews />
         {!isAppReady && (
           <LoadingBackdrop>

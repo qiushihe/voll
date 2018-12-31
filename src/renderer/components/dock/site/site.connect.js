@@ -2,7 +2,7 @@ import { connect } from "react-redux";
 import { ipcRenderer } from "electron";
 import { createStructuredSelector } from "reselect";
 
-import { showSiteNameInTray } from "/renderer/selectors/preferences.selector";
+import { showLabelInDock } from "/renderer/selectors/preferences.selector";
 import { id, name, iconSrc, unreadCount } from "/renderer/selectors/site.selector";
 import { activeSiteId } from "/renderer/selectors/webviews.selector";
 
@@ -16,7 +16,7 @@ export default connect(
     name,
     iconSrc,
     unreadCount,
-    showSiteName: showSiteNameInTray,
+    showLabel: showLabelInDock,
     activeSiteId
   }),
   (dispatch) => ({

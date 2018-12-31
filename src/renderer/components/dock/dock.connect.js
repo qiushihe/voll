@@ -1,14 +1,14 @@
 import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 
-import { showSiteNameInTray } from "/renderer/selectors/preferences.selector";
+import { showLabelInDock } from "/renderer/selectors/preferences.selector";
 import { sites } from "/renderer/selectors/sites.selector";
 
-import Tray from "./tray";
+import Dock from "./dock";
 
 export default connect(
   createStructuredSelector({
-    showSiteName: showSiteNameInTray,
+    showLabel: showLabelInDock,
     sites
   })
-)(Tray);
+)(Dock);
