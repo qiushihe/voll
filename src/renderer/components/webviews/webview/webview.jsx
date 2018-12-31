@@ -14,9 +14,10 @@ const Base = styled.div`
 `;
 
 const StatusBar = styled.div`
-  background-color: #efefef;
   white-space: nowrap;
   overflow: hidden;
+  padding: 3px 6px;
+  border-bottom: 1px solid #efefef;
 `;
 
 class Webview extends PureComponent {
