@@ -37,10 +37,6 @@ class Dock extends PureComponent {
         <SitesList>
           {Children.toArray(renderSites(sites))}
         </SitesList>
-        <div>
-          <div>bottom 1</div>
-          <div>bottom 2</div>
-        </div>
       </Base>
     );
   }

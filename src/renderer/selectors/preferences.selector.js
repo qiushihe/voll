@@ -12,3 +12,8 @@ export const showSiteUrl = createSelector(
   preferences,
   get("showSiteUrl")
 );
+
+export const hideWindowOnClose = createSelector(
+  preferences,
+  get("hideWindowOnClose")
+);

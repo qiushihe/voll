@@ -29,6 +29,7 @@ class MainWindow extends EventEmitter {
   constructor({
     localSettings,
     remoteSettings,
+    preventClose,
     allSites,
     posX,
     posY,
@@ -40,7 +41,7 @@ class MainWindow extends EventEmitter {
     this.localSettings = localSettings;
     this.remoteSettings = remoteSettings;
 
-    this.preventClose = true;
+    this.preventClose = false; // If window should be hidden instead of closed.
     this.pendingSites = []; // Used while adding sites one at a time.
     this.allSites = allSites;
     this.allWebContents = {};
@@ -190,9 +191,11 @@ class MainWindow extends EventEmitter {
     const sendReply = getReplier(evt.sender);
 
     this.remoteSettings.getSettings().then((settings) => {
-      sendReply("set-preferences", {
-        preferences: getOr({}, "preferences")(settings)
-      });
+      const preferences = getOr({}, "preferences")(settings);
+      sendReply("set-preferences", { preferences });
+
+      const hideWindowOnClose = getOr(false, "hideWindowOnClose")(preferences);
+      this.setPreventClose(hideWindowOnClose);
 
       // Add sites one at a time so the final `onAllSitesWebContentsCreated` function would be only called by
       // the final `handleElectronIpcMainWebContentsCreated` function.

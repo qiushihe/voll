@@ -9,8 +9,9 @@ import { withPayload } from "/renderer/helpers/reducer.helper";
 import setPreferences from "./preferences/set-preferences";
 
 const initialState = {
-  showLabelInDock: true,
-  showSiteUrl: false
+  showLabelInDock: false,
+  showSiteUrl: false,
+  hideWindowOnClose: false
 };
 
 export default handleActions({
