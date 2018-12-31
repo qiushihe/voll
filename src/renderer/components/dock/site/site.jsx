@@ -5,7 +5,7 @@ import isEmpty from "lodash/fp/isEmpty";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlobeAfrica } from "@fortawesome/free-solid-svg-icons";
 
-import BaseSite from "../base-site";
+import DockIcon from "../dock-icon";
 
 const IconContainer = styled.div`
   box-sizing: border-box;
@@ -76,14 +76,14 @@ class Site extends PureComponent {
   }
 
   render() {
-    const { name, showSiteName, isActive, activateSite } = this.props;
+    const { name, showLabel, isActive, activateSite } = this.props;
 
     return (
-      <BaseSite
+      <DockIcon
         label={name}
         renderIcon={this.renderIcon}
         onClick={activateSite}
-        showSiteName={showSiteName}
+        showLabel={showLabel}
         isActive={isActive}
       />
     );
@@ -94,7 +94,7 @@ Site.propTypes = {
   name: PropTypes.string,
   iconSrc: PropTypes.string,
   unreadCount: PropTypes.number,
-  showSiteName: PropTypes.bool,
+  showLabel: PropTypes.bool,
   isActive: PropTypes.bool,
   activateSite: PropTypes.func,
   onUnreadCountChange: PropTypes.func
@@ -104,7 +104,7 @@ Site.defaultProps = {
   name: "A Site",
   iconSrc: null,
   unreadCount: 0,
-  showSiteName: false,
+  showLabel: false,
   isActive: false,
   activateSite: (() => {}),
   onUnreadCountChange: (() => {})

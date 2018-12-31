@@ -9,10 +9,16 @@ const Base = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
-  min-width: ${({ showSiteName }) => showSiteName ? "200px" : "60px"};
+  min-width: ${({ showLabel }) => showLabel ? "200px" : "60px"};
   box-sizing: border-box;
   background-color: #1d1838;
   box-shadow: inset -10px 0px 10px -10px black;
+`;
+
+const SitesList = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
   overflow-y: auto;
 `;
 
@@ -22,26 +28,28 @@ const renderSite = ({ id }) => (
 
 const renderSites = map(renderSite);
 
-class Tray extends PureComponent {
+class Dock extends PureComponent {
   render() {
-    const { showSiteName, sites } = this.props;
+    const { showLabel, sites } = this.props;
 
     return (
-      <Base showSiteName={showSiteName}>
-        {Children.toArray(renderSites(sites))}
+      <Base showLabel={showLabel}>
+        <SitesList>
+          {Children.toArray(renderSites(sites))}
+        </SitesList>
       </Base>
     );
   }
 }
 
-Tray.propTypes = {
-  showSiteName: PropTypes.bool,
+Dock.propTypes = {
+  showLabel: PropTypes.bool,
   sites: PropTypes.array
 };
 
-Tray.defaultProps = {
-  showSiteName: false,
+Dock.defaultProps = {
+  showLabel: false,
   sites: []
 };
 
-export default Tray;
+export default Dock;
