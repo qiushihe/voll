@@ -3,9 +3,9 @@ import get from "lodash/fp/get";
 
 import { preferences } from "./root.selector";
 
-export const showSiteNameInTray = createSelector(
+export const showLabelInDock = createSelector(
   preferences,
-  get("showSiteNameInTray")
+  get("showLabelInDock")
 );
 
 export const showSiteUrl = createSelector(

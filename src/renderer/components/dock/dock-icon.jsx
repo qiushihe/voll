@@ -37,7 +37,7 @@ const Label = styled.div`
   overflow: hidden;
 `;
 
-class BaseSite extends PureComponent {
+class DockIcon extends PureComponent {
   constructor(...args) {
     super(...args);
 
@@ -58,7 +58,7 @@ class BaseSite extends PureComponent {
   }
 
   render() {
-    const { label, showSiteName, isActive, renderIcon, onClick } = this.props;
+    const { label, showLabel, isActive, renderIcon, onClick } = this.props;
     const { isHover } = this.state;
 
     return (
@@ -75,7 +75,7 @@ class BaseSite extends PureComponent {
             isHover
           })}
         </Icon>
-        {showSiteName && (
+        {showLabel && (
           <Label>{label}</Label>
         )}
       </Base>
@@ -83,20 +83,20 @@ class BaseSite extends PureComponent {
   }
 }
 
-BaseSite.propTypes = {
+DockIcon.propTypes = {
   label: PropTypes.node,
-  showSiteName: PropTypes.bool,
+  showLabel: PropTypes.bool,
   isActive: PropTypes.bool,
   renderIcon: PropTypes.func,
   onClick: PropTypes.func
 };
 
-BaseSite.defaultProps = {
+DockIcon.defaultProps = {
   label: "",
-  showSiteName: false,
+  showLabel: false,
   isActive: false,
   renderIcon: (() => {}),
   onClick: (() => {})
 };
 
-export default BaseSite;
+export default DockIcon;

@@ -5,7 +5,7 @@ import { pickObjectWithAttributes } from "/renderer/helpers/pick.helper";
 export const PREFERENCES_SET_PREFERENCES = "PREFERENCES_SET_PREFERENCES";
 
 export const preferencesAttributes = [
-  "showSiteNameInTray",
+  "showLabelInDock",
   "showSiteUrl"
 ];
 

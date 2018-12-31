@@ -9,7 +9,7 @@ import { withPayload } from "/renderer/helpers/reducer.helper";
 import setPreferences from "./preferences/set-preferences";
 
 const initialState = {
-  showSiteNameInTray: false,
+  showLabelInDock: true,
   showSiteUrl: false
 };
 
