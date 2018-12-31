@@ -20,7 +20,7 @@ import RemoteSettings from "./remote-settings";
 import Preloads from "./preloads";
 import Menus from "./menus";
 import MainWindow from "./main-window";
-import TrayIcon from './tray-icon';
+import TrayIcon from "./tray-icon";
 
 const uncappedMap = map.convert({ cap: false });
 
@@ -49,9 +49,12 @@ class App {
     this.handleElectronIpcMainSiteUnreadCountChanged = this.handleElectronIpcMainSiteUnreadCountChanged.bind(this);
     this.handleElectronIpcMainSiteActivated = this.handleElectronIpcMainSiteActivated.bind(this);
 
+    this.handleMainWindowClosePrevented = this.handleMainWindowClosePrevented.bind(this);
     this.handleMainWindowClosed = this.handleMainWindowClosed.bind(this);
     this.saveMainWindowSizeAndPosition = debounce(1000)(this.saveMainWindowSizeAndPosition.bind(this));
     this.saveActiveSiteIndex = debounce(1000)(this.saveActiveSiteIndex.bind(this));
+
+    this.reallyQuit = this.reallyQuit.bind(this);
   }
 
   start() {
@@ -104,6 +107,7 @@ class App {
         height
       });
 
+      this.mainWindow.on("close-prevented", this.handleMainWindowClosePrevented);
       this.mainWindow.on("closed", this.handleMainWindowClosed);
       this.mainWindow.on("resize-move", this.saveMainWindowSizeAndPosition);
     });
@@ -111,9 +115,12 @@ class App {
 
   createTrayIcon() {
     this.trayIcon = new TrayIcon({ iconPath: Icon.getTrayIconPath() });
+
     this.trayIcon.on("show-main-window", () => {
       this.activate();
     });
+
+    this.trayIcon.on("really-quit", this.reallyQuit);
   }
 
   activate() {
@@ -134,7 +141,9 @@ class App {
   }
 
   handleElectronAppReady() {
-    ElectronMenu.setApplicationMenu(Menus.createMainMenu());
+    ElectronMenu.setApplicationMenu(Menus.createMainMenu({
+      onQuit: this.reallyQuit
+    }));
 
     this.localSettings.getSettings()
       .then((localSettings) => {
@@ -184,7 +193,12 @@ class App {
     ])(this.allSites);
   }
 
+  handleMainWindowClosePrevented() {
+    this.mainWindow.hide();
+  }
+
   handleMainWindowClosed() {
+    this.mainWindow.removeListener("close-prevented", this.handleMainWindowClosePrevented);
     this.mainWindow.removeListener("closed", this.handleMainWindowClosed);
     this.mainWindow.removeListener("resize-move", this.saveMainWindowSizeAndPosition);
     this.mainWindow = null;
@@ -198,6 +212,11 @@ class App {
   saveActiveSiteIndex(index) {
     console.log("Save active site index", index);
     this.localSettings.updateSettings({ activeSiteIndex: index });
+  }
+
+  reallyQuit() {
+    this.mainWindow.setPreventClose(false);
+    electronApp.quit();
   }
 }
 

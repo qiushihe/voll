@@ -4,8 +4,26 @@ import {
   Menu as ElectronMenu
 } from "electron";
 
+const getQuitItem = ({ onClick }) => {
+  const label = process.platform === "darwin"
+    ? "Quit Voll"
+    : "Exit";
+
+  return {
+    label,
+    click: onClick
+  };
+};
+
 export default {
-  createMainMenu: () => {
+  createTrayMenu: ({ onShowMainWindow, onQuit }) => {
+    return ElectronMenu.buildFromTemplate([
+      { label: "Show Main Window", click: onShowMainWindow },
+      { type: "separator" },
+      getQuitItem({ onClick: onQuit })
+    ]);
+  },
+  createMainMenu: ({ onQuit }) => {
     const aboutVoll = {
       label: "Voll?",
       click: () => { electronShell.openExternal("https://pathofexile.gamepedia.com/Voll,_Emperor_of_Purity#Lore") }
@@ -62,7 +80,7 @@ export default {
         submenu: [
           { role: "about" },
           { type: "separator" },
-          { role: "quit" }
+          getQuitItem({ onClick: onQuit })
         ]
       };
 
@@ -79,7 +97,7 @@ export default {
         submenu: [
           { role: "about" },
           { type: "separator" },
-          { role: "quit" }
+          getQuitItem({ onClick: onQuit })
         ]
       };
 
