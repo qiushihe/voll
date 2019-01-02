@@ -215,7 +215,9 @@ class App {
   }
 
   reallyQuit() {
-    this.mainWindow.setPreventClose(false);
+    if (this.mainWindow) {
+      this.mainWindow.setPreventClose(false);
+    }
     electronApp.quit();
   }
 }
