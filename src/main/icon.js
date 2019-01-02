@@ -1,9 +1,9 @@
 import { join as joinPath } from "path";
 import { app as electronApp} from "electron";
 
+// These path are relative to the `build` directory and those icon images are generated into the build directory.
+
 export default {
-  // These path are relative to the `build` directory and those icon images are copied into the build directory
-  // by CopyWebpackPlugin during the build phase.
   getIconPath: () => {
     if (process.platform === "win32") {
       return joinPath(electronApp.getAppPath(), "lolgo.ico");
