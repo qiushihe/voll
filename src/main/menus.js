@@ -9,8 +9,17 @@ const getQuitItem = ({ onClick }) => {
     ? "Quit Voll"
     : "Exit";
 
+  let accelerator = "Ctrl+Q";
+
+  if (process.platform === "win32") {
+    accelerator = "Alt+F4";
+  } else if (process.platform === "darwin") {
+    accelerator = "Cmd+Q";
+  }
+
   return {
     label,
+    accelerator,
     click: onClick
   };
 };
