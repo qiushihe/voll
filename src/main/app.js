@@ -1,11 +1,6 @@
-import {
-  app as electronApp,
-  ipcMain as electronIpcMain,
-  Menu as ElectronMenu
-} from "electron";
-
 import { readFile } from "graceful-fs";
 import { join as joinPath } from "path";
+
 import uuidv4 from "uuid/v4";
 import flow from "lodash/fp/flow";
 import get from "lodash/fp/get";
@@ -13,6 +8,14 @@ import getOr from "lodash/fp/getOr";
 import map from "lodash/fp/map";
 import sum from "lodash/fp/sum";
 import debounce from "lodash/fp/debounce";
+
+import {
+  app as electronApp,
+  ipcMain as electronIpcMain,
+  Menu as ElectronMenu
+} from "electron";
+
+import electronContextMenu from "electron-context-menu";
 
 import Icon from "./icon";
 import LocalSettings from "./local-settings";
@@ -63,6 +66,12 @@ class App {
     if (!electronApp.requestSingleInstanceLock()) {
       electronApp.quit();
     }
+
+    electronContextMenu({
+      showCopyImageAddress: true,
+      showSaveImageAs: true,
+      showInspectElement: true
+    });
 
     electronApp.on("second-instance", this.handleElectronAppSecondInstance);
     electronApp.on("ready", this.handleElectronAppReady);
