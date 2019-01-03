@@ -1,6 +1,7 @@
 import { PureComponent, createRef } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
+import electronContextMenu from "electron-context-menu";
 
 const Base = styled.div`
   display: flex;
@@ -37,6 +38,13 @@ class Webview extends PureComponent {
     const webview = this.webviewRef.current;
     const webContents = webview.getWebContents();
 
+    electronContextMenu({
+      window: webview,
+      showCopyImageAddress: true,
+      showSaveImageAs: true,
+      showInspectElement: true
+    });
+
     webview.addEventListener("did-navigate", (evt) => {
       this.setState({ currentUrl: evt.url });
     });
@@ -49,7 +57,7 @@ class Webview extends PureComponent {
       onIpcAction({ evtName: evt.channel, evtArgs: evt.args});
     });
 
-    onMount({ webContentId: webContents.id })
+    onMount({ webContentId: webContents.id });
   }
 
   render() {
