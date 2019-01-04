@@ -2,8 +2,8 @@ import { PureComponent } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import isEmpty from "lodash/fp/isEmpty";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGlobeAfrica } from "@fortawesome/free-solid-svg-icons";
+
+import { Explore as ExploreIcon } from "@material-ui/icons";
 
 import DockIcon from "../dock-icon";
 
@@ -30,16 +30,27 @@ const IconImage = styled.img`
   left: 0;
 `;
 
+const overrideIconSize = () => (`
+  font-size: 42px !important;
+`);
+
+const IconPlaceholder = styled(ExploreIcon)`
+  ${overrideIconSize()}
+`;
+
 const IconBadge = styled.div`
-  display: inline-block;
+  display: inline-flex;
   position: absolute;
   font-size: 10px;
   background: red;
   color: white;
   border-radius: 99px;
-  padding: 2px 4px;
-  bottom: 2px;
-  right: 2px;
+  bottom: 0px;
+  right: 0px;
+  min-width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
 `;
 
 class Site extends PureComponent {
@@ -62,7 +73,7 @@ class Site extends PureComponent {
     return (
       <IconContainer isActive={isActive} isHover={isHover}>
         {isEmpty(iconSrc) ? (
-          <FontAwesomeIcon icon={faGlobeAfrica} />
+          <IconPlaceholder />
         ) : (
           <IconImage src={iconSrc} />
         )}

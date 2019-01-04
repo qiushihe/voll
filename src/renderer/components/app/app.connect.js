@@ -2,6 +2,7 @@ import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 import { ipcRenderer } from "electron";
 
+import { showLabelInDock } from "/renderer/selectors/preferences.selector";
 import { getIsAppReady } from "/renderer/selectors/app.selector";
 
 import { setStates as setAppStates } from "/renderer/actions/app.action";
@@ -13,7 +14,8 @@ import App from "./app";
 
 export default connect(
   createStructuredSelector({
-    isAppReady: getIsAppReady
+    isAppReady: getIsAppReady,
+    isDockExpanded: showLabelInDock
   }),
   (dispatch) => ({
     setAppStates: ({ states }) => dispatch(setAppStates({ states })),
