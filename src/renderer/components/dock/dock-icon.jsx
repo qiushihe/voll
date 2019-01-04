@@ -5,11 +5,6 @@ import styled from "styled-components";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 
-const overrideDensePaddings = () => (`
-  padding-top: 3px !important;
-  padding-bottom: 3px !important;
-`);
-
 const overrideSelectedBackgroundColor = () => (`
   background-color: white !important;
 `);
@@ -22,7 +17,6 @@ const Base = styled((props) => (
   background-color: transparent;
   border-right: none;
   box-shadow: none;
-  ${overrideDensePaddings()}
 
   &.selected {
     color: black;
@@ -34,11 +28,11 @@ const Base = styled((props) => (
 
 const Icon = styled.div`
   display: flex;
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
   align-items: center;
   justify-content: center;
-  margin: 0 6px;
+  margin: 0 8px;
   cursor: pointer;
   user-select: none;
 `;

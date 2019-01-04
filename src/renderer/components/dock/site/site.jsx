@@ -39,15 +39,18 @@ const IconPlaceholder = styled(ExploreIcon)`
 `;
 
 const IconBadge = styled.div`
-  display: inline-block;
+  display: inline-flex;
   position: absolute;
   font-size: 10px;
   background: red;
   color: white;
   border-radius: 99px;
-  padding: 2px 4px;
-  bottom: 2px;
-  right: 2px;
+  bottom: 0px;
+  right: 0px;
+  min-width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
 `;
 
 class Site extends PureComponent {
