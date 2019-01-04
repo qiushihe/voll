@@ -42,12 +42,23 @@ module.exports = function () {
           }
         }
       }, {
+        test: /\.woff2?(\?v=\d+\.\d+\.\d+)?$/,
+        use: {
+          loader: "file-loader",
+          options: {
+            name: "fonts/[hash]-[name].[ext]"
+          }
+        }
+      }, {
         test: /\.jsx?$/,
         exclude: /node_modules/,
         use: {
           loader: "babel-loader",
           options: babelRc
         }
+      }, {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
       }]
     },
     plugins: [
