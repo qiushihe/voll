@@ -3,19 +3,20 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 import map from "lodash/fp/map";
 
+import List from "@material-ui/core/List";
+
 import Site from "./site";
 
 const Base = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
-  min-width: ${({ showLabel }) => showLabel ? "200px" : "60px"};
   box-sizing: border-box;
   background-color: #1d1838;
   box-shadow: inset -10px 0px 10px -10px black;
 `;
 
-const SitesList = styled.div`
+const SitesList = styled(List)`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
@@ -30,11 +31,11 @@ const renderSites = map(renderSite);
 
 class Dock extends PureComponent {
   render() {
-    const { showLabel, sites } = this.props;
+    const { sites } = this.props;
 
     return (
-      <Base showLabel={showLabel}>
-        <SitesList>
+      <Base>
+        <SitesList disablePadding={true} dense={true}>
           {Children.toArray(renderSites(sites))}
         </SitesList>
       </Base>
@@ -43,12 +44,10 @@ class Dock extends PureComponent {
 }
 
 Dock.propTypes = {
-  showLabel: PropTypes.bool,
   sites: PropTypes.array
 };
 
 Dock.defaultProps = {
-  showLabel: false,
   sites: []
 };
 

@@ -126,6 +126,8 @@ const doneMacOsLogo = Promise.all([
 
 // Other logos --------------------------------------------------------------------------------------------------------
 
+let allDone = false;
+
 Promise.all([
   doneWindowsLogo,
   doneMacOsLogo
@@ -145,4 +147,14 @@ Promise.all([
 }).then(() => {
   shell.rm("-fr", icoBuildPath);
   shell.rm("-fr", icnsBuildPath);
+}).then(() => {
+  allDone = true;
 });
+
+const wait = () => {
+  if (!allDone) {
+    setTimeout(wait, 1000);
+  }
+};
+
+wait();

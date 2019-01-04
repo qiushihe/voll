@@ -2,31 +2,47 @@ import { PureComponent } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 
-const Base = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 3px 0;
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+
+const overrideSelectedBackgroundColor = () => (`
+  background-color: white !important;
+`);
+
+const Base = styled((props) => (
+  <ListItem classes={{ selected: "selected" }} {...props} />
+))`
   cursor: pointer;
-  min-height: 48px;
-  color: ${({ isActive }) => isActive ? "black" : "white"};
-  background-color: ${({ isActive }) => isActive ? "white" : "transparent"};
-  border-right: ${({ isActive }) => isActive ? "1px solid #eeeeee" : "none"};
-  box-shadow: ${({ isActive }) => isActive ? "0px 3px 3px 0px black" : "none"};
+  color: white;
+  background-color: transparent;
+  border-right: none;
+  box-shadow: none;
+
+  &.selected {
+    color: black;
+    border-right: 1px solid #eeeeee;
+    box-shadow: 0px 3px 3px 0px black;
+    ${overrideSelectedBackgroundColor()}
+  }
 `;
 
 const Icon = styled.div`
   display: flex;
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
   align-items: center;
   justify-content: center;
-  margin: 0 6px;
+  margin: 0 8px;
   cursor: pointer;
   user-select: none;
 `;
 
-const Label = styled.div`
+const overrideDenseTextStyles = () => (`
+  font-size: inherit !important;
+  padding: 0 !important;
+`);
+
+const Label = styled(ListItemText)`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -35,6 +51,7 @@ const Label = styled.div`
   user-select: none;
   white-space: nowrap;
   overflow: hidden;
+  ${overrideDenseTextStyles()}
 `;
 
 class DockIcon extends PureComponent {
@@ -63,11 +80,11 @@ class DockIcon extends PureComponent {
 
     return (
       <Base
+        disableGutters={true}
+        selected={isActive}
         onClick={onClick}
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
-        isActive={isActive}
-        isHover={isHover}
       >
         <Icon>
           {renderIcon({
@@ -76,7 +93,9 @@ class DockIcon extends PureComponent {
           })}
         </Icon>
         {showLabel && (
-          <Label>{label}</Label>
+          <Label disableTypography={true}>
+            {label}
+          </Label>
         )}
       </Base>
     );
