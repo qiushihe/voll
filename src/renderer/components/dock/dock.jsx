@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 import map from "lodash/fp/map";
 
+import List from "@material-ui/core/List";
+
 import Site from "./site";
 
 const Base = styled.div`
@@ -14,7 +16,7 @@ const Base = styled.div`
   box-shadow: inset -10px 0px 10px -10px black;
 `;
 
-const SitesList = styled.div`
+const SitesList = styled(List)`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
@@ -33,7 +35,7 @@ class Dock extends PureComponent {
 
     return (
       <Base>
-        <SitesList>
+        <SitesList disablePadding={true} dense={true}>
           {Children.toArray(renderSites(sites))}
         </SitesList>
       </Base>
