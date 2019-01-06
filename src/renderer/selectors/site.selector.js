@@ -21,7 +21,7 @@ export const iconSrc = createSelector(site, get("iconSrc"));
 
 export const sessionId = createSelector(site, get("sessionId"));
 
-export const persistentSessionId = createSelector(site, get("persistentSessionId"));
+export const transientSession = createSelector(site, get("transientSession"));
 
 export const externalUrlPatterns = createSelector(site, get("externalUrlPatterns"));
 

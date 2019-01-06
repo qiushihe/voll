@@ -8,7 +8,7 @@ import {
   id,
   url,
   sessionId,
-  persistentSessionId,
+  transientSession,
   preloadUrl
 } from "/renderer/selectors/site.selector";
 
@@ -19,16 +19,15 @@ import { dispatchIpcAction } from "/renderer/actions/ipc.action";
 
 import Webview from "./webview";
 
-const getPartition = ({ sessionId, persistentSessionId }) => {
+const getPartition = ({ sessionId, transientSession }) => {
   const sessionIdString = `${sessionId}`.trim();
-  const persistentSessionIdString = `${persistentSessionId}`.trim();
 
-  if (!isEmpty(persistentSessionIdString)) {
-    return `persist:${persistentSessionIdString}`;
-  } else if (!isEmpty(sessionIdString)) {
+  if (isEmpty(sessionIdString)) {
+    return null;
+  } else if (transientSession) {
     return sessionIdString;
   } else {
-    return null;
+    return `persist:${sessionIdString}`;
   }
 };
 
@@ -37,7 +36,7 @@ export default connect(
     id,
     url,
     sessionId,
-    persistentSessionId,
+    transientSession,
     preloadUrl,
     activeSiteId,
     showUrl: showSiteUrl
@@ -51,7 +50,7 @@ export default connect(
     ...dispatchProps,
     partition: getPartition({
       sessionId: stateProps.sessionId,
-      persistentSessionId: stateProps.sessionId
+      transientSession: stateProps.transientSession
     }),
     useragent: UA.chrome(71), // TODO: Implement component width detection and switch to a mobile device's UA
     isActive: stateProps.id === stateProps.activeSiteId,
