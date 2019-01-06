@@ -4,6 +4,7 @@ import { ipcRenderer } from "electron";
 
 import { showLabelInDock } from "/renderer/selectors/preferences.selector";
 import { getIsAppReady } from "/renderer/selectors/app.selector";
+import { isVisible as isSettingsVisible } from "/src/renderer/selectors/settings.selector";
 
 import { setStates as setAppStates } from "/renderer/actions/app.action";
 import { addSite } from "/renderer/actions/sites.action";
@@ -15,7 +16,8 @@ import App from "./app";
 export default connect(
   createStructuredSelector({
     isAppReady: getIsAppReady,
-    isDockExpanded: showLabelInDock
+    isDockExpanded: showLabelInDock,
+    isSettingsVisible
   }),
   (dispatch) => ({
     setAppStates: ({ states }) => dispatch(setAppStates({ states })),

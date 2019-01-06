@@ -23,9 +23,9 @@ export const sessionId = createSelector(site, get("sessionId"));
 
 export const transientSession = createSelector(site, get("transientSession"));
 
-export const externalUrlPatterns = createSelector(site, get("externalUrlPatterns"));
+export const externalUrlPatterns = createSelector(site, getOr([], "externalUrlPatterns"));
 
-export const internalUrlPatterns = createSelector(site, get("internalUrlPatterns"));
+export const internalUrlPatterns = createSelector(site, getOr([], "internalUrlPatterns"));
 
 export const preloadUrl = createSelector(site, get("preloadUrl"));
 

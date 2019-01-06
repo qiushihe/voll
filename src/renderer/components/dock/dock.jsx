@@ -6,6 +6,7 @@ import map from "lodash/fp/map";
 import List from "@material-ui/core/List";
 
 import Site from "./site";
+import Settings from "./settings";
 
 const Base = styled.div`
   display: flex;
@@ -38,6 +39,9 @@ class Dock extends PureComponent {
         <SitesList disablePadding={true} dense={true}>
           {Children.toArray(renderSites(sites))}
         </SitesList>
+        <div>
+          <Settings />
+        </div>
       </Base>
     );
   }

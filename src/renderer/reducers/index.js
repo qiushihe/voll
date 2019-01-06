@@ -4,12 +4,14 @@ import app from "./app.reducer";
 import sites from "./sites.reducer";
 import webviews from "./webviews.reducer";
 import preferences from "./preferences.reducer";
+import settings from "./settings.reducer";
 
 const combinedReducer = combineReducers({
   app,
   sites,
   webviews,
-  preferences
+  preferences,
+  settings
 });
 
 export default (state = {}, action) => {
