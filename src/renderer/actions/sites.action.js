@@ -10,7 +10,7 @@ export const siteAttributes = [
   "url",
   "iconSrc",
   "sessionId",
-  "persistentSessionId",
+  "transientSession",
   "externalUrlPatterns",
   "internalUrlPatterns",
   "preloadUrl"
