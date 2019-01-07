@@ -14,10 +14,10 @@ class Preloads {
     return new Promise((resolve, reject) => {
       const madeDir = (err) => {
         if (err) {
-          console.error("Error preparing preload path", this.preloadsDirPath);
+          console.error("[Preload] Error preparing preload path", this.preloadsDirPath);
           reject(err);
         } else {
-          console.log("Prepared preload path", this.preloadsDirPath);
+          console.log("[Preload] Prepared preload path", this.preloadsDirPath);
           resolve(this.preloadsDirPath);
         }
       };
@@ -43,10 +43,10 @@ class Preloads {
         "utf8",
         (err) => {
           if (err) {
-            console.error("Error setting up preload for site", siteId);
+            console.error("[Preload] Error setting up preload for site", siteId);
             reject(err);
           } else {
-            console.log("Setup preload for site", siteId);
+            console.log("[Preload] Setup preload for site", siteId);
             resolve(preloadFilePath);
           }
         }
