@@ -1,13 +1,12 @@
 import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
-import { ipcRenderer } from "electron";
 
 import { showLabelInDock } from "/renderer/selectors/preferences.selector";
 import { getIsAppReady } from "/renderer/selectors/app.selector";
 
 import { setStates as setAppStates } from "/renderer/actions/app.action";
-import { addSite } from "/renderer/actions/sites.action";
-import { setPreferences } from "/renderer/actions/preferences.action";
+import { getSites, getActiveSiteId } from "/renderer/actions/sites.action";
+import { getPreferences } from "/renderer/actions/preferences.action";
 import { activateSite } from "/renderer/actions/webviews.action";
 
 import App from "./app";
@@ -18,10 +17,11 @@ export default connect(
     isDockExpanded: showLabelInDock
   }),
   (dispatch) => ({
-    setAppStates: ({ states }) => dispatch(setAppStates({ states })),
-    setPreferences: ({ preferences }) => dispatch(setPreferences({ preferences })),
+    getPreferences: () => dispatch(getPreferences()),
+    getSites: () => dispatch(getSites()),
+    getActiveSiteId: () => dispatch(getActiveSiteId()),
     activateSite: ({ siteId }) => dispatch(activateSite({ siteId })),
-    addSite: ({ site }) => dispatch(addSite({ site }))
+    setAppStates: ({ states }) => dispatch(setAppStates({ states })),
   }),
   (stateProps, dispatchProps, ownProps) => ({
     ...ownProps,
@@ -29,11 +29,12 @@ export default connect(
     ...dispatchProps,
 
     onMount: () => {
-      ipcRenderer.on("set-app-states", (_, { states }) => dispatchProps.setAppStates({ states }));
-      ipcRenderer.on("set-preferences", (_, { preferences }) => dispatchProps.setPreferences({ preferences }));
-      ipcRenderer.on("set-active-site-id", (_, { activeSiteId }) => dispatchProps.activateSite({ siteId: activeSiteId }));
-      ipcRenderer.on("add-site", (_, { site }) => dispatchProps.addSite({ site }));
-      ipcRenderer.send("app-did-mount");
+      // TODO: Restore active site
+      dispatchProps.getPreferences()
+        .then(() => dispatchProps.getSites())
+        .then(() => dispatchProps.setAppStates({ states: { isAppReady: true } }))
+        .then(() => dispatchProps.getActiveSiteId())
+        .then(({ activeSiteId }) => dispatchProps.activateSite({ siteId: activeSiteId }));
     }
   })
 )(App);

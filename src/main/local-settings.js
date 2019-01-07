@@ -1,5 +1,3 @@
-import uuidv4 from "uuid/v4";
-import request from "request";
 import { readFile, writeFile } from "graceful-fs";
 import assign from "lodash/fp/assign";
 
@@ -18,7 +16,7 @@ class LocalSettings {
           reject(err);
         } else {
           const settings = JSON.parse(data);
-          console.log("Got local settings", JSON.stringify(settings, null, 2));
+          // console.log("Got local settings", JSON.stringify(settings, null, 2));
           resolve(settings);
         }
       });
@@ -69,21 +67,3 @@ class LocalSettings {
 }
 
 export default LocalSettings;
-
-export const fetchSettings = (url) => new Promise((resolve, reject) => {
-  const fetchUrl = `${url}?${uuidv4()}`;
-  console.log("Fetching from", fetchUrl);
-  request.get(fetchUrl, (err, res, body) => {
-    if (err) {
-      console.error("Error fetching settings JSON.", err);
-      reject(err);
-    } else {
-      try {
-        resolve(JSON.parse(body));
-      } catch (err) {
-        console.error("Error parsing fetched settings JSON.", err);
-        reject(err);
-      }
-    }
-  });
-});

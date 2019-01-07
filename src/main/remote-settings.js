@@ -18,7 +18,7 @@ class RemoteSettings {
         } else {
           try {
             const settings = JSON.parse(body);
-            console.log("Got remote settings", JSON.stringify(settings, null, 2));
+            // console.log("Got remote settings", JSON.stringify(settings, null, 2));
             resolve(settings);
           } catch (err) {
             console.error("Error parsing fetched settings JSON.", err);

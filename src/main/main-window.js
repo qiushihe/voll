@@ -1,36 +1,18 @@
 import {
   app as electronApp,
-  ipcMain as electronIpcMain,
   shell as electronShell,
   BrowserWindow as ElectronBrowserWindow
 } from "electron";
 
 import EventEmitter from "events";
-import flow from "lodash/fp/flow";
-import keys from "lodash/fp/keys";
-import values from "lodash/fp/values";
-import get from "lodash/fp/get";
-import sortBy from "lodash/fp/sortBy";
-import isNumber from "lodash/fp/isNumber";
-import isFinite from "lodash/fp/isFinite";
-import getOr from "lodash/fp/getOr";
-import map from "lodash/fp/map";
-import every from "lodash/fp/every";
 
 import { getInternalUrlChecker } from "/main/url-checker";
 
 import Icon from "./icon";
 
-const isFiniteNumber = (value) => (isNumber(value) && isFinite(value));
-const getReplier = (sender) => (...args) => sender.send(...args);
-const getFrom = (collection) => (key) => get(key)(collection);
-
 class MainWindow extends EventEmitter {
   constructor({
-    localSettings,
-    remoteSettings,
-    preventClose,
-    allSites,
+    ipcServer,
     posX,
     posY,
     width,
@@ -38,14 +20,10 @@ class MainWindow extends EventEmitter {
   }) {
     super();
 
-    this.localSettings = localSettings;
-    this.remoteSettings = remoteSettings;
+    this.ipcServer = ipcServer;
 
     this.preventClose = false; // If window should be hidden instead of closed.
-    this.pendingSites = []; // Used while adding sites one at a time.
-    this.allSites = allSites;
     this.allWebContents = {};
-    this.siteReady = {};
 
     this.browserWindow = new ElectronBrowserWindow({
       title: "Voll",
@@ -75,9 +53,8 @@ class MainWindow extends EventEmitter {
     this.handleMainWindowClose = this.handleMainWindowClose.bind(this);
     this.handleMainWindowClosed = this.handleMainWindowClosed.bind(this);
 
-    this.handleElectronIpcMainWebContentsCreated = this.handleElectronIpcMainWebContentsCreated.bind(this);
     this.handleElectronAppWebContentsCreated = this.handleElectronAppWebContentsCreated.bind(this);
-    this.handleElectronIpcMainAppDidMount = this.handleElectronIpcMainAppDidMount.bind(this);
+    this.handleSetSiteWebContent = this.handleSetSiteWebContent.bind(this);
 
     this.browserWindow.on("page-title-updated", this.handleMainWindowTitleUpdated);
     this.browserWindow.on("resize", this.handleMainWindowResizeMove);
@@ -86,8 +63,7 @@ class MainWindow extends EventEmitter {
     this.browserWindow.on("closed", this.handleMainWindowClosed);
 
     electronApp.on("web-contents-created", this.handleElectronAppWebContentsCreated);
-    electronIpcMain.on("web-contents-created", this.handleElectronIpcMainWebContentsCreated);
-    electronIpcMain.on("app-did-mount", this.handleElectronIpcMainAppDidMount);
+    this.ipcServer.on("set-site-web-content", this.handleSetSiteWebContent);
   }
 
   show() {
@@ -106,46 +82,14 @@ class MainWindow extends EventEmitter {
     this.preventClose = preventClose;
   }
 
-  addOneSite({ sendReply }) {
-    const [site, ...restSites] = this.pendingSites || [];
-    this.pendingSites = restSites || [];
-    if (!!site) {
-      sendReply("add-site", { site });
-    }
-  }
-
-  onAllSitesWebContentsCreated({ sendReply }) {
-    this.localSettings.getSettings().then(({ activeSiteIndex }) => {
-      if (isFiniteNumber(activeSiteIndex) && activeSiteIndex >= 0) {
-        const activeSite = flow([
-          values,
-          sortBy(get("index")),
-          get(activeSiteIndex)
-        ])(this.allSites);
-
-        if (activeSite) {
-          console.log("Restore active site", activeSite.id);
-          sendReply("set-active-site-id", { activeSiteId: activeSite.id });
-        }
-      }
-
-      sendReply("set-app-states", {
-        states: { isAppReady: true }
-      });
-    });
-  }
-
   // This `web-contents-created` event is fired by Electron itself when *any* WebContents object is created.
   // Here we catch them all because we need reference to some of them and we don't know yet which one is which, but
-  // we will in a bit (See the `handleElectronIpcMainWebContentsCreated` handler for `electronIpcMain` below).
+  // we will in a bit (See the `handleSetSiteWebContent` handler for `ipcServer` below).
   handleElectronAppWebContentsCreated(_, webContents) {
     this.allWebContents[webContents.id] = webContents;
   }
 
-  handleElectronIpcMainWebContentsCreated(evt, { siteId, webContentId }) {
-    const sendReply = getReplier(evt.sender);
-
-    const site = this.allSites[siteId];
+  handleSetSiteWebContent({ site, webContentId }) {
     const webContents = this.allWebContents[webContentId];
 
     const isUrlInternal = getInternalUrlChecker({
@@ -165,42 +109,6 @@ class MainWindow extends EventEmitter {
         evt.preventDefault();
         electronShell.openExternal(url);
       }
-    });
-
-    webContents.on("destroyed", () => {
-      this.siteReady[siteId] = false;
-    });
-
-    this.siteReady[siteId] = true;
-
-    flow([
-      keys,
-      map(getFrom(this.siteReady)),
-      every(Boolean),
-      (allSitesReady) => {
-        if (allSitesReady) {
-          this.onAllSitesWebContentsCreated({ sendReply });
-        } else {
-          this.addOneSite({ sendReply });
-        }
-      }
-    ])(this.allSites);
-  }
-
-  handleElectronIpcMainAppDidMount(evt) {
-    const sendReply = getReplier(evt.sender);
-
-    this.remoteSettings.getSettings().then((settings) => {
-      const preferences = getOr({}, "preferences")(settings);
-      sendReply("set-preferences", { preferences });
-
-      const hideWindowOnClose = getOr(false, "hideWindowOnClose")(preferences);
-      this.setPreventClose(hideWindowOnClose);
-
-      // Add sites one at a time so the final `onAllSitesWebContentsCreated` function would be only called by
-      // the final `handleElectronIpcMainWebContentsCreated` function.
-      this.pendingSites = flow([values, sortBy(get("index"))])(this.allSites);
-      this.addOneSite({ sendReply });
     });
   }
 
@@ -228,10 +136,8 @@ class MainWindow extends EventEmitter {
     this.browserWindow.removeListener("closed", this.handleMainWindowClosed);
 
     electronApp.removeListener("web-contents-created", this.handleElectronAppWebContentsCreated);
-    electronIpcMain.removeListener("web-contents-created", this.handleElectronIpcMainWebContentsCreated);
-    electronIpcMain.removeListener("app-did-mount", this.handleElectronIpcMainAppDidMount);
+    this.ipcServer.removeListener("set-site-web-content", this.handleSetSiteWebContent);
 
-    this.siteReady = {};
     this.allWebContents = {};
     this.emit("closed");
   }
