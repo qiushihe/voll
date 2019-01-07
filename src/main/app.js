@@ -122,6 +122,7 @@ class App {
     this.activate();
   }
 
+  // TODO: Need to reset title on page (re)load to clear any left over unread count from before the reload.
   handleSetTotalUnreadCount({ totalUnreadCount }) {
     if (totalUnreadCount > 0) {
       this.mainWindow.setTitle(`Voll (${totalUnreadCount})`);
