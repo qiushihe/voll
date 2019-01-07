@@ -68,6 +68,7 @@ class App {
   createMainWindow() {
     return this.localSettings.getSettings().then(({ posX, posY, width, height }) => {
       this.mainWindow = new MainWindow({
+        preventClose: false, // TODO: Read from remote settings
         ipcServer: this.ipcServer,
         posX,
         posY,

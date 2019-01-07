@@ -12,6 +12,7 @@ import Icon from "./icon";
 
 class MainWindow extends EventEmitter {
   constructor({
+    preventClose,
     ipcServer,
     posX,
     posY,
@@ -20,9 +21,9 @@ class MainWindow extends EventEmitter {
   }) {
     super();
 
+    this.preventClose = preventClose; // If window should be hidden instead of closed.
     this.ipcServer = ipcServer;
 
-    this.preventClose = false; // If window should be hidden instead of closed.
     this.allWebContents = {};
 
     this.browserWindow = new ElectronBrowserWindow({
@@ -125,6 +126,9 @@ class MainWindow extends EventEmitter {
     if (this.preventClose) {
       evt.preventDefault();
       this.emit("close-prevented");
+      console.log("[MainWindow] Close prevented");
+    } else {
+      console.log("[MainWindow] Close allowed");
     }
   }
 

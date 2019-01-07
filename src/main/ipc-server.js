@@ -69,7 +69,9 @@ class IpcServer extends EventEmitter {
 
   ensureSites() {
     if (this.preloads) {
-      return Promise.resolve();
+      return new Promise((resolve) => {
+        resolve(values(this.allSites));
+      });
     } else {
       this.preloads = new Preloads({
         preloadsDirPath: joinPath(electronApp.getPath("userData"), "site-preloads")
@@ -87,7 +89,7 @@ class IpcServer extends EventEmitter {
               const siteId = uuidv4();
               const site = { ..._site, id: siteId, index };
 
-              console.log("Setup site", siteId, _site.name, _site.url);
+              console.log("[IpcServer] Setup site", siteId, _site.name, _site.url);
 
               return this.preloads.setupPreload({ site }).then((preloadFilePath) => {
                 site.preloadUrl = `file:///${preloadFilePath}`;

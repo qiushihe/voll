@@ -1,5 +1,7 @@
 import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
+import defer from "lodash/fp/defer";
+import delay from "lodash/fp/delay";
 
 import { showLabelInDock } from "/renderer/selectors/preferences.selector";
 import { getIsAppReady } from "/renderer/selectors/app.selector";
@@ -29,12 +31,17 @@ export default connect(
     ...dispatchProps,
 
     onMount: () => {
-      // TODO: Restore active site
-      dispatchProps.getPreferences()
-        .then(() => dispatchProps.getSites())
-        .then(() => dispatchProps.setAppStates({ states: { isAppReady: true } }))
-        .then(() => dispatchProps.getActiveSiteId())
-        .then(({ activeSiteId }) => dispatchProps.activateSite({ siteId: activeSiteId }));
+      defer(() => {
+        dispatchProps.getPreferences()
+          .then(() => dispatchProps.getSites())
+          .then(() => dispatchProps.getActiveSiteId())
+          .then(({ activeSiteId }) => dispatchProps.activateSite({ siteId: activeSiteId }))
+          .then(() => {
+            delay(1000)(() => {
+              dispatchProps.setAppStates({ states: { isAppReady: true } });
+            });
+          });
+      })
     }
   })
 )(App);
