@@ -9,14 +9,14 @@ class LocalSettings {
 
   read() {
     return new Promise((resolve, reject) => {
-      console.log("Reading local settings from", this.settingsFilePath);
+      console.log("[LocalSettings] Reading local settings from", this.settingsFilePath);
       readFile(this.settingsFilePath, "utf8", (err, data) => {
         if (err) {
-          console.error("Error reading app settings.", err);
+          console.error("[LocalSettings] Error reading app settings.", err);
           reject(err);
         } else {
           const settings = JSON.parse(data);
-          // console.log("Got local settings", JSON.stringify(settings, null, 2));
+          // console.log("[LocalSettings] Got local settings", JSON.stringify(settings, null, 2));
           resolve(settings);
         }
       });
@@ -27,7 +27,7 @@ class LocalSettings {
     return new Promise((resolve, reject) => {
       writeFile(this.settingsFilePath, JSON.stringify(data, null, 2), "utf8", (err) => {
         if (err) {
-          console.error("Error writing app settings.", err);
+          console.error("[LocalSettings] Error writing app settings.", err);
           reject(err);
         } else {
           resolve(data);

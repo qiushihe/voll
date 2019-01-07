@@ -144,7 +144,7 @@ class App {
   }
 
   saveMainWindowSizeAndPosition({ posX, posY, width, height }) {
-    console.log("Save main window size and position", posX, posY, width, height);
+    console.log("[App] Save main window size and position", posX, posY, width, height);
     this.localSettings.updateSettings({ posX, posY, width, height });
   }
 
