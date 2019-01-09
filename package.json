@@ -1,6 +1,6 @@
 {
   "name": "voll",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "scripts": {
     "clean": "shx rm -fr ./dist/* ./build/*",
     "build-dev": "webpack --mode development",
