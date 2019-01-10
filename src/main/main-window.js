@@ -111,6 +111,8 @@ class MainWindow extends EventEmitter {
         electronShell.openExternal(url);
       }
     });
+
+    this.emit("site-web-content-ready", { siteId: site.id, webContentId });
   }
 
   handleMainWindowTitleUpdated(evt) {
