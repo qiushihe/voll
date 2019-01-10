@@ -34,6 +34,7 @@ const IconBadge = styled.div`
   right: 0px;
   min-width: 16px;
   height: 16px;
+  padding: 0 3px;
   align-items: center;
   justify-content: center;
 `;
