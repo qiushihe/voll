@@ -46,13 +46,6 @@ class Site extends PureComponent {
     this.renderIcon = this.renderIcon.bind(this);
   }
 
-  componentDidUpdate({ unreadCount: unreadCountWas }) {
-    const { unreadCount, onUnreadCountChange } = this.props;
-    if (unreadCount !== unreadCountWas) {
-      onUnreadCountChange({ unreadCount });
-    }
-  }
-
   renderIcon() {
     const { iconSrc, unreadCount } = this.props;
 
@@ -91,8 +84,7 @@ Site.propTypes = {
   unreadCount: PropTypes.number,
   showLabel: PropTypes.bool,
   isActive: PropTypes.bool,
-  activateSite: PropTypes.func,
-  onUnreadCountChange: PropTypes.func
+  activateSite: PropTypes.func
 };
 
 Site.defaultProps = {
@@ -101,8 +93,7 @@ Site.defaultProps = {
   unreadCount: 0,
   showLabel: false,
   isActive: false,
-  activateSite: (() => {}),
-  onUnreadCountChange: (() => {})
+  activateSite: (() => {})
 };
 
 export default Site;

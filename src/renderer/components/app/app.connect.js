@@ -8,8 +8,8 @@ import { getIsAppReady } from "/renderer/selectors/app.selector";
 import { isVisible as isSettingsVisible } from "/src/renderer/selectors/settings.selector";
 
 import { setStates as setAppStates } from "/renderer/actions/app.action";
-import { getSites, getActiveSiteId } from "/renderer/actions/sites.action";
-import { getPreferences } from "/renderer/actions/preferences.action";
+import { fetchSites, fetchActiveSiteId } from "/renderer/actions/sites.action";
+import { fetchPreferences } from "/renderer/actions/preferences.action";
 import { activateSite } from "/renderer/actions/webviews.action";
 
 import App from "./app";
@@ -21,9 +21,9 @@ export default connect(
     isSettingsVisible
   }),
   (dispatch) => ({
-    getPreferences: () => dispatch(getPreferences()),
-    getSites: () => dispatch(getSites()),
-    getActiveSiteId: () => dispatch(getActiveSiteId()),
+    fetchPreferences: () => dispatch(fetchPreferences()),
+    fetchSites: () => dispatch(fetchSites()),
+    fetchActiveSiteId: () => dispatch(fetchActiveSiteId()),
     activateSite: ({ siteId }) => dispatch(activateSite({ siteId })),
     setAppStates: ({ states }) => dispatch(setAppStates({ states })),
   }),
@@ -34,9 +34,9 @@ export default connect(
 
     onMount: () => {
       defer(() => {
-        dispatchProps.getPreferences()
-          .then(() => dispatchProps.getSites())
-          .then(() => dispatchProps.getActiveSiteId())
+        dispatchProps.fetchPreferences()
+          .then(() => dispatchProps.fetchSites())
+          .then(() => dispatchProps.fetchActiveSiteId())
           .then(({ activeSiteId }) => dispatchProps.activateSite({ siteId: activeSiteId }))
           .then(() => {
             delay(1000)(() => {
