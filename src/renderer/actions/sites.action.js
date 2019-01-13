@@ -7,7 +7,7 @@ import {
   setSiteUnreadCount as setSiteUnreadCountRequest,
   getActiveSiteId as getActiveSiteIdRequest,
   setActiveSiteId as setActiveSiteIdRequest
-} from "/src/renderer/api/sites.api";
+} from "/renderer/api/sites.api";
 
 import { pickObjectWithAttributes } from "/renderer/helpers/pick.helper";
 

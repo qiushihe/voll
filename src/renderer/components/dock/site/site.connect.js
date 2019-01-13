@@ -6,7 +6,7 @@ import { id, name, iconSrc, unreadCount } from "/renderer/selectors/site.selecto
 import { activeSiteId } from "/renderer/selectors/webviews.selector";
 
 import { activateSite } from "/renderer/actions/webviews.action";
-import { setActiveSiteId, setSiteUnreadCount } from "/src/renderer/actions/sites.action";
+import { setActiveSiteId, setSiteUnreadCount } from "/renderer/actions/sites.action";
 
 import Site from "./site";
 

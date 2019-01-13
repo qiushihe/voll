@@ -2,7 +2,7 @@ import { createAction } from "redux-actions";
 
 import { pickObjectWithAttributes } from "/renderer/helpers/pick.helper";
 
-import { getPreferences as getPreferencesRequest } from "/src/renderer/api/preferences.api";
+import { getPreferences as getPreferencesRequest } from "/renderer/api/preferences.api";
 
 export const PREFERENCES_SET_PREFERENCES = "PREFERENCES_SET_PREFERENCES";
 
