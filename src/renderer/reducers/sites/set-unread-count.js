@@ -1,12 +1,9 @@
-export default (state = {}, { siteId, count }) => {
+export default (state = {}, { siteId, unreadCount }) => {
   const site = state[siteId];
   return !!site
     ? ({
       ...state,
-      [siteId]: {
-        ...site,
-        unreadCount: count
-      }
+      [siteId]: { ...site, unreadCount }
     })
     : state;
 };

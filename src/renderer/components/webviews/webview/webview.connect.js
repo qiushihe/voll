@@ -15,7 +15,7 @@ import { activeSiteId } from "/renderer/selectors/webviews.selector";
 import { showSiteUrl } from "/renderer/selectors/preferences.selector";
 
 import { dispatchIpcAction } from "/renderer/actions/ipc.action";
-import { setSiteWebContent } from "/renderer/actions/sites.action";
+import { updateSiteWebContent } from "/renderer/actions/sites.action";
 
 import Webview from "./webview";
 
@@ -43,7 +43,7 @@ export default connect(
   }),
   (dispatch) => ({
     onIpcAction: ({ siteId, evtName, evtArgs }) => dispatch(dispatchIpcAction({ siteId, evtName, evtArgs })),
-    setSiteWebContent: ({ siteId, webContentId }) => dispatch(setSiteWebContent({ siteId, webContentId }))
+    updateSiteWebContent: ({ siteId, webContentId }) => dispatch(updateSiteWebContent({ siteId, webContentId }))
   }),
   (stateProps, dispatchProps, ownProps) => ({
     ...ownProps,
@@ -61,7 +61,7 @@ export default connect(
       evtArgs
     }),
     onMount: ({ webContentId }) => {
-      dispatchProps.setSiteWebContent({
+      dispatchProps.updateSiteWebContent({
         siteId: stateProps.id,
         webContentId
       });

@@ -2,11 +2,11 @@ import { createAction } from "redux-actions";
 import map from "lodash/fp/map";
 
 import {
-  getSites as getSitesRequest,
-  setSiteWebContent as setSiteWebContentRequest,
-  setSiteUnreadCount as setSiteUnreadCountRequest,
-  getActiveSiteId as getActiveSiteIdRequest,
-  setActiveSiteId as setActiveSiteIdRequest
+  fetchSites as fetchSitesRequest,
+  updateSiteWebContent as updateSiteWebContentRequest,
+  updateSiteUnreadCount as updateSiteUnreadCountRequest,
+  fetchActiveSiteId as fetchActiveSiteIdRequest,
+  updateActiveSiteId as updateActiveSiteIdRequest
 } from "/renderer/api/sites.api";
 
 import { pickObjectWithAttributes } from "/renderer/helpers/pick.helper";
@@ -26,26 +26,26 @@ export const siteAttributes = [
   "preloadUrl"
 ];
 
-export const getSites = () => (dispatch) => {
-  return getSitesRequest().then(({ sites }) => {
+export const fetchSites = () => (dispatch) => {
+  return fetchSitesRequest().then(({ sites }) => {
     map((site) => dispatch(addSite({ site })))(sites);
   });
 };
 
-export const setSiteWebContent = ({ siteId, webContentId }) => () => {
-  return setSiteWebContentRequest({ siteId, webContentId });
+export const updateSiteWebContent = ({ siteId, webContentId }) => () => {
+  return updateSiteWebContentRequest({ siteId, webContentId });
 };
 
-export const setSiteUnreadCount = ({ siteId, unreadCount }) => () => {
-  return setSiteUnreadCountRequest({ siteId, unreadCount });
+export const updateSiteUnreadCount = ({ siteId, unreadCount }) => () => {
+  return updateSiteUnreadCountRequest({ siteId, unreadCount });
 };
 
-export const getActiveSiteId = () => () => {
-  return getActiveSiteIdRequest();
+export const fetchActiveSiteId = () => () => {
+  return fetchActiveSiteIdRequest();
 };
 
-export const setActiveSiteId = ({ activeSiteId }) => () => {
-  return setActiveSiteIdRequest({ activeSiteId });
+export const updateActiveSiteId = ({ activeSiteId }) => () => {
+  return updateActiveSiteIdRequest({ activeSiteId });
 };
 
 export const addSite = createAction(

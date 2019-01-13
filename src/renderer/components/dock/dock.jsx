@@ -3,6 +3,11 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 import map from "lodash/fp/map";
 
+import {
+  FirstPage as FirstPageIcon,
+  LastPage as LastPageIcon
+} from "@material-ui/icons";
+
 import List from "@material-ui/core/List";
 
 import Site from "./site";
@@ -14,6 +19,32 @@ const Base = styled.div`
   box-sizing: border-box;
   background-color: #1d1838;
   box-shadow: inset -10px 0px 10px -10px black;
+`;
+
+const Toggle = styled.div`
+  background-color: black;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  cursor: pointer;
+  opacity: 0.6;
+
+  &:hover {
+    opacity: 1;
+  }
+`;
+
+const overrideIconFontSize = () => `
+  font-size: 16px !important;
+`;
+
+const ExpandIcon = styled(LastPageIcon)`
+  ${overrideIconFontSize()}
+`;
+
+const CollapseIcon = styled(FirstPageIcon)`
+  ${overrideIconFontSize()}
 `;
 
 const SitesList = styled(List)`
@@ -31,10 +62,13 @@ const renderSites = map(renderSite);
 
 class Dock extends PureComponent {
   render() {
-    const { sites } = this.props;
+    const { sites, showLabel, toggleShowLabel } = this.props;
 
     return (
       <Base>
+        <Toggle onClick={toggleShowLabel}>
+          {showLabel ? <CollapseIcon /> : <ExpandIcon />}
+        </Toggle>
         <SitesList disablePadding={true} dense={true}>
           {Children.toArray(renderSites(sites))}
         </SitesList>
@@ -44,11 +78,15 @@ class Dock extends PureComponent {
 }
 
 Dock.propTypes = {
-  sites: PropTypes.array
+  sites: PropTypes.array,
+  showLabel: PropTypes.bool,
+  toggleShowLabel: PropTypes.func
 };
 
 Dock.defaultProps = {
-  sites: []
+  sites: [],
+  showLabel: false,
+  toggleShowLabel: () => ({})
 };
 
 export default Dock;

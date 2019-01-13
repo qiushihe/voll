@@ -20,6 +20,7 @@ class IpcServer extends EventEmitter {
     this.sites = sites;
 
     this.handleGetPreferences = this.handleGetPreferences.bind(this);
+    this.handleSetPreferences = this.handleSetPreferences.bind(this);
     this.handleGetSites = this.handleGetSites.bind(this);
     this.handleSetSiteWebContent = this.handleSetSiteWebContent.bind(this);
     this.handleSetSiteUnreadCount = this.handleSetSiteUnreadCount.bind(this);
@@ -30,6 +31,7 @@ class IpcServer extends EventEmitter {
   start() {
     console.log("[IpcServer] Starting IPC Server ...");
     electronIpcMain.on("get-preferences", this.handleGetPreferences);
+    electronIpcMain.on("set-preferences", this.handleSetPreferences);
     electronIpcMain.on("get-sites", this.handleGetSites);
     electronIpcMain.on("set-site-web-content", this.handleSetSiteWebContent);
     electronIpcMain.on("set-site-unread-count", this.handleSetSiteUnreadCount);
@@ -45,6 +47,25 @@ class IpcServer extends EventEmitter {
     this.settings.ensureReady().then(({ localSettings }) => {
       sendReply(messageId, { preferences: getOr({}, "preferences")(localSettings) });
     });
+  }
+
+  handleSetPreferences(evt, { messageId, preferences }) {
+    const sendReply = getReplier(evt.sender);
+
+    console.log("[IpcServer] Handle", messageId);
+
+    this.settings.ensureReady()
+      .then(({ localSettings }) => {
+        const currentPreferences = getOr({}, "preferences")(localSettings);
+        const newPreferences = {
+          ...currentPreferences,
+          ...(preferences || {})
+        };
+        return this.settings.updateLocalSettings({ preferences: newPreferences });
+      })
+      .then((updatedLocalSettings) => {
+        sendReply(messageId, { preferences: getOr({}, "preferences")(updatedLocalSettings) });
+      });
   }
 
   handleGetSites(evt, { messageId }) {
