@@ -9,7 +9,6 @@ module.exports = {
     ["module-resolver", {
       "root": __dirname,
       "alias": {
-        "/src": resolvePath(__dirname, "src", ""),
         "/main": resolvePath(__dirname, "src", "main"),
         "/renderer": resolvePath(__dirname, "src", "renderer"),
         "/templates": resolvePath(__dirname, "src", "templates")
@@ -20,4 +19,4 @@ module.exports = {
     ["@babel/env"],
     ["@babel/react"]
   ]
-}
+};

@@ -1,21 +1,21 @@
 import { sendIpcRequest } from "./ipc-request";
 
-export const getSites = () => {
+export const fetchSites = () => {
   return sendIpcRequest("get-sites");
 };
 
-export const setSiteWebContent = ({ siteId, webContentId }) => {
+export const updateSiteWebContent = ({ siteId, webContentId }) => {
   return sendIpcRequest("set-site-web-content", { siteId, webContentId });
 };
 
-export const setSiteUnreadCount = ({ siteId, unreadCount }) => {
+export const updateSiteUnreadCount = ({ siteId, unreadCount }) => {
   return sendIpcRequest("set-site-unread-count", { siteId, unreadCount });
 };
 
-export const getActiveSiteId = () => {
+export const fetchActiveSiteId = () => {
   return sendIpcRequest("get-active-site-id");
 };
 
-export const setActiveSiteId = ({ activeSiteId }) => {
+export const updateActiveSiteId = ({ activeSiteId }) => {
   return sendIpcRequest("set-active-site-id", { activeSiteId });
 };
