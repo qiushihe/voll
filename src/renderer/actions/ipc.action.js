@@ -2,6 +2,7 @@ import { createAction } from "redux-actions";
 import pick from "lodash/fp/pick";
 import isFunction from "lodash/fp/isFunction";
 
+import { unreadCount as getUnreadCount } from "/renderer/selectors/site.selector";
 import { updateSiteUnreadCount } from "/renderer/actions/sites.action";
 
 export const IPC_SET_UNREAD_COUNT = "IPC_SET_UNREAD_COUNT";
@@ -13,9 +14,15 @@ export const setUnreadCount = createAction(
   ({ siteId, unreadCount }) => ({ siteId, unreadCount })
 );
 
-export const ipcSetUnreadCount = (siteId, firstArg) => (dispatch) => {
+export const ipcSetUnreadCount = (siteId, firstArg) => (dispatch, getState) => {
+  const currentUnreadCount = getUnreadCount(getState(), { siteId });
   const { count: unreadCount } = pickIpcActionPayload(["count"])(firstArg);
-  return dispatch(updateSiteUnreadCount({ siteId, unreadCount }))
+
+  const updatedUnreadCount = unreadCount !== currentUnreadCount
+    ? dispatch(updateSiteUnreadCount({ siteId, unreadCount }))
+    : Promise.resolve();
+
+  return updatedUnreadCount
     .then(() => dispatch(setUnreadCount({ siteId, unreadCount })));
 };
 
