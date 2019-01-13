@@ -42,8 +42,8 @@ class IpcServer extends EventEmitter {
 
     console.log("[IpcServer] Handle", messageId);
 
-    this.settings.ensureReady().then(({ remoteSettings }) => {
-      sendReply(messageId, { preferences: getOr({}, "preferences")(remoteSettings) });
+    this.settings.ensureReady().then(({ localSettings }) => {
+      sendReply(messageId, { preferences: getOr({}, "preferences")(localSettings) });
     });
   }
 
