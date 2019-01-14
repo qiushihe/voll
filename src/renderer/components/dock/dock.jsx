@@ -25,6 +25,7 @@ const Toggle = styled.div`
   background-color: black;
   color: white;
   display: flex;
+  flex: 0 0 auto;
   flex-direction: column;
   align-items: flex-end;
   cursor: pointer;
