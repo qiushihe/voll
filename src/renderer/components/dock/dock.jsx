@@ -56,6 +56,11 @@ const SitesList = styled(List)`
   overflow-y: auto;
 `;
 
+const BottomIcons = styled.div`
+  display: flex;
+  flex: 0 0 auto;
+`;
+
 const renderSite = ({ id }) => (
   <Site siteId={id} />
 );
@@ -74,9 +79,9 @@ class Dock extends PureComponent {
         <SitesList disablePadding={true} dense={true}>
           {Children.toArray(renderSites(sites))}
         </SitesList>
-        <div>
+        <BottomIcons>
           <Settings />
-        </div>
+        </BottomIcons>
       </Base>
     );
   }
