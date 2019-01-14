@@ -7,11 +7,8 @@ import Switch from "@material-ui/core/Switch";
 import Section from "/renderer/components/settings/section";
 import SectionItem from "/renderer/components/settings/section/item";
 
-import {
-  multipleCallbacks,
-  stateChanger,
-  getCheckedOr
-} from "/renderer/helpers/form.helper";
+import { stateChanger, getCheckedOr } from "/renderer/helpers/form.helper";
+import { parallelCallbacks as inParallel } from "/renderer/helpers/function.helper";
 
 class Appearance extends PureComponent {
   constructor(...args) {
@@ -59,7 +56,7 @@ class Appearance extends PureComponent {
           />
           <Switch
             checked={showLabelInDock}
-            onChange={multipleCallbacks(defaultUncheckedHandler("showLabelInDock"), toggleShowLabelInDock)}
+            onChange={inParallel(defaultUncheckedHandler("showLabelInDock"), toggleShowLabelInDock)}
           />
         </SectionItem>
         <SectionItem>
@@ -69,7 +66,7 @@ class Appearance extends PureComponent {
           />
           <Switch
             checked={showSiteUrl}
-            onChange={multipleCallbacks(defaultUncheckedHandler("showSiteUrl"), toggleShowSiteUrl)}
+            onChange={inParallel(defaultUncheckedHandler("showSiteUrl"), toggleShowSiteUrl)}
           />
         </SectionItem>
         <SectionItem>
@@ -79,7 +76,7 @@ class Appearance extends PureComponent {
           />
           <Switch
             checked={hideUnreadBadge}
-            onChange={multipleCallbacks(defaultUncheckedHandler("hideUnreadBadge"), toggleHideUnreadBadge)}
+            onChange={inParallel(defaultUncheckedHandler("hideUnreadBadge"), toggleHideUnreadBadge)}
           />
         </SectionItem>
         <SectionItem>
@@ -89,7 +86,7 @@ class Appearance extends PureComponent {
           />
           <Switch
             checked={hideWindowOnClose}
-            onChange={multipleCallbacks(defaultUncheckedHandler("hideWindowOnClose"), toggleHideWindowOnClose)}
+            onChange={inParallel(defaultUncheckedHandler("hideWindowOnClose"), toggleHideWindowOnClose)}
           />
         </SectionItem>
       </Section>
