@@ -5,7 +5,7 @@ import delay from "lodash/fp/delay";
 
 import { showLabelInDock } from "/renderer/selectors/preferences.selector";
 import { getIsAppReady } from "/renderer/selectors/app.selector";
-import { isVisible as isSettingsVisible } from "/src/renderer/selectors/settings.selector";
+import { isVisible as isSettingsVisible } from "/renderer/selectors/settings.selector";
 
 import { setStates as setAppStates } from "/renderer/actions/app.action";
 import { fetchSites, fetchActiveSiteId } from "/renderer/actions/sites.action";

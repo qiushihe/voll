@@ -9,5 +9,7 @@ export default connect(
   createStructuredSelector({
     sites
   }),
-  () => ({})
+  () => ({
+    onAddSite: () => ({})
+  })
 )(Sites);

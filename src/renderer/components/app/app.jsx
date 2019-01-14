@@ -7,7 +7,7 @@ import { withTheme } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
 import CssBaseline from "@material-ui/core/CssBaseline";
 
-import { CONTENT, ASIDE, BLOCKING_OVERLAY } from "/src/renderer/helpers/z-index.helper";
+import { CONTENT, ASIDE, BLOCKING_OVERLAY } from "/renderer/helpers/z-index.helper";
 import Dock from "/renderer/components/dock";
 import Webviews from "/renderer/components/webviews";
 import Settings from "/renderer/components/settings";

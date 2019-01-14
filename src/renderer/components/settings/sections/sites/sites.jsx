@@ -5,8 +5,8 @@ import map from "lodash/fp/map";
 import ListItemText from "@material-ui/core/ListItemText";
 import { Add as AddIcon } from "@material-ui/icons";
 
-import Section from "/src/renderer/components/settings/section";
-import SectionItem from "/src/renderer/components/settings/section/item";
+import Section from "/renderer/components/settings/section";
+import SectionItem from "/renderer/components/settings/section/item";
 
 import Site from "./site";
 

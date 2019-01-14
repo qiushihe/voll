@@ -1,7 +1,7 @@
 import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 
-import { hide } from "/src/renderer/actions/settings.action";
+import { hide } from "/renderer/actions/settings.action";
 
 import Settings from "./settings";
 

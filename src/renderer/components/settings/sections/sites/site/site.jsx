@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import ListItemText from "@material-ui/core/ListItemText";
 import { Edit as EditIcon } from "@material-ui/icons";
 
-import SectionItem from "/src/renderer/components/settings/section/item";
+import SectionItem from "/renderer/components/settings/section/item";
 
 class Site extends PureComponent {
   render() {

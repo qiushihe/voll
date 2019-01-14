@@ -1,8 +1,8 @@
 import { connect } from "react-redux";
 
-import { hideSiteInfo } from "/src/renderer/actions/settings.action";
+import { hideSiteInfo } from "/renderer/actions/settings.action";
 
-import { showInfoSiteId, showingSiteInfo } from "/src/renderer/selectors/settings.selector";
+import { showInfoSiteId, showingSiteInfo } from "/renderer/selectors/settings.selector";
 import {
   name,
   url,
