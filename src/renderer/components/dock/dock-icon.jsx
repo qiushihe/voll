@@ -12,6 +12,7 @@ const overrideSelectedBackgroundColor = () => (`
 const Base = styled((props) => (
   <ListItem classes={{ selected: "selected" }} {...props} />
 ))`
+  flex: 0 0 auto;
   cursor: pointer;
   color: white;
   background-color: transparent;
@@ -29,7 +30,6 @@ const Base = styled((props) => (
 
 const Icon = styled.div`
   display: flex;
-  flex: 0 0 auto;
   width: 42px;
   height: 42px;
   align-items: center;
