@@ -10,7 +10,7 @@ import { Close as CloseIcon } from "@material-ui/icons";
 
 import { OVERLAY } from "/renderer/helpers/z-index.helper";
 
-import AppearanceSection from "./sections/appearance/appearance";
+import AppearanceSection from "./sections/appearance";
 import SitesSection from "./sections/sites";
 import RemoteSection from "./sections/remote";
 
@@ -28,10 +28,15 @@ const Base = styled.div`
   z-index: ${OVERLAY};
 `;
 
+const overrideFontSize = () => `
+  font-size: 16px !important;
+`;
+
 const HeaderText = styled((props) => (
   <Typography {...props} variant="h6" color="inherit" />
 ))`
   flex-grow: 1;
+  ${overrideFontSize()}
 `;
 
 const ContentWrapper = styled.div`

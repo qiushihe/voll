@@ -64,7 +64,9 @@ class IpcServer extends EventEmitter {
         return this.settings.updateLocalSettings({ preferences: newPreferences });
       })
       .then((updatedLocalSettings) => {
-        sendReply(messageId, { preferences: getOr({}, "preferences")(updatedLocalSettings) });
+        const updatedPreferences = getOr({}, "preferences")(updatedLocalSettings);
+        this.emit("set-preferences", { preferences: updatedPreferences });
+        sendReply(messageId, { preferences: updatedPreferences });
       });
   }
 

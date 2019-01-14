@@ -1,7 +1,7 @@
 import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 
-import { showLabelInDock } from "/renderer/selectors/preferences.selector";
+import { showLabelInDock, hideUnreadBadge } from "/renderer/selectors/preferences.selector";
 import { id, name, iconSrc, unreadCount } from "/renderer/selectors/site.selector";
 import { activeSiteId } from "/renderer/selectors/webviews.selector";
 
@@ -17,6 +17,7 @@ export default connect(
     iconSrc,
     unreadCount,
     showLabel: showLabelInDock,
+    hideBadge: hideUnreadBadge,
     activeSiteId
   }),
   (dispatch) => ({

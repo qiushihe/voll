@@ -12,6 +12,7 @@ export const PREFERENCES_SET_PREFERENCES = "PREFERENCES_SET_PREFERENCES";
 export const preferencesAttributes = [
   "showLabelInDock",
   "showSiteUrl",
+  "hideUnreadBadge",
   "hideWindowOnClose"
 ];
 

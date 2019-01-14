@@ -1,6 +1,7 @@
 import { readFile } from "graceful-fs";
 
 import debounce from "lodash/fp/debounce";
+import getOr from "lodash/fp/getOr";
 
 import {
   app as electronApp,
@@ -72,16 +73,20 @@ class App {
 
   createMainWindow() {
     return this.settings.ensureReady().then(({
-      localSettings: { posX, posY, width, height }
+      localSettings: {
+        posX, posY, width, height,
+        preferences
+      }
     }) => {
       this.mainWindow = new MainWindow({
-        preventClose: false, // TODO: Read from remote settings
         ipcServer: this.ipcServer,
         posX,
         posY,
         width,
         height
       });
+
+      this.mainWindow.setPreventClose(getOr(false, "hideWindowOnClose")(preferences));
 
       this.mainWindow.on("site-web-content-ready", this.handleMainWindowSiteWebContentReady);
       this.mainWindow.on("close-prevented", this.handleMainWindowClosePrevented);

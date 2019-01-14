@@ -19,6 +19,7 @@ const StatusBar = styled.div`
   overflow: hidden;
   padding: 3px 6px;
   border-bottom: 1px solid #efefef;
+  font-size: 12px;
 `;
 
 class Webview extends PureComponent {

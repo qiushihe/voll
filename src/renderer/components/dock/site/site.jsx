@@ -47,7 +47,7 @@ class Site extends PureComponent {
   }
 
   renderIcon() {
-    const { iconSrc, unreadCount } = this.props;
+    const { hideBadge, iconSrc, unreadCount } = this.props;
 
     return Children.toArray([
       isEmpty(iconSrc) ? (
@@ -55,7 +55,7 @@ class Site extends PureComponent {
       ) : (
         <IconImage src={iconSrc} />
       ),
-      unreadCount > 0 ? (
+      (unreadCount > 0 && !hideBadge) ? (
         <IconBadge>
           {unreadCount > 999 ? "999+" : unreadCount}
         </IconBadge>
@@ -83,6 +83,7 @@ Site.propTypes = {
   iconSrc: PropTypes.string,
   unreadCount: PropTypes.number,
   showLabel: PropTypes.bool,
+  hideBadge: PropTypes.bool,
   isActive: PropTypes.bool,
   activateSite: PropTypes.func
 };
@@ -92,6 +93,7 @@ Site.defaultProps = {
   iconSrc: null,
   unreadCount: 0,
   showLabel: false,
+  hideBadge: false,
   isActive: false,
   activateSite: (() => {})
 };

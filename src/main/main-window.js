@@ -6,6 +6,8 @@ import {
 
 import EventEmitter from "events";
 
+import getOr from "lodash/fp/getOr";
+
 import { getInternalUrlChecker } from "/main/url-checker";
 
 import Icon from "./icon";
@@ -21,9 +23,9 @@ class MainWindow extends EventEmitter {
   }) {
     super();
 
-    this.preventClose = preventClose; // If window should be hidden instead of closed.
     this.ipcServer = ipcServer;
 
+    this.preventClose = false; // If window should be hidden instead of closed.
     this.allWebContents = {};
 
     this.browserWindow = new ElectronBrowserWindow({
@@ -56,6 +58,7 @@ class MainWindow extends EventEmitter {
 
     this.handleElectronAppWebContentsCreated = this.handleElectronAppWebContentsCreated.bind(this);
     this.handleSetSiteWebContent = this.handleSetSiteWebContent.bind(this);
+    this.handleSetPreferences = this.handleSetPreferences.bind(this);
 
     this.browserWindow.on("page-title-updated", this.handleMainWindowTitleUpdated);
     this.browserWindow.on("resize", this.handleMainWindowResizeMove);
@@ -65,6 +68,7 @@ class MainWindow extends EventEmitter {
 
     electronApp.on("web-contents-created", this.handleElectronAppWebContentsCreated);
     this.ipcServer.on("set-site-web-content", this.handleSetSiteWebContent);
+    this.ipcServer.on("set-preferences", this.handleSetPreferences);
   }
 
   show() {
@@ -115,6 +119,13 @@ class MainWindow extends EventEmitter {
     this.emit("site-web-content-ready", { siteId: site.id, webContentId });
   }
 
+  handleSetPreferences({ preferences }) {
+    const hideWindowOnClose = getOr(false, "hideWindowOnClose")(preferences);
+    if (hideWindowOnClose !== this.preventClose) {
+      this.setPreventClose(hideWindowOnClose);
+    }
+  }
+
   handleMainWindowTitleUpdated(evt) {
     evt.preventDefault();
   }
@@ -143,6 +154,7 @@ class MainWindow extends EventEmitter {
 
     electronApp.removeListener("web-contents-created", this.handleElectronAppWebContentsCreated);
     this.ipcServer.removeListener("set-site-web-content", this.handleSetSiteWebContent);
+    this.ipcServer.removeListener("set-preferences", this.handleSetPreferences);
 
     this.allWebContents = {};
     this.emit("closed");
