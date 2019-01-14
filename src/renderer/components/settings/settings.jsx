@@ -7,15 +7,12 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import { Close as CloseIcon } from "@material-ui/icons";
-import ListItemText from "@material-ui/core/ListItemText";
-import Switch from "@material-ui/core/Switch";
 
-import { OVERLAY } from "/src/renderer/helpers/z-index.helper";
+import { OVERLAY } from "/renderer/helpers/z-index.helper";
 
-import Section from "./section";
-import SectionItem from "./section/item";
-
+import AppearanceSection from "./sections/appearance/appearance";
 import SitesSection from "./sections/sites";
+import RemoteSection from "./sections/remote";
 
 import SiteInfoDialog from "./site-info-dialog";
 
@@ -58,7 +55,7 @@ class Settings extends PureComponent {
     return (
       <Base>
         <AppBar position="relative">
-          <Toolbar>
+          <Toolbar variant="dense">
             <HeaderText>
               Settings
             </HeaderText>
@@ -69,43 +66,9 @@ class Settings extends PureComponent {
         </AppBar>
         <ContentWrapper>
           <ContentInner>
+            <AppearanceSection />
             <SitesSection />
-            <Section title="Appearance (non-functional)">
-              <SectionItem>
-                <ListItemText
-                  primary="Expanded Dock"
-                  secondary="Show sites names in addition to icons in the Dock"
-                />
-                <Switch />
-              </SectionItem>
-              <SectionItem>
-                <ListItemText
-                  primary="Show Unread Badge"
-                  secondary="Show unread badge for sites that support/report unread counts"
-                />
-                <Switch />
-              </SectionItem>
-            </Section>
-            <Section title="Remote Settings (non-functional)">
-              <SectionItem>
-                <ListItemText
-                  primary="Settings JSON URL"
-                  secondary="https://..."
-                />
-              </SectionItem>
-              <SectionItem>
-                <ListItemText
-                  primary="Gist Access Token"
-                  secondary="XXXXXXXX-XXXX-XXXX-..."
-                />
-              </SectionItem>
-              <SectionItem>
-                <ListItemText
-                  primary="Something Else"
-                  secondary="There must be something else I've forgotten ..."
-                />
-              </SectionItem>
-            </Section>
+            <RemoteSection />
           </ContentInner>
         </ContentWrapper>
         <SiteInfoDialog />
