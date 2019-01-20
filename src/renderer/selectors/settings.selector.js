@@ -10,6 +10,16 @@ export const isVisible = createSelector(
   get("isVisible")
 );
 
+export const settingsJsonUrl = createSelector(
+  settings,
+  get("settingsJsonUrl")
+);
+
+export const gistAccessToken = createSelector(
+  settings,
+  get("gistAccessToken")
+);
+
 export const showInfoSiteId = createSelector(
   settings,
   get("showInfoSiteId")

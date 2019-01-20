@@ -10,6 +10,7 @@ import { isVisible as isSettingsVisible } from "/renderer/selectors/settings.sel
 import { setStates as setAppStates } from "/renderer/actions/app.action";
 import { fetchSites, fetchActiveSiteId } from "/renderer/actions/sites.action";
 import { fetchPreferences } from "/renderer/actions/preferences.action";
+import { fetchSettings } from "/renderer/actions/settings.action";
 import { activateSite } from "/renderer/actions/webviews.action";
 
 import App from "./app";
@@ -21,6 +22,7 @@ export default connect(
     isSettingsVisible
   }),
   (dispatch) => ({
+    fetchSettings: () => dispatch(fetchSettings()),
     fetchPreferences: () => dispatch(fetchPreferences()),
     fetchSites: () => dispatch(fetchSites()),
     fetchActiveSiteId: () => dispatch(fetchActiveSiteId()),
@@ -34,7 +36,9 @@ export default connect(
 
     onMount: () => {
       defer(() => {
-        dispatchProps.fetchPreferences()
+        Promise.resolve()
+          .then(() => dispatchProps.fetchSettings())
+          .then(() => dispatchProps.fetchPreferences())
           .then(() => dispatchProps.fetchSites())
           .then(() => dispatchProps.fetchActiveSiteId())
           .then(({ activeSiteId }) => dispatchProps.activateSite({ siteId: activeSiteId }))

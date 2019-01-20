@@ -21,6 +21,8 @@ class IpcServer extends EventEmitter {
 
     this.handleGetPreferences = this.handleGetPreferences.bind(this);
     this.handleSetPreferences = this.handleSetPreferences.bind(this);
+    this.handleGetSettings = this.handleGetSettings.bind(this);
+    this.handleSetSettings = this.handleSetSettings.bind(this);
     this.handleGetSites = this.handleGetSites.bind(this);
     this.handleSetSiteWebContent = this.handleSetSiteWebContent.bind(this);
     this.handleSetSiteUnreadCount = this.handleSetSiteUnreadCount.bind(this);
@@ -32,6 +34,8 @@ class IpcServer extends EventEmitter {
     console.log("[IpcServer] Starting IPC Server ...");
     electronIpcMain.on("get-preferences", this.handleGetPreferences);
     electronIpcMain.on("set-preferences", this.handleSetPreferences);
+    electronIpcMain.on("get-settings", this.handleGetSettings);
+    electronIpcMain.on("set-settings", this.handleSetSettings);
     electronIpcMain.on("get-sites", this.handleGetSites);
     electronIpcMain.on("set-site-web-content", this.handleSetSiteWebContent);
     electronIpcMain.on("set-site-unread-count", this.handleSetSiteUnreadCount);
@@ -67,6 +71,46 @@ class IpcServer extends EventEmitter {
         const updatedPreferences = getOr({}, "preferences")(updatedLocalSettings);
         this.emit("set-preferences", { preferences: updatedPreferences });
         sendReply(messageId, { preferences: updatedPreferences });
+      });
+  }
+
+  handleGetSettings(evt, { messageId }) {
+    const sendReply = getReplier(evt.sender);
+
+    console.log("[IpcServer] Handle", messageId);
+
+    this.settings.ensureReady().then(({ localSettings }) => {
+      sendReply(messageId, {
+        settings: {
+          settingsJsonUrl: getOr("", "settingsJsonUrl")(localSettings),
+          gistAccessToken: getOr("", "gistAccessToken")(localSettings)
+        }
+      });
+    });
+  }
+
+  handleSetSettings(evt, { messageId, settings }) {
+    const sendReply = getReplier(evt.sender);
+
+    console.log("[IpcServer] Handle", messageId);
+
+    this.settings.ensureReady()
+      .then(({ localSettings }) => {
+        const currentSettingsJsonUrl = getOr("", "settingsJsonUrl")(localSettings);
+        const currentGistAccessToken = getOr("", "gistAccessToken")(localSettings);
+
+        return this.settings.updateLocalSettings({
+          settingsJsonUrl: getOr(currentSettingsJsonUrl, "settingsJsonUrl")(settings),
+          gistAccessToken: getOr(currentGistAccessToken, "gistAccessToken")(settings)
+        });
+      })
+      .then((updatedLocalSettings) => {
+        const updatedSettings = {
+          settingsJsonUrl: getOr("", "settingsJsonUrl")(updatedLocalSettings),
+          gistAccessToken: getOr("", "gistAccessToken")(updatedLocalSettings)
+        };
+        this.emit("set-settings", updatedSettings);
+        sendReply(messageId, { settings: updatedSettings });
       });
   }
 
