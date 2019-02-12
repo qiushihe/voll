@@ -24,4 +24,32 @@ class TrayIcon extends EventEmitter {
   }
 }
 
+TrayIcon.create = (options) => {
+  let retryCount = 0;
+
+  const tryCreateTrayIcon = () => new Promise((resolve, reject) => {
+    console.log("[TrayIcon] Trying to create TrayIcon ...");
+    try {
+      resolve(new TrayIcon(options));
+    } catch (err) {
+      if (
+        err instanceof TypeError &&
+        err.message.match(/Error\sprocessing\sargument\sat\sindex/) &&
+        retryCount < 5
+      ) {
+        console.log("[TrayIcon] Attempting to retry from TypeError ...");
+        retryCount += 1;
+
+        setTimeout(() => {
+          tryCreateTrayIcon().then(resolve);
+        }, 1000);
+      } else {
+        reject(err);
+      }
+    }
+  });
+
+  return tryCreateTrayIcon();
+};
+
 export default TrayIcon;

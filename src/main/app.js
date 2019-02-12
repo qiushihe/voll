@@ -91,13 +91,15 @@ class App {
   }
 
   createTrayIcon() {
-    this.trayIcon = new TrayIcon({ iconPath: Icon.getTrayIconPath() });
+    TrayIcon.create({ iconPath: Icon.getTrayIconPath() }).then((trayIcon) => {
+      this.trayIcon = trayIcon;
 
-    this.trayIcon.on("show-main-window", () => {
-      this.activate();
+      this.trayIcon.on("show-main-window", () => {
+        this.activate();
+      });
+
+      this.trayIcon.on("really-quit", this.reallyQuit);
     });
-
-    this.trayIcon.on("really-quit", this.reallyQuit);
   }
 
   activate() {
