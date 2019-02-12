@@ -1,3 +1,4 @@
+var React = {}; // Skip babel provide-modules
 var ipcRenderer = require("electron").ipcRenderer;
 
 window.__sendToVoll = function () {
