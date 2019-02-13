@@ -24,6 +24,10 @@ class Spell {
     });
   }
 
+  getLanguage() {
+    return this.language;
+  }
+
   ensureReady() {
     return this.dictionaryReady;
   }

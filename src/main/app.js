@@ -23,12 +23,13 @@ class App {
 
     this.settings = new Settings();
 
-    this.sites = new Sites({
-      settings: this.settings
-    });
-
     this.spell = new Spell({
       language: "en-US"
+    });
+
+    this.sites = new Sites({
+      settings: this.settings,
+      spell: this.spell
     });
 
     this.ipcServer = new IpcServer({

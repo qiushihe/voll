@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 var webFrame = Electron.webFrame;
 
-webFrame.setSpellCheckProvider("en-US", false, {
+webFrame.setSpellCheckProvider("$$$SPELL_CHECK_LANGUAGE$$$", false, {
   spellCheck: function(word) {
     var result = ipcRenderer.sendSync("sync-check-spell", word);
     if (result) {
