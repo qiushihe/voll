@@ -5,19 +5,19 @@ import { ipcMain as electronIpcMain } from "electron";
 import flow from "lodash/fp/flow";
 import get from "lodash/fp/get";
 import getOr from "lodash/fp/getOr";
-import map from "lodash/fp/map";
+import isEmpty from "lodash/fp/isEmpty";
 import sortBy from "lodash/fp/sortBy";
 import first from "lodash/fp/first";
-import sum from "lodash/fp/sum";
 
 const getReplier = (sender) => (...args) => sender.send(...args);
 
 class IpcServer extends EventEmitter {
-  constructor({ settings, sites }) {
+  constructor({ settings, sites, spell }) {
     super();
 
     this.settings = settings;
     this.sites = sites;
+    this.spell = spell;
 
     this.handleGetPreferences = this.handleGetPreferences.bind(this);
     this.handleSetPreferences = this.handleSetPreferences.bind(this);
@@ -26,10 +26,18 @@ class IpcServer extends EventEmitter {
     this.handleSetSiteUnreadCount = this.handleSetSiteUnreadCount.bind(this);
     this.handleGetActiveSiteId = this.handleGetActiveSiteId.bind(this);
     this.handleSetActiveSiteId = this.handleSetActiveSiteId.bind(this);
+
+    this.handleSyncCheckSpell = this.handleSyncCheckSpell.bind(this);
   }
 
   start() {
     console.log("[IpcServer] Starting IPC Server ...");
+
+    this.dictionary = null;
+    this.spell.ensureReady().then((dictionary) => {
+      this.dictionary = dictionary;
+    });
+
     electronIpcMain.on("get-preferences", this.handleGetPreferences);
     electronIpcMain.on("set-preferences", this.handleSetPreferences);
     electronIpcMain.on("get-sites", this.handleGetSites);
@@ -37,6 +45,8 @@ class IpcServer extends EventEmitter {
     electronIpcMain.on("set-site-unread-count", this.handleSetSiteUnreadCount);
     electronIpcMain.on("get-active-site-id", this.handleGetActiveSiteId);
     electronIpcMain.on("set-active-site-id", this.handleSetActiveSiteId);
+
+    electronIpcMain.on("sync-check-spell", this.handleSyncCheckSpell);
   }
 
   handleGetPreferences(evt, { messageId }) {
@@ -133,6 +143,21 @@ class IpcServer extends EventEmitter {
     });
 
     sendReply(messageId);
+  }
+
+  handleSyncCheckSpell(evt, word) {
+    // Don't log the spell check request because it happens for every single individual words.
+    // console.log("[IpcServer] Handle check-spell", word);
+
+    if (this.dictionary) {
+      evt.returnValue = {
+        isInDictionary: this.dictionary.spellCheck(word)
+      };
+    } else {
+      evt.returnValue = {
+        isInDictionary: true
+      };
+    }
   }
 }
 

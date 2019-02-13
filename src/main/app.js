@@ -1,5 +1,3 @@
-import { readFile } from "graceful-fs";
-
 import debounce from "lodash/fp/debounce";
 
 import {
@@ -16,6 +14,7 @@ import MainWindow from "./main-window";
 import TrayIcon from "./tray-icon";
 import Settings from "./settings";
 import Sites from "./sites";
+import Spell from "./spell";
 
 class App {
   constructor() {
@@ -28,9 +27,14 @@ class App {
       settings: this.settings
     });
 
+    this.spell = new Spell({
+      language: "en-US"
+    });
+
     this.ipcServer = new IpcServer({
       settings: this.settings,
-      sites: this.sites
+      sites: this.sites,
+      spell: this.spell
     });
 
     this.handleElectronAppSecondInstance = this.handleElectronAppSecondInstance.bind(this);
