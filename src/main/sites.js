@@ -18,10 +18,11 @@ const uncappedMap = map.convert({ cap: false });
 const isFinitePositiveNumber = (value) => (isNumber(value) && isFinite(value) && value >= 0);
 
 class Sites extends EventEmitter {
-  constructor({ settings }) {
+  constructor({ settings, spell }) {
     super();
 
     this.settings = settings;
+    this.spell = spell;
     this.allSites = {};
   }
 
@@ -32,7 +33,8 @@ class Sites extends EventEmitter {
       });
     } else {
       this.preloads = new Preloads({
-        preloadsDirPath: joinPath(electronApp.getPath("userData"), "site-preloads")
+        preloadsDirPath: joinPath(electronApp.getPath("userData"), "site-preloads"),
+        spellCheckLanguage: this.spell.getLanguage()
       });
 
       return this.preloads.preparePreloads()

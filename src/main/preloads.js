@@ -3,11 +3,12 @@ import { lstat, mkdir, writeFile } from "graceful-fs";
 import rimraf from "rimraf";
 import compact from "lodash/fp/compact";
 
-import PRELOAD_CORE from "raw-loader!/templates/preload.js.core";
+import PRELOAD_CORE from "raw-loader!/templates/preload-core.js";
 
 class Preloads {
-  constructor({ preloadsDirPath }) {
+  constructor({ preloadsDirPath, spellCheckLanguage }) {
     this.preloadsDirPath = preloadsDirPath;
+    this.spellCheckLanguage = spellCheckLanguage;
   }
 
   preparePreloads() {
@@ -36,10 +37,14 @@ class Preloads {
     const { id: siteId, preloadCode } = site;
     const preloadFilePath = joinPath(this.preloadsDirPath, `${siteId}.js`);
 
+    const preloadFileContent = compact([PRELOAD_CORE, preloadCode])
+      .join("\n")
+      .replace("$$$SPELL_CHECK_LANGUAGE$$$", this.spellCheckLanguage);
+
     return new Promise((resolve, reject) => {
       writeFile(
         preloadFilePath,
-        compact([PRELOAD_CORE, preloadCode]).join("\n"),
+        preloadFileContent,
         "utf8",
         (err) => {
           if (err) {

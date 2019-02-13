@@ -52,6 +52,7 @@
     "run-script-os": "^1.0.5",
     "shelljs": "^0.8.3",
     "shx": "^0.3.2",
+    "simple-spellchecker": "^0.9.7",
     "style-loader": "^0.23.1",
     "styled-components": "^4.1.2",
     "typeface-roboto": "0.0.54",

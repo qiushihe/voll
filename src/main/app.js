@@ -1,5 +1,3 @@
-import { readFile } from "graceful-fs";
-
 import debounce from "lodash/fp/debounce";
 import getOr from "lodash/fp/getOr";
 
@@ -17,6 +15,7 @@ import MainWindow from "./main-window";
 import TrayIcon from "./tray-icon";
 import Settings from "./settings";
 import Sites from "./sites";
+import Spell from "./spell";
 
 class App {
   constructor() {
@@ -25,13 +24,19 @@ class App {
 
     this.settings = new Settings();
 
+    this.spell = new Spell({
+      language: "en-US"
+    });
+
     this.sites = new Sites({
-      settings: this.settings
+      settings: this.settings,
+      spell: this.spell
     });
 
     this.ipcServer = new IpcServer({
       settings: this.settings,
-      sites: this.sites
+      sites: this.sites,
+      spell: this.spell
     });
 
     this.handleElectronAppSecondInstance = this.handleElectronAppSecondInstance.bind(this);
@@ -96,13 +101,15 @@ class App {
   }
 
   createTrayIcon() {
-    this.trayIcon = new TrayIcon({ iconPath: Icon.getTrayIconPath() });
+    TrayIcon.create({ iconPath: Icon.getTrayIconPath() }).then((trayIcon) => {
+      this.trayIcon = trayIcon;
 
-    this.trayIcon.on("show-main-window", () => {
-      this.activate();
+      this.trayIcon.on("show-main-window", () => {
+        this.activate();
+      });
+
+      this.trayIcon.on("really-quit", this.reallyQuit);
     });
-
-    this.trayIcon.on("really-quit", this.reallyQuit);
   }
 
   activate() {
