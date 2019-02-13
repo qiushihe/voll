@@ -38,6 +38,8 @@ class Webview extends PureComponent {
     const webview = this.webviewRef.current;
     const webContents = webview.getWebContents();
 
+    // TODO: Possibly clone/rewrite `electron-context-menu` to add
+    // the ability to support spell check suggestions.
     electronContextMenu({
       window: webview,
       showCopyImageAddress: true,
