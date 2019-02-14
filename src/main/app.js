@@ -62,6 +62,7 @@ class App {
     this.ipcServer.start();
 
     contextMenu({
+      spellChecker: this.spell,
       showCopyImageAddress: true,
       showSaveImageAs: true,
       showInspectElement: true

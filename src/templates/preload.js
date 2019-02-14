@@ -16,7 +16,7 @@ webFrame.setSpellCheckProvider("$$$SPELL_CHECK_LANGUAGE$$$", false, {
   spellCheck: function (word) {
     var result = ipcRenderer.sendSync("sync-check-spell", word);
     if (result) {
-      return result.isInDictionary;
+      return !result.misspelled;
     } else {
       return true;
     }

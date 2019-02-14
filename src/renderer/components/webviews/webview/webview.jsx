@@ -2,6 +2,9 @@ import { PureComponent, createRef } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 
+var Electron = require("electron");
+var ipcRenderer = Electron.ipcRenderer;
+
 import contextMenu from "/common/context-menu";
 
 const Base = styled.div`
@@ -41,6 +44,9 @@ class Webview extends PureComponent {
 
     contextMenu({
       window: webview,
+      spellChecker: {
+        checkSpell: (word) => ipcRenderer.sendSync("sync-check-spell", word)
+      },
       showCopyImageAddress: true,
       showSaveImageAs: true,
       showInspectElement: true

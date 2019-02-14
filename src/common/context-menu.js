@@ -1,44 +1,99 @@
 import electron from "electron";
 import { download } from "electron-dl";
+import get from "lodash/fp/get";
+import flow from "lodash/fp/flow";
+import map from "lodash/fp/map";
+import isEmpty from "lodash/fp/isEmpty";
+import isFunction from "lodash/fp/isFunction";
 
-const webContents = win => win.webContents || win.getWebContents();
+const getMaybeRemoteBrowserWindow = () => electron.BrowserWindow || electron.remote.BrowserWindow;
 
-const create = (win, options) => {
-  webContents(win).on("context-menu", (event, props) => {
-    if (typeof options.shouldShowMenu === "function" && options.shouldShowMenu(event, props) === false) {
+const getMaybeRemoteApp = () => electron.app || electron.remote.app;
+
+const getWindowWebContent = win => win.webContents || win.getWebContents();
+
+const withSecondArg = (func) => (_, secondArg) => func(secondArg);
+
+const contextMenuCreator = (options) => (win) => {
+  const shouldShowMenu = isFunction(options.shouldShowMenu)
+    ? options.shouldShowMenu
+    : () => true;
+
+  const checkSpell = get("spellChecker.checkSpell")(options);
+
+  const windowWebContent = getWindowWebContent(win);
+
+  getWindowWebContent(win).on("context-menu", (event, props) => {
+    if (shouldShowMenu(event, props) === false) {
       return;
     }
 
-    const {editFlags} = props;
-    const hasText = props.selectionText.trim().length > 0;
-    const can = type => editFlags[`can${type}`] && hasText;
+    const { editFlags } = props;
+
+    const misspelledWord = props.misspelledWord;
+    let misspelledSuggestionItems = [];
+
+    if (!isEmpty(misspelledWord) && checkSpell) {
+      const spellCheckResult = checkSpell(misspelledWord);
+      if (spellCheckResult.misspelled) {
+        misspelledSuggestionItems = flow([
+          map((suggestion) => ({
+            label: suggestion,
+            click: () => windowWebContent.replaceMisspelling(suggestion)
+          })),
+          (items) => (
+            !isEmpty(items)
+              ? [...items, { type: "separator" }]
+              : items
+          )
+        ])(spellCheckResult.suggestions);
+      }
+    }
+
+    const isEditable = props.isEditable;
+    const selectedText = props.selectionText.trim().length > 0;
+    let textActionItems = [];
+
+    if (isEditable && selectedText) {
+      textActionItems = [
+        ...textActionItems,
+        {
+          label: "Cut",
+          accelerator: "CommandOrControl+X",
+          enabled: editFlags.canCut,
+          click: () => windowWebContent.cut()
+        },
+        {
+          label: "Copy",
+          accelerator: "CommandOrControl+C",
+          enabled: editFlags.canCopy,
+          click: () => windowWebContent.copy()
+        }
+      ];
+    }
+
+    if (isEditable) {
+      textActionItems = [
+        ...textActionItems,
+        {
+          label: "Paste",
+          accelerator: "CommandOrControl+V",
+          enabled: editFlags.canPaste,
+          click: () => windowWebContent.paste()
+        }
+      ];
+    }
+
+    if (!isEmpty(textActionItems)) {
+      textActionItems = [
+        ...textActionItems,
+        { type: "separator" }
+      ];
+    }
 
     let menuTpl = [
-      { type: "separator" },
-      {
-        id: "cut",
-        label: "Cut",
-        // Needed because of macOS limitation:
-        // https://github.com/electron/electron/issues/5860
-        role: can("Cut") ? "cut" : "",
-        enabled: can("Cut"),
-        visible: props.isEditable
-      },
-      {
-        id: "copy",
-        label: "Copy",
-        role: can("Copy") ? "copy" : "",
-        enabled: can("Copy"),
-        visible: props.isEditable || hasText
-      },
-      {
-        id: "paste",
-        label: "Paste",
-        role: can("Paste") ? "paste" : "",
-        enabled: editFlags.canPaste,
-        visible: props.isEditable
-      },
-      { type: "separator" }
+      ...misspelledSuggestionItems,
+      ...textActionItems,
     ];
 
     if (props.mediaType === 'image') {
@@ -116,8 +171,8 @@ const create = (win, options) => {
           label: "Inspect Element",
           click: () => {
             win.inspectElement(props.x, props.y);
-            if (webContents(win).isDevToolsOpened()) {
-              webContents(win).devToolsWebContents.focus();
+            if (getWindowWebContent(win).isDevToolsOpened()) {
+              getWindowWebContent(win).devToolsWebContents.focus();
             }
           }
         },
@@ -163,26 +218,25 @@ const delUnusedElements = (menuTpl) => {
 };
 
 export default (options = {}) => {
+  const createContextMenu = contextMenuCreator(options);
+
   if (options.window) {
-    const win = options.window;
-    const wc = webContents(win);
+    const _window = options.window;
+    const webContent = getWindowWebContent(_window);
 
     // When window is a webview that has not yet finished loading webContents is not available
-    if (wc === undefined) {
-      win.addEventListener("dom-ready", () => {
-        create(win, options);
-      }, {once: true});
-      return;
+    if (webContent === undefined) {
+      _window.addEventListener("dom-ready", () => createContextMenu(_window), { once: true });
+    } else {
+      createContextMenu(_window);
     }
+  } else {
+    map(createContextMenu)(getMaybeRemoteBrowserWindow().getAllWindows());
 
-    return create(win, options);
+    getMaybeRemoteApp().on(
+      "browser-window-created",
+      // The first argument is the event and the second argument is the window.
+      withSecondArg(createContextMenu)
+    );
   }
-
-  for (const win of (electron.BrowserWindow || electron.remote.BrowserWindow).getAllWindows()) {
-    create(win, options);
-  }
-
-  (electron.app || electron.remote.app).on("browser-window-created", (event, win) => {
-    create(win, options);
-  });
 };
