@@ -5,7 +5,7 @@ import {
   Menu as ElectronMenu
 } from "electron";
 
-import electronContextMenu from "electron-context-menu";
+import contextMenu from "/common/context-menu";
 
 import IpcServer from "./ipc-server";
 import Icon from "./icon";
@@ -61,7 +61,7 @@ class App {
 
     this.ipcServer.start();
 
-    electronContextMenu({
+    contextMenu({
       showCopyImageAddress: true,
       showSaveImageAs: true,
       showInspectElement: true

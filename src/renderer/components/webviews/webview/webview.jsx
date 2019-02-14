@@ -1,7 +1,8 @@
 import { PureComponent, createRef } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import electronContextMenu from "electron-context-menu";
+
+import contextMenu from "/common/context-menu";
 
 const Base = styled.div`
   display: flex;
@@ -38,9 +39,7 @@ class Webview extends PureComponent {
     const webview = this.webviewRef.current;
     const webContents = webview.getWebContents();
 
-    // TODO: Possibly clone/rewrite `electron-context-menu` to add
-    // the ability to support spell check suggestions.
-    electronContextMenu({
+    contextMenu({
       window: webview,
       showCopyImageAddress: true,
       showSaveImageAs: true,
