@@ -11,6 +11,7 @@ class Spell {
     console.log("[Spell] dictionaries path", this.dictionariesPath);
     console.log("[Spell] language", this.language);
 
+    this.dictionary = null;
     this.dictionaryReady = new Promise((resolve, reject) => {
       SpellChecker.getDictionary(this.language, this.dictionariesPath, (err, result) => {
         if (err) {
@@ -18,6 +19,7 @@ class Spell {
           reject(err);
         } else {
           console.log("[Spell] dictionary ready");
+          this.dictionary = result;
           resolve(result);
         }
       });
@@ -30,6 +32,14 @@ class Spell {
 
   ensureReady() {
     return this.dictionaryReady;
+  }
+
+  checkSpell(word) {
+    if (this.dictionary) {
+      return this.dictionary.checkAndSuggest(word, 5, 3);
+    } else {
+      return { misspelled: false, suggestions: [] };
+    }
   }
 }
 
