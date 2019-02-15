@@ -62,7 +62,13 @@ const contextMenuCreator = (options) => (win) => {
           accelerator: "CommandOrControl+X",
           enabled: editFlags.canCut,
           click: () => windowWebContent.cut()
-        },
+        }
+      ];
+    }
+
+    if (selectedText) {
+      textActionItems = [
+        ...textActionItems,
         {
           label: "Copy",
           accelerator: "CommandOrControl+C",
