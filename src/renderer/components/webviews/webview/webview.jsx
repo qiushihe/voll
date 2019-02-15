@@ -1,7 +1,11 @@
 import { PureComponent, createRef } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import electronContextMenu from "electron-context-menu";
+
+var Electron = require("electron");
+var ipcRenderer = Electron.ipcRenderer;
+
+import contextMenu from "/common/context-menu";
 
 const Base = styled.div`
   display: flex;
@@ -39,8 +43,11 @@ class Webview extends PureComponent {
     const webview = this.webviewRef.current;
     const webContents = webview.getWebContents();
 
-    electronContextMenu({
+    contextMenu({
       window: webview,
+      spellChecker: {
+        checkSpell: (word) => ipcRenderer.sendSync("sync-check-spell", word)
+      },
       showCopyImageAddress: true,
       showSaveImageAs: true,
       showInspectElement: true

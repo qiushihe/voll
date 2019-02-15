@@ -11,6 +11,7 @@ module.exports = {
       "alias": {
         "/main": resolvePath(__dirname, "src", "main"),
         "/renderer": resolvePath(__dirname, "src", "renderer"),
+        "/common": resolvePath(__dirname, "src", "common"),
         "/templates": resolvePath(__dirname, "src", "templates")
       }
     }]

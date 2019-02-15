@@ -35,11 +35,6 @@ class IpcServer extends EventEmitter {
   start() {
     console.log("[IpcServer] Starting IPC Server ...");
 
-    this.dictionary = null;
-    this.spell.ensureReady().then((dictionary) => {
-      this.dictionary = dictionary;
-    });
-
     electronIpcMain.on("get-preferences", this.handleGetPreferences);
     electronIpcMain.on("set-preferences", this.handleSetPreferences);
     electronIpcMain.on("get-settings", this.handleGetSettings);
@@ -194,16 +189,7 @@ class IpcServer extends EventEmitter {
   handleSyncCheckSpell(evt, word) {
     // Don't log the spell check request because it happens for every single individual words.
     // console.log("[IpcServer] Handle check-spell", word);
-
-    if (this.dictionary) {
-      evt.returnValue = {
-        isInDictionary: this.dictionary.spellCheck(word)
-      };
-    } else {
-      evt.returnValue = {
-        isInDictionary: true
-      };
-    }
+    evt.returnValue = this.spell.checkSpell(word);
   }
 }
 
