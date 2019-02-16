@@ -5,7 +5,6 @@ import { ipcMain as electronIpcMain } from "electron";
 import flow from "lodash/fp/flow";
 import get from "lodash/fp/get";
 import getOr from "lodash/fp/getOr";
-import isEmpty from "lodash/fp/isEmpty";
 import sortBy from "lodash/fp/sortBy";
 import first from "lodash/fp/first";
 
