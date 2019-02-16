@@ -1,5 +1,7 @@
 import uuidv4 from "uuid/v4";
 import request from "request";
+import isEmpty from 'lodash/fp/isEmpty';
+import assign from 'lodash/fp/assign';
 
 class RemoteSettings {
   constructor({ settingsJsonUrl }) {
@@ -9,23 +11,28 @@ class RemoteSettings {
 
   fetch() {
     return new Promise((resolve, reject) => {
-      const fetchUrl = `${this.settingsJsonUrl}?${uuidv4()}`;
-      console.log("[RemoteSettings] Fetching remote settings from", fetchUrl);
-      request.get(fetchUrl, (err, res, body) => {
-        if (err) {
-          console.error("[RemoteSettings] Error fetching settings JSON.", err);
-          reject(err);
-        } else {
-          try {
-            const settings = JSON.parse(body);
-            // console.log("[RemoteSettings] Got remote settings", JSON.stringify(settings, null, 2));
-            resolve(settings);
-          } catch (err) {
-            console.error("[RemoteSettings] Error parsing fetched settings JSON.", err);
+      if (isEmpty(this.settingsJsonUrl)) {
+        console.error("[RemoteSettings] Settings JSON URL not provided.");
+        reject(new Error("Remote settings JSON URL not provided."));
+      } else {
+        const fetchUrl = `${this.settingsJsonUrl}?${uuidv4()}`;
+        console.log("[RemoteSettings] Fetching remote settings from", fetchUrl);
+        request.get(fetchUrl, (err, res, body) => {
+          if (err) {
+            console.error("[RemoteSettings] Error fetching settings JSON.", err);
             reject(err);
+          } else {
+            try {
+              const settings = JSON.parse(body);
+              // console.log("[RemoteSettings] Got remote settings", JSON.stringify(settings, null, 2));
+              resolve(settings);
+            } catch (err) {
+              console.error("[RemoteSettings] Error parsing fetched settings JSON.", err);
+              reject(err);
+            }
           }
-        }
-      });
+        });
+      }
     });
   }
 
@@ -40,7 +47,7 @@ class RemoteSettings {
     });
   }
 
-  getSettings() {
+  ensureReady() {
     return this.readCache()
       .then((cachedSettings) => (
         cachedSettings || (
@@ -48,7 +55,23 @@ class RemoteSettings {
             .catch(() => ({}))
             .then((settingsFromDisk) => this.writeCache(settingsFromDisk))
         )
-      ));
+      ))
+      .then(() => this);
+  }
+
+  getSettings() {
+    return this.ensureReady()
+      .then(() => this.readCache());
+  }
+
+  updateSettings(updates) {
+    return this.getSettings()
+      .then((settings) => assign({ ...settings })(updates))
+      .then((updatedSettings) => {
+        console.log("[RemoteSettings] Saving remote settings not implemented!");
+        return updatedSettings;
+      })
+      .then((writtenSettings) => this.writeCache(writtenSettings));
   }
 }
 

@@ -78,27 +78,31 @@ class App {
   }
 
   createMainWindow() {
-    return this.settings.ensureReady().then(({
-      localSettings: {
-        posX, posY, width, height,
-        preferences
-      }
-    }) => {
-      this.mainWindow = new MainWindow({
-        ipcServer: this.ipcServer,
+    return this.settings.ensureReady()
+      .then((settings) => settings.getLocalSettings())
+      .then((localSettings) => localSettings.getSettings())
+      .then(({
         posX,
         posY,
         width,
-        height
+        height,
+        preferences
+      }) => {
+        this.mainWindow = new MainWindow({
+          ipcServer: this.ipcServer,
+          posX,
+          posY,
+          width,
+          height
+        });
+
+        this.mainWindow.setPreventClose(getOr(false, "hideWindowOnClose")(preferences));
+
+        this.mainWindow.on("site-web-content-ready", this.handleMainWindowSiteWebContentReady);
+        this.mainWindow.on("close-prevented", this.handleMainWindowClosePrevented);
+        this.mainWindow.on("closed", this.handleMainWindowClosed);
+        this.mainWindow.on("resize-move", this.saveMainWindowSizeAndPosition);
       });
-
-      this.mainWindow.setPreventClose(getOr(false, "hideWindowOnClose")(preferences));
-
-      this.mainWindow.on("site-web-content-ready", this.handleMainWindowSiteWebContentReady);
-      this.mainWindow.on("close-prevented", this.handleMainWindowClosePrevented);
-      this.mainWindow.on("closed", this.handleMainWindowClosed);
-      this.mainWindow.on("resize-move", this.saveMainWindowSizeAndPosition);
-    });
   }
 
   createTrayIcon() {

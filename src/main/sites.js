@@ -39,25 +39,24 @@ class Sites extends EventEmitter {
 
       return this.preloads.preparePreloads()
         .then(() => this.settings.ensureReady())
-        .then(({ remoteSettings }) => {
-          const sitesReady = flow([
-            getOr([], "sites"),
-            uncappedMap((_site, index) => {
-              const siteId = uuidv4();
-              const site = { ..._site, id: siteId, index };
+        .then((settings) => settings.getRemoteSettings())
+        .then((remoteSettings) => remoteSettings.getSettings())
+        .then(flow([
+          getOr([], "sites"),
+          uncappedMap((_site, index) => {
+            const siteId = uuidv4();
+            const site = { ..._site, id: siteId, index };
 
-              console.log("[Sites] Setup site", siteId, site.name, site.url);
+            console.log("[Sites] Setup site", siteId, site.name, site.url);
 
-              return this.preloads.setupPreload({ site }).then((preloadFilePath) => {
-                site.preloadUrl = `file:///${preloadFilePath}`;
-                this.allSites[siteId] = site;
-              });
-            }),
-            (promises) => Promise.all(promises)
-          ])(remoteSettings);
-
-          return sitesReady.then(() => values(this.allSites));
-        });
+            return this.preloads.setupPreload({ site }).then((preloadFilePath) => {
+              site.preloadUrl = `file:///${preloadFilePath}`;
+              this.allSites[siteId] = site;
+            });
+          }),
+          (promises) => Promise.all(promises)
+        ]))
+        .then(() => values(this.allSites));
     }
   }
 

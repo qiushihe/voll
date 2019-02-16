@@ -47,7 +47,7 @@ class LocalSettings {
     });
   }
 
-  getSettings() {
+  ensureReady() {
     return this.readCache()
       .then((cachedSettings) => (
         cachedSettings || (
@@ -55,7 +55,13 @@ class LocalSettings {
             .catch(() => ({}))
             .then((settingsFromDisk) => this.writeCache(settingsFromDisk))
         )
-      ));
+      ))
+      .then(() => this);
+  }
+
+  getSettings() {
+    return this.ensureReady()
+      .then(() => this.readCache());
   }
 
   updateSettings(updates) {

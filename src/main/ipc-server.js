@@ -52,9 +52,11 @@ class IpcServer extends EventEmitter {
 
     console.log("[IpcServer] Handle", messageId);
 
-    this.settings.ensureReady().then(({ localSettings }) => {
-      sendReply(messageId, { preferences: getOr({}, "preferences")(localSettings) });
-    });
+    this.settings.ensureReady()
+      .then((settings) => settings.getLocalSettings())
+      .then((localSettings) => localSettings.getSettings())
+      .then(getOr({}, "preferences"))
+      .then((preferences) => sendReply(messageId, { preferences }));
   }
 
   handleSetPreferences(evt, { messageId, preferences }) {
@@ -63,8 +65,10 @@ class IpcServer extends EventEmitter {
     console.log("[IpcServer] Handle", messageId);
 
     this.settings.ensureReady()
-      .then(({ localSettings }) => {
-        const currentPreferences = getOr({}, "preferences")(localSettings);
+      .then((settings) => settings.getLocalSettings())
+      .then((localSettings) => localSettings.getSettings())
+      .then(getOr({}, "preferences"))
+      .then((currentPreferences) => {
         const newPreferences = {
           ...currentPreferences,
           ...(preferences || {})
@@ -83,14 +87,20 @@ class IpcServer extends EventEmitter {
 
     console.log("[IpcServer] Handle", messageId);
 
-    this.settings.ensureReady().then(({ localSettings }) => {
-      sendReply(messageId, {
-        settings: {
-          settingsJsonUrl: getOr("", "settingsJsonUrl")(localSettings),
-          gistAccessToken: getOr("", "gistAccessToken")(localSettings)
-        }
+    this.settings.ensureReady()
+      .then((settings) => settings.getLocalSettings())
+      .then((localSettings) => localSettings.getSettings())
+      .then(({
+        settingsJsonUrl = "",
+        gistAccessToken = ""
+      }) => {
+        sendReply(messageId, {
+          settings: {
+            settingsJsonUrl,
+            gistAccessToken
+          }
+        });
       });
-    });
   }
 
   handleSetSettings(evt, { messageId, settings }) {
@@ -99,10 +109,12 @@ class IpcServer extends EventEmitter {
     console.log("[IpcServer] Handle", messageId);
 
     this.settings.ensureReady()
-      .then(({ localSettings }) => {
-        const currentSettingsJsonUrl = getOr("", "settingsJsonUrl")(localSettings);
-        const currentGistAccessToken = getOr("", "gistAccessToken")(localSettings);
-
+      .then((settings) => settings.getLocalSettings())
+      .then((localSettings) => localSettings.getSettings())
+      .then(({
+        currentSettingsJsonUrl = "",
+        currentGistAccessToken = ""
+      }) => {
         return this.settings.updateLocalSettings({
           settingsJsonUrl: getOr(currentSettingsJsonUrl, "settingsJsonUrl")(settings),
           gistAccessToken: getOr(currentGistAccessToken, "gistAccessToken")(settings)
@@ -155,22 +167,24 @@ class IpcServer extends EventEmitter {
 
     console.log("[IpcServer] Handle", messageId);
 
-    this.settings.ensureReady().then(({ localSettings }) => {
-      const activeSiteIndex = get("activeSiteIndex")(localSettings);
+    this.settings.ensureReady()
+      .then((settings) => settings.getLocalSettings())
+      .then((localSettings) => localSettings.getSettings())
+      .then(get("activeSiteIndex"))
+      .then((activeSiteIndex) => {
+        const activeSiteId = flow([
+          sortBy(get("index")),
+          get(`${activeSiteIndex}.id`)
+        ])(this.sites.getSitesArray());
 
-      const activeSiteId = flow([
-        sortBy(get("index")),
-        get(`${activeSiteIndex}.id`)
-      ])(this.sites.getSitesArray());
+        const defaultActiveSiteId = flow([
+          sortBy(get("index")),
+          first,
+          get("id")
+        ])(this.sites.getSitesArray());
 
-      const defaultActiveSiteId = flow([
-        sortBy(get("index")),
-        first,
-        get("id")
-      ])(this.sites.getSitesArray());
-
-      sendReply(messageId, { activeSiteId: (activeSiteId || defaultActiveSiteId) });
-    });
+        sendReply(messageId, { activeSiteId: (activeSiteId || defaultActiveSiteId) });
+      });
   }
 
   handleSetActiveSiteId(evt, { messageId, activeSiteId }) {
