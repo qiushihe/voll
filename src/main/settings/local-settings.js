@@ -78,6 +78,11 @@ class LocalSettings {
       }));
   }
 
+  getSites() {
+    return this.getSettings()
+      .then(getOr([], "sites"));
+  }
+
   getPreferences() {
     return this.getSettings()
       .then(getOr({}, "preferences"));

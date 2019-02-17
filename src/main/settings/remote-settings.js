@@ -8,12 +8,14 @@ class RemoteSettings {
   constructor({ settingsJsonUrl }) {
     this.settingsJsonUrl = settingsJsonUrl;
     this.cachedSettings = null;
+    this.hasValidSettings = false;
   }
 
   fetch() {
     return new Promise((resolve, reject) => {
       if (isEmpty(this.settingsJsonUrl)) {
         console.error("[RemoteSettings] Settings JSON URL not provided.");
+        this.hasValidSettings = false;
         reject(new Error("Remote settings JSON URL not provided."));
       } else {
         const fetchUrl = `${this.settingsJsonUrl}?${uuidv4()}`;
@@ -21,14 +23,17 @@ class RemoteSettings {
         request.get(fetchUrl, (err, res, body) => {
           if (err) {
             console.error("[RemoteSettings] Error fetching settings JSON.", err);
+            this.hasValidSettings = false;
             reject(err);
           } else {
             try {
               const settings = JSON.parse(body);
-              // console.log("[RemoteSettings] Got remote settings", JSON.stringify(settings, null, 2));
+              console.log("[RemoteSettings] Fetched remote settings");
+              this.hasValidSettings = true;
               resolve(settings);
             } catch (err) {
               console.error("[RemoteSettings] Error parsing fetched settings JSON.", err);
+              this.hasValidSettings = false;
               reject(err);
             }
           }
@@ -61,7 +66,7 @@ class RemoteSettings {
   }
 
   isValid() {
-    return !isEmpty(this.settingsJsonUrl);
+    return this.hasValidSettings;
   }
 
   getSettings() {

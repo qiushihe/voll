@@ -39,14 +39,42 @@ class Sites extends EventEmitter {
 
       return this.preloads.preparePreloads()
         .then(() => this.settings.ensureReady())
-        .then((settings) => settings.getRemoteSettings())
-        .then((remoteSettings) => remoteSettings.getSites())
+        .then((settings) => Promise.all([
+          settings,
+          settings.getLocalSettings(),
+          settings.getRemoteSettings()
+        ]))
+        .then(([
+          settings,
+          localSettings,
+          remoteSettings
+        ]) => Promise.all([
+          settings,
+          localSettings.getSites(),
+          remoteSettings.getSites(),
+          remoteSettings.isValid(),
+        ]))
+        .then(([
+          settings,
+          localSites,
+          remoteSites,
+          isRemoteValid
+        ]) => {
+          if (isRemoteValid) {
+            console.log("[Sites] Remote valid; Overriding local sites");
+            return settings.updateLocalSettings({ sites: remoteSites })
+              .then((localSettings) => localSettings.getSites())
+          } else {
+            console.log("[Sites] Remote invalid; Using local sites");
+            return localSites;
+          }
+        })
         .then(flow([
           uncappedMap((_site, index) => {
             const siteId = uuidv4();
             const site = { ..._site, id: siteId, index };
 
-            console.log("[Sites] Setup site", siteId, site.name, site.url);
+            console.log("[Sites] Setup site preload", siteId, site.name, site.url);
 
             return this.preloads.setupPreload({ site }).then((preloadFilePath) => {
               site.preloadUrl = `file:///${preloadFilePath}`;
