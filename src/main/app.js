@@ -80,14 +80,14 @@ class App {
   createMainWindow() {
     return this.settings.ensureReady()
       .then((settings) => settings.getLocalSettings())
-      .then((localSettings) => localSettings.getSettings())
-      .then(({
-        posX,
-        posY,
-        width,
-        height,
+      .then((localSettings) => Promise.all([
+        localSettings.getMainWindowStates(),
+        localSettings.getPreferences()
+      ]))
+      .then(([
+        { posX, posY, width, height },
         preferences
-      }) => {
+      ]) => {
         this.mainWindow = new MainWindow({
           ipcServer: this.ipcServer,
           posX,

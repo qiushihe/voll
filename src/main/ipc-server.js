@@ -54,8 +54,7 @@ class IpcServer extends EventEmitter {
 
     this.settings.ensureReady()
       .then((settings) => settings.getLocalSettings())
-      .then((localSettings) => localSettings.getSettings())
-      .then(getOr({}, "preferences"))
+      .then((localSettings) => localSettings.getPreferences())
       .then((preferences) => sendReply(messageId, { preferences }));
   }
 
@@ -66,8 +65,7 @@ class IpcServer extends EventEmitter {
 
     this.settings.ensureReady()
       .then((settings) => settings.getLocalSettings())
-      .then((localSettings) => localSettings.getSettings())
-      .then(getOr({}, "preferences"))
+      .then((localSettings) => localSettings.getPreferences())
       .then((currentPreferences) => {
         const newPreferences = {
           ...currentPreferences,
@@ -75,8 +73,8 @@ class IpcServer extends EventEmitter {
         };
         return this.settings.updateLocalSettings({ preferences: newPreferences });
       })
-      .then((updatedLocalSettings) => {
-        const updatedPreferences = getOr({}, "preferences")(updatedLocalSettings);
+      .then((localSettings) => localSettings.getPreferences())
+      .then((updatedPreferences) => {
         this.emit("set-preferences", { preferences: updatedPreferences });
         sendReply(messageId, { preferences: updatedPreferences });
       });
@@ -89,16 +87,10 @@ class IpcServer extends EventEmitter {
 
     this.settings.ensureReady()
       .then((settings) => settings.getLocalSettings())
-      .then((localSettings) => localSettings.getSettings())
-      .then(({
-        settingsJsonUrl = "",
-        gistAccessToken = ""
-      }) => {
+      .then((localSettings) => localSettings.getRemoteParameters())
+      .then(({ settingsJsonUrl, gistAccessToken }) => {
         sendReply(messageId, {
-          settings: {
-            settingsJsonUrl,
-            gistAccessToken
-          }
+          settings: { settingsJsonUrl,  gistAccessToken }
         });
       });
   }
@@ -110,20 +102,24 @@ class IpcServer extends EventEmitter {
 
     this.settings.ensureReady()
       .then((settings) => settings.getLocalSettings())
-      .then((localSettings) => localSettings.getSettings())
+      .then((localSettings) => localSettings.getRemoteParameters())
       .then(({
-        currentSettingsJsonUrl = "",
-        currentGistAccessToken = ""
-      }) => {
-        return this.settings.updateLocalSettings({
+        settingsJsonUrl: currentSettingsJsonUrl,
+        gistAccessToken: currentGistAccessToken
+      }) => (
+        this.settings.updateLocalSettings({
           settingsJsonUrl: getOr(currentSettingsJsonUrl, "settingsJsonUrl")(settings),
           gistAccessToken: getOr(currentGistAccessToken, "gistAccessToken")(settings)
-        });
-      })
-      .then((updatedLocalSettings) => {
+        })
+      ))
+      .then((localSettings) => localSettings.getRemoteParameters())
+      .then(({
+        settingsJsonUrl: updatedSettingsJsonUrl,
+        gistAccessToken: updatedGistAccessToken
+      }) => {
         const updatedSettings = {
-          settingsJsonUrl: getOr("", "settingsJsonUrl")(updatedLocalSettings),
-          gistAccessToken: getOr("", "gistAccessToken")(updatedLocalSettings)
+          settingsJsonUrl: updatedSettingsJsonUrl,
+          gistAccessToken: updatedGistAccessToken
         };
         this.emit("set-settings", updatedSettings);
         sendReply(messageId, { settings: updatedSettings });
@@ -169,9 +165,8 @@ class IpcServer extends EventEmitter {
 
     this.settings.ensureReady()
       .then((settings) => settings.getLocalSettings())
-      .then((localSettings) => localSettings.getSettings())
-      .then(get("activeSiteIndex"))
-      .then((activeSiteIndex) => {
+      .then((localSettings) => localSettings.getSitesStates())
+      .then(({ activeSiteIndex }) => {
         const activeSiteId = flow([
           sortBy(get("index")),
           get(`${activeSiteIndex}.id`)

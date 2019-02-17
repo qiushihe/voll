@@ -40,9 +40,8 @@ class Sites extends EventEmitter {
       return this.preloads.preparePreloads()
         .then(() => this.settings.ensureReady())
         .then((settings) => settings.getRemoteSettings())
-        .then((remoteSettings) => remoteSettings.getSettings())
+        .then((remoteSettings) => remoteSettings.getSites())
         .then(flow([
-          getOr([], "sites"),
           uncappedMap((_site, index) => {
             const siteId = uuidv4();
             const site = { ..._site, id: siteId, index };

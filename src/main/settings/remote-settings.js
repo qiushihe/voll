@@ -2,6 +2,7 @@ import uuidv4 from "uuid/v4";
 import request from "request";
 import isEmpty from 'lodash/fp/isEmpty';
 import assign from 'lodash/fp/assign';
+import getOr from 'lodash/fp/getOr';
 
 class RemoteSettings {
   constructor({ settingsJsonUrl }) {
@@ -59,9 +60,18 @@ class RemoteSettings {
       .then(() => this);
   }
 
+  isValid() {
+    return !isEmpty(this.settingsJsonUrl);
+  }
+
   getSettings() {
     return this.ensureReady()
       .then(() => this.readCache());
+  }
+
+  getSites() {
+    return this.getSettings()
+      .then(getOr([], "sites"));
   }
 
   updateSettings(updates) {
@@ -71,7 +81,8 @@ class RemoteSettings {
         console.log("[RemoteSettings] Saving remote settings not implemented!");
         return updatedSettings;
       })
-      .then((writtenSettings) => this.writeCache(writtenSettings));
+      .then((writtenSettings) => this.writeCache(writtenSettings))
+      .then(() => this);
   }
 }
 

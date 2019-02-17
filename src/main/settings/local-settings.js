@@ -1,5 +1,7 @@
 import { readFile, writeFile } from "graceful-fs";
 import assign from "lodash/fp/assign";
+import getOr from "lodash/fp/getOr";
+import pick from "lodash/fp/pick";
 
 class LocalSettings {
   constructor({ settingsFilePath }) {
@@ -64,11 +66,37 @@ class LocalSettings {
       .then(() => this.readCache());
   }
 
+  getMainWindowStates() {
+    return this.getSettings()
+      .then(pick(["posX", "posY", "width", "height"]));
+  }
+
+  getSitesStates() {
+    return this.getSettings()
+      .then((settings) => ({
+        activeSiteIndex: getOr(0, "activeSiteIndex")(settings)
+      }));
+  }
+
+  getPreferences() {
+    return this.getSettings()
+      .then(getOr({}, "preferences"));
+  }
+
+  getRemoteParameters() {
+    return this.getSettings()
+      .then((settings) => ({
+        settingsJsonUrl: getOr("", "settingsJsonUrl")(settings),
+        gistAccessToken: getOr("", "gistAccessToken")(settings)
+      }));
+  }
+
   updateSettings(updates) {
     return this.getSettings()
       .then((settings) => assign({ ...settings })(updates))
       .then((updatedSettings) => this.write(updatedSettings))
-      .then((writtenSettings) => this.writeCache(writtenSettings));
+      .then((writtenSettings) => this.writeCache(writtenSettings))
+      .then(() => this);
   }
 }
 
