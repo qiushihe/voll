@@ -8,7 +8,8 @@ import {
   url,
   sessionId,
   transientSession,
-  preloadUrl
+  preloadUrl,
+  checksum
 } from "/renderer/selectors/site.selector";
 
 import { activeSiteId } from "/renderer/selectors/webviews.selector";
@@ -38,6 +39,7 @@ export default connect(
     sessionId,
     transientSession,
     preloadUrl,
+    checksum,
     activeSiteId,
     showUrl: showSiteUrl
   }),

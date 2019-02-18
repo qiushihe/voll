@@ -1,9 +1,7 @@
 import { PureComponent, createRef } from "react";
+import { ipcRenderer } from "electron";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-
-var Electron = require("electron");
-var ipcRenderer = Electron.ipcRenderer;
 
 import contextMenu from "/common/context-menu";
 
@@ -69,7 +67,16 @@ class Webview extends PureComponent {
   }
 
   render() {
-    const { url, isActive, partition, useragent, preloadUrl, showUrl } = this.props;
+    const {
+      url,
+      isActive,
+      partition,
+      useragent,
+      preloadUrl,
+      checksum,
+      showUrl
+    } = this.props;
+
     const { currentUrl } = this.state;
 
     return (
@@ -78,6 +85,7 @@ class Webview extends PureComponent {
           <StatusBar>{currentUrl}</StatusBar>
         )}
         <webview
+          key={checksum}
           ref={this.webviewRef}
           style={{ display: "flex", width: "100%", height: "100%" }}
           src={url}
@@ -97,6 +105,7 @@ Webview.propTypes = {
   partition: PropTypes.string,
   useragent: PropTypes.string,
   preloadUrl: PropTypes.string,
+  checksum: PropTypes.string,
   isActive: PropTypes.bool,
   showUrl: PropTypes.bool,
   onMount: PropTypes.func,
@@ -108,6 +117,7 @@ Webview.defaultProps = {
   partition: null,
   useragent: null,
   preloadUrl: null,
+  checksum: "",
   isActive: false,
   showUrl: false,
   onMount: (() => {}),
