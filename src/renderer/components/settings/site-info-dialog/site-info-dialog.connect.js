@@ -2,12 +2,18 @@ import { connect } from "react-redux";
 
 import { hideSiteInfo } from "/renderer/actions/settings.action";
 
-import { showInfoSiteId, showingSiteInfo } from "/renderer/selectors/settings.selector";
+import {
+  showInfoSiteId,
+  showInfoSiteIsNew,
+  showingSiteInfo,
+} from "/renderer/selectors/settings.selector";
+
 import {
   name,
   url,
   iconSrc,
   sessionId,
+  transientSession,
   externalUrlPatterns,
   internalUrlPatterns
 } from "/renderer/selectors/site.selector";
@@ -19,15 +25,20 @@ export default connect(
     const siteId = showInfoSiteId(state, ownProps);
     return {
       isOpen: showingSiteInfo(state, ownProps),
+      isNew: showInfoSiteIsNew(state, ownProps),
       siteName: name(state, { ...ownProps, siteId }),
       siteUrl: url(state, { ...ownProps, siteId }),
       siteIconUrl: iconSrc(state, { ...ownProps, siteId }),
       siteSessionId: sessionId(state, { ...ownProps, siteId }),
+      siteTransientSession: transientSession(state, { ...ownProps, siteId }),
       siteExternalUrlPatterns: externalUrlPatterns(state, { ...ownProps, siteId }).join("\n").trim(),
       siteInternalUrlPatterns: internalUrlPatterns(state, { ...ownProps, siteId }).join("\n").trim()
     };
   },
   (dispatch) => ({
-    onClose: () => dispatch(hideSiteInfo())
+    onClose: () => dispatch(hideSiteInfo()),
+    onSubmit: (values) => {
+      console.log("onSubmit", values);
+    }
   })
 )(SiteInfoDialog);

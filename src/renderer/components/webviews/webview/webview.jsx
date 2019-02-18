@@ -72,8 +72,6 @@ class Webview extends PureComponent {
     const { url, isActive, partition, useragent, preloadUrl, showUrl } = this.props;
     const { currentUrl } = this.state;
 
-    console.log("partition", partition);
-
     return (
       <Base isActive={isActive}>
         {showUrl && (

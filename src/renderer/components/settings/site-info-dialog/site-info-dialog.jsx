@@ -1,6 +1,7 @@
 import { PureComponent } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
+import { Formik } from 'formik';
 
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -27,16 +28,131 @@ const FullWidthTextField = styled(TextField)`
 `;
 
 class SiteInfoDialog extends PureComponent {
+  constructor(...args) {
+    super(...args);
+
+    this.renderForm = this.renderForm.bind(this);
+    this.submitForm = this.submitForm.bind(this);
+  }
+
+  renderForm({
+    values: {
+      name,
+      url,
+      iconSrc,
+      sessionId,
+      transientSession,
+      externalUrlPatterns,
+      internalUrlPatterns
+    },
+    handleChange,
+    handleSubmit
+  }) {
+    const { isNew, onClose } = this.props;
+
+    return (
+      <form onSubmit={handleSubmit}>
+        <DialogTitle id="form-dialog-title">
+          {isNew ? "Add Site" : "Edit Site Info"}
+        </DialogTitle>
+        <DialogContent>
+          <SpacedFormGroup>
+            <FullWidthTextField
+              label="Name"
+              name="name"
+              value={name}
+              onChange={handleChange}
+            />
+          </SpacedFormGroup>
+          <SpacedFormGroup>
+            <FullWidthTextField
+              label="URL"
+              name="url"
+              value={url}
+              onChange={handleChange}
+            />
+          </SpacedFormGroup>
+          <SpacedFormGroup>
+            <FullWidthTextField
+              label="Icon URL"
+              name="iconSrc"
+              value={iconSrc}
+              onChange={handleChange}
+            />
+          </SpacedFormGroup>
+          <SpacedFormGroup>
+            <FullWidthTextField
+              label="Session ID"
+              name="sessionId"
+              value={sessionId}
+              onChange={handleChange}
+            />
+            <FormControlLabel
+              control={(
+                <Switch
+                  color="primary"
+                  name="transientSession"
+                  value={transientSession}
+                  onChange={handleChange}
+                />
+              )}
+              label="Transient"
+              labelPlacement="start"
+            />
+          </SpacedFormGroup>
+          <SpacedFormGroup>
+            <FullWidthTextField
+              label="External URL Patterns (one on each line)"
+              name="externalUrlPatterns"
+              value={externalUrlPatterns}
+              onChange={handleChange}
+              multiline
+            />
+          </SpacedFormGroup>
+          <SpacedFormGroup>
+            <FullWidthTextField
+              label="Internal URL Patterns (one on each line)"
+              name="internalUrlPatterns"
+              value={internalUrlPatterns}
+              onChange={handleChange}
+              multiline
+            />
+          </SpacedFormGroup>
+        </DialogContent>
+        <DialogActions>
+          {!isNew && (
+            <Button onClick={() => ({})} color="secondary" disabled>
+              Delete Site (non-functional)
+            </Button>
+          )}
+          <Button onClick={onClose} color="default">
+            Cancel
+          </Button>
+          <Button type="submit" color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </form>
+    );
+  }
+
+  submitForm(values, { setSubmitting }) {
+    const { onSubmit } = this.props;
+    onSubmit(values);
+    setSubmitting(false);
+  }
+
   render() {
     const {
       isOpen,
-      onClose,
       siteName,
       siteUrl,
       siteIconUrl,
       siteSessionId,
+      siteTransientSession,
       siteExternalUrlPatterns,
-      siteInternalUrlPatterns
+      siteInternalUrlPatterns,
+      onClose
     } = this.props;
 
     return (
@@ -47,47 +163,19 @@ class SiteInfoDialog extends PureComponent {
         onClose={onClose}
         aria-labelledby="form-dialog-title"
       >
-        <DialogTitle id="form-dialog-title">
-          Edit Site Info
-        </DialogTitle>
-        <DialogContent>
-          <SpacedFormGroup>
-            <FullWidthTextField label="Name" defaultValue={siteName} />
-          </SpacedFormGroup>
-          <SpacedFormGroup>
-            <FullWidthTextField label="URL" defaultValue={siteUrl} />
-          </SpacedFormGroup>
-          <SpacedFormGroup>
-            <FullWidthTextField label="Icon URL" defaultValue={siteIconUrl} />
-          </SpacedFormGroup>
-          <SpacedFormGroup>
-            <FullWidthTextField label="Session ID" defaultValue={siteSessionId} />
-            <FormControlLabel
-              control={(
-                <Switch value="transient-session" color="primary" />
-              )}
-              label="Transient"
-              labelPlacement="start"
-            />
-          </SpacedFormGroup>
-          <SpacedFormGroup>
-            <FullWidthTextField label="External URL Patterns (one on each line)" defaultValue={siteExternalUrlPatterns} multiline />
-          </SpacedFormGroup>
-          <SpacedFormGroup>
-            <FullWidthTextField label="Internal URL Patterns (one on each line)" defaultValue={siteInternalUrlPatterns} multiline />
-          </SpacedFormGroup>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => ({})} color="secondary" disabled>
-            Delete Site (non-functional)
-          </Button>
-          <Button onClick={onClose} color="default">
-            Cancel
-          </Button>
-          <Button onClick={() => ({})} color="primary" disabled>
-            Save (non-functional)
-          </Button>
-        </DialogActions>
+        <Formik
+          initialValues={{
+            name: siteName,
+            url: siteUrl,
+            iconSrc: siteIconUrl,
+            sessionId: siteSessionId,
+            transientSession: siteTransientSession,
+            externalUrlPatterns: siteExternalUrlPatterns,
+            internalUrlPatterns: siteInternalUrlPatterns
+          }}
+          render={this.renderForm}
+          onSubmit={this.submitForm}
+        />
       </Dialog>
     );
   }
@@ -95,24 +183,30 @@ class SiteInfoDialog extends PureComponent {
 
 SiteInfoDialog.propTypes = {
   isOpen: PropTypes.bool,
+  isNew: PropTypes.bool,
   siteName: PropTypes.string,
   siteUrl: PropTypes.string,
   siteIconUrl: PropTypes.string,
   siteSessionId: PropTypes.string,
+  siteTransientSession: PropTypes.bool,
   siteExternalUrlPatterns: PropTypes.string,
   siteInternalUrlPatterns: PropTypes.string,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
+  onSubmit: PropTypes.func
 };
 
 SiteInfoDialog.defaultProps = {
   isOpen: false,
+  isNew: false,
   siteName: "",
   siteUrl: "",
   siteIconUrl: "",
   siteSessionId: "",
+  siteTransientSession: false,
   siteExternalUrlPatterns: "",
   siteInternalUrlPatterns: "",
-  onClose: () => ({})
+  onClose: () => ({}),
+  onSubmit: () => ({})
 };
 
 export default SiteInfoDialog;

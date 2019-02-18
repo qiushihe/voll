@@ -1,5 +1,4 @@
 import { createAction } from "redux-actions";
-import map from "lodash/fp/map";
 
 import {
   fetchSites as fetchSitesRequest,
@@ -9,9 +8,14 @@ import {
   updateActiveSiteId as updateActiveSiteIdRequest
 } from "/renderer/api/sites.api";
 
-import { pickObjectWithAttributes } from "/renderer/helpers/pick.helper";
+import {
+  pickObjectWithAttributes,
+  pickArrayObjectWithAttributes
+} from "/renderer/helpers/pick.helper";
 
+export const SITES_CLEAR_SITES = "SITES_CLEAR_SITES";
 export const SITES_ADD_SITE = "SITES_ADD_SITE";
+export const SITES_ADD_SITES = "SITES_ADD_SITES";
 
 export const siteAttributes = [
   "id",
@@ -26,9 +30,22 @@ export const siteAttributes = [
   "preloadUrl"
 ];
 
+export const clearSites = createAction(SITES_CLEAR_SITES);
+
+export const addSite = createAction(
+  SITES_ADD_SITE,
+  pickObjectWithAttributes("site", siteAttributes)
+);
+
+export const addSites = createAction(
+  SITES_ADD_SITES,
+  pickArrayObjectWithAttributes("sites", siteAttributes)
+);
+
 export const fetchSites = () => (dispatch) => {
   return fetchSitesRequest().then(({ sites }) => {
-    map((site) => dispatch(addSite({ site })))(sites);
+    dispatch(clearSites());
+    dispatch(addSites({ sites }));
   });
 };
 
@@ -47,8 +64,3 @@ export const fetchActiveSiteId = () => () => {
 export const updateActiveSiteId = ({ activeSiteId }) => () => {
   return updateActiveSiteIdRequest({ activeSiteId });
 };
-
-export const addSite = createAction(
-  SITES_ADD_SITE,
-  pickObjectWithAttributes("site", siteAttributes)
-);

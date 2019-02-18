@@ -23,6 +23,8 @@ class IpcServer extends EventEmitter {
     this.handleGetSettings = this.handleGetSettings.bind(this);
     this.handleSetSettings = this.handleSetSettings.bind(this);
     this.handleGetSites = this.handleGetSites.bind(this);
+    this.handleSaveSite = this.handleSaveSite.bind(this);
+    this.handleDeleteSite = this.handleDeleteSite.bind(this);
     this.handleSetSiteWebContent = this.handleSetSiteWebContent.bind(this);
     this.handleSetSiteUnreadCount = this.handleSetSiteUnreadCount.bind(this);
     this.handleGetActiveSiteId = this.handleGetActiveSiteId.bind(this);
@@ -39,6 +41,8 @@ class IpcServer extends EventEmitter {
     electronIpcMain.on("get-settings", this.handleGetSettings);
     electronIpcMain.on("set-settings", this.handleSetSettings);
     electronIpcMain.on("get-sites", this.handleGetSites);
+    electronIpcMain.on("save-site", this.handleSaveSite);
+    electronIpcMain.on("delete-site", this.handleDeleteSite);
     electronIpcMain.on("set-site-web-content", this.handleSetSiteWebContent);
     electronIpcMain.on("set-site-unread-count", this.handleSetSiteUnreadCount);
     electronIpcMain.on("get-active-site-id", this.handleGetActiveSiteId);
@@ -134,6 +138,22 @@ class IpcServer extends EventEmitter {
     this.sites.ensureReady().then((sites) => {
       sendReply(messageId, { sites });
     });
+  }
+
+  handleSaveSite(evt, { messageId, site }) {
+    const sendReply = getReplier(evt.sender);
+
+    console.log("[IpcServer] Handle", messageId, site);
+
+    sendReply(messageId);
+  }
+
+  handleDeleteSite(evt, { messageId, siteId }) {
+    const sendReply = getReplier(evt.sender);
+
+    console.log("[IpcServer] Handle", messageId, siteId);
+
+    sendReply(messageId);
   }
 
   handleSetSiteWebContent(evt, { messageId, siteId, webContentId }) {

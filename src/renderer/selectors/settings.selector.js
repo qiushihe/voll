@@ -2,8 +2,9 @@ import { createSelector } from "reselect";
 import get from "lodash/fp/get";
 import negate from "lodash/fp/negate";
 import isEmpty from "lodash/fp/isEmpty";
+import flow from "lodash/fp/flow";
 
-import { settings } from "./root.selector";
+import { settings, sites } from "./root.selector";
 
 export const isVisible = createSelector(
   settings,
@@ -23,6 +24,17 @@ export const gistAccessToken = createSelector(
 export const showInfoSiteId = createSelector(
   settings,
   get("showInfoSiteId")
+);
+
+export const showInfoSiteIsNew = createSelector(
+  sites,
+  showInfoSiteId,
+  (allSites, siteId) => (
+    flow([
+      get(siteId),
+      isEmpty
+    ])(allSites)
+  )
 );
 
 export const showingSiteInfo = createSelector(

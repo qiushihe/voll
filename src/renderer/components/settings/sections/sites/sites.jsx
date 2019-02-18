@@ -25,7 +25,7 @@ class Sites extends PureComponent {
         {Children.toArray(renderSites(sites))}
         <SectionItem onClick={onAddSite}>
           <ListItemText>
-            Add site (non-functional)
+            Add site
           </ListItemText>
           <AddIcon color="action" />
         </SectionItem>
