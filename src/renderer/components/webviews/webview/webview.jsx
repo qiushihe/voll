@@ -1,9 +1,7 @@
 import { PureComponent, createRef } from "react";
+import { ipcRenderer } from "electron";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-
-var Electron = require("electron");
-var ipcRenderer = Electron.ipcRenderer;
 
 import contextMenu from "/common/context-menu";
 
