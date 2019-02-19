@@ -43,7 +43,8 @@ class SiteInfoDialog extends PureComponent {
       sessionId,
       transientSession,
       externalUrlPatterns,
-      internalUrlPatterns
+      internalUrlPatterns,
+      preloadCode
     },
     handleChange,
     handleSubmit
@@ -118,6 +119,15 @@ class SiteInfoDialog extends PureComponent {
               multiline
             />
           </SpacedFormGroup>
+          <SpacedFormGroup>
+            <FullWidthTextField
+              label="Preload Code"
+              name="preloadCode"
+              value={preloadCode}
+              onChange={handleChange}
+              multiline
+            />
+          </SpacedFormGroup>
         </DialogContent>
         <DialogActions>
           {!isNew && (
@@ -152,6 +162,7 @@ class SiteInfoDialog extends PureComponent {
       siteTransientSession,
       siteExternalUrlPatterns,
       siteInternalUrlPatterns,
+      sitePreloadCode,
       onClose
     } = this.props;
 
@@ -171,7 +182,8 @@ class SiteInfoDialog extends PureComponent {
             sessionId: siteSessionId,
             transientSession: siteTransientSession,
             externalUrlPatterns: siteExternalUrlPatterns,
-            internalUrlPatterns: siteInternalUrlPatterns
+            internalUrlPatterns: siteInternalUrlPatterns,
+            preloadCode: sitePreloadCode
           }}
           render={this.renderForm}
           onSubmit={this.submitForm}
@@ -191,6 +203,7 @@ SiteInfoDialog.propTypes = {
   siteTransientSession: PropTypes.bool,
   siteExternalUrlPatterns: PropTypes.string,
   siteInternalUrlPatterns: PropTypes.string,
+  sitePreloadCode: PropTypes.string,
   onClose: PropTypes.func,
   onSubmit: PropTypes.func
 };
@@ -205,6 +218,7 @@ SiteInfoDialog.defaultProps = {
   siteTransientSession: false,
   siteExternalUrlPatterns: "",
   siteInternalUrlPatterns: "",
+  sitePreloadCode: "",
   onClose: () => ({}),
   onSubmit: () => ({})
 };

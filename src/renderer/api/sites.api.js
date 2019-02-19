@@ -4,6 +4,10 @@ export const fetchSites = () => {
   return sendIpcRequest("get-sites");
 };
 
+export const saveSite = ({ site }) => {
+  return sendIpcRequest("save-site", { site });
+};
+
 export const updateSiteWebContent = ({ siteId, webContentId }) => {
   return sendIpcRequest("set-site-web-content", { siteId, webContentId });
 };

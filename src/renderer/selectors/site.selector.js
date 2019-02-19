@@ -30,6 +30,8 @@ export const internalUrlPatterns = createSelector(site, getOr([], "internalUrlPa
 
 export const preloadUrl = createSelector(site, get("preloadUrl"));
 
+export const preloadCode = createSelector(site, getOr("", "preloadCode"));
+
 export const unreadCount = createSelector(site, getOr(0, "unreadCount"));
 
 // Set as the `key` prop on the site's `<webview />` tag. If any of these key attributes change,

@@ -135,9 +135,12 @@ class IpcServer extends EventEmitter {
 
     console.log("[IpcServer] Handle", messageId);
 
-    this.sites.ensureReady().then((sites) => {
-      sendReply(messageId, { sites });
-    });
+    this.sites.ensureReady()
+      .then(() => {
+        sendReply(messageId, {
+          sites: this.sites.getSitesArray()
+        });
+      });
   }
 
   handleSaveSite(evt, { messageId, site }) {
@@ -145,7 +148,13 @@ class IpcServer extends EventEmitter {
 
     console.log("[IpcServer] Handle", messageId, site);
 
-    sendReply(messageId);
+    this.sites.ensureReady()
+      .then(() => (
+        this.sites.saveSite(site)
+      ))
+      .then((savedSite) => {
+        sendReply(messageId, { site: savedSite });
+      });
   }
 
   handleDeleteSite(evt, { messageId, siteId }) {

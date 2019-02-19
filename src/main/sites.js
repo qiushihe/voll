@@ -83,7 +83,7 @@ class Sites extends EventEmitter {
           }),
           (promises) => Promise.all(promises)
         ]))
-        .then(() => values(this.allSites));
+        .then(() => this);
     }
   }
 
@@ -93,6 +93,23 @@ class Sites extends EventEmitter {
 
   getSitesArray() {
     return values(this.allSites);
+  }
+
+  saveSite(site) {
+    console.log("saveSite", site);
+
+    const { id: siteId } = site;
+    const existingSite = getOr({ id: siteId }, siteId)(this.allSites);
+
+    console.log("existingSite", existingSite);
+
+    const getPreloadCode = getOr("", "preloadCode");
+    const isPreloadCodeChanged = getPreloadCode(existingSite) !== getPreloadCode(site);
+
+    console.log("isPreloadCodeChanged", isPreloadCodeChanged);
+
+    return Promise.resolve()
+      .then(() => site);
   }
 
   setUnreadCount(siteId, unreadCount) {

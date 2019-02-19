@@ -2,6 +2,7 @@ import { createAction } from "redux-actions";
 
 import {
   fetchSites as fetchSitesRequest,
+  saveSite as saveSiteRequest,
   updateSiteWebContent as updateSiteWebContentRequest,
   updateSiteUnreadCount as updateSiteUnreadCountRequest,
   fetchActiveSiteId as fetchActiveSiteIdRequest,
@@ -27,7 +28,8 @@ export const siteAttributes = [
   "transientSession",
   "externalUrlPatterns",
   "internalUrlPatterns",
-  "preloadUrl"
+  "preloadUrl",
+  "preloadCode"
 ];
 
 export const clearSites = createAction(SITES_CLEAR_SITES);
@@ -46,6 +48,12 @@ export const fetchSites = () => (dispatch) => {
   return fetchSitesRequest().then(({ sites }) => {
     dispatch(clearSites());
     dispatch(addSites({ sites }));
+  });
+};
+
+export const saveSite = ({ site }) => (dispatch) => {
+  return saveSiteRequest({ site }).then(({ site: savedSite }) => {
+    console.log("savedSite", savedSite);
   });
 };
 

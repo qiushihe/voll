@@ -1,6 +1,7 @@
 import { join as joinPath } from "path";
 import { lstat, mkdir, writeFile } from "graceful-fs";
 import rimraf from "rimraf";
+import md5 from "md5";
 import compact from "lodash/fp/compact";
 
 import PRELOAD_CORE from "raw-loader!/templates/preload.js";
@@ -35,11 +36,17 @@ class Preloads {
 
   setupPreload({ site }) {
     const { id: siteId, preloadCode } = site;
-    const preloadFilePath = joinPath(this.preloadsDirPath, `${siteId}.js`);
 
     const preloadFileContent = compact([PRELOAD_CORE, preloadCode])
       .join("\n")
       .replace("$$$SPELL_CHECK_LANGUAGE$$$", this.spellCheckLanguage);
+
+    // TODO: Should delete the previous preload file when a new one with different
+    //       checksum is generated.
+    const preloadFilePath = joinPath(
+      this.preloadsDirPath,
+      `${siteId}--${md5(preloadFileContent)}.js`
+    );
 
     return new Promise((resolve, reject) => {
       writeFile(
