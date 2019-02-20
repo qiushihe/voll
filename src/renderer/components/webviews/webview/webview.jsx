@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 
 import contextMenu from "/common/context-menu";
+import {sessionId} from '/renderer/selectors/site.selector';
 
 const Base = styled.div`
   display: flex;

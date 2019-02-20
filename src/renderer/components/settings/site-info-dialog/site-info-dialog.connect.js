@@ -12,6 +12,7 @@ import {
 import {
   name,
   url,
+  index,
   iconSrc,
   sessionId,
   transientSession,
@@ -29,6 +30,7 @@ export default connect(
       isOpen: showingSiteInfo(state, ownProps),
       isNew: showInfoSiteIsNew(state, ownProps),
       siteId: siteId,
+      siteIndex: index(state, { ...ownProps, siteId }),
       siteName: name(state, { ...ownProps, siteId }),
       siteUrl: url(state, { ...ownProps, siteId }),
       siteIconUrl: iconSrc(state, { ...ownProps, siteId }),
@@ -41,14 +43,20 @@ export default connect(
   },
   (dispatch) => ({
     onClose: () => dispatch(hideSiteInfo()),
-    onSave: ({ site }) => dispatch(saveSite({ site }))
+    onSave: ({ site, onSuccess, onError }) => dispatch(saveSite({ site, onSuccess, onError }))
   }),
   (stateProps, dispatchProps, ownProps) => ({
     ...ownProps,
     ...stateProps,
     ...dispatchProps,
-    onSubmit: (values) => dispatchProps.onSave({
-      site: { ...values, id: stateProps.siteId }
+    onSubmit: ({ site, onSuccess, onError } = {}) => dispatchProps.onSave({
+      site: {
+        ...site,
+        id: stateProps.siteId,
+        index: stateProps.siteIndex
+      },
+      onSuccess,
+      onError
     })
   })
 )(SiteInfoDialog);

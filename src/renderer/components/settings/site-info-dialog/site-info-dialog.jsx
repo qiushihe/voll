@@ -147,9 +147,22 @@ class SiteInfoDialog extends PureComponent {
   }
 
   submitForm(values, { setSubmitting }) {
-    const { onSubmit } = this.props;
-    onSubmit(values);
-    setSubmitting(false);
+    const { onSubmit, onClose } = this.props;
+
+    onSubmit({
+      site: {
+        ...values,
+        internalUrlPatterns: `${values.internalUrlPatterns}`.trim().split("\n"),
+        externalUrlPatterns: `${values.externalUrlPatterns}`.trim().split("\n")
+      },
+      onSuccess: () => {
+        setSubmitting(false);
+        onClose();
+      },
+      onError: () => {
+        setSubmitting(false);
+      }
+    });
   }
 
   render() {

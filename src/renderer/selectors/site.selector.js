@@ -12,7 +12,7 @@ export const site = createSelector(
   (siteId, sites) => find({ id: siteId })(sites)
 );
 
-export const id = createSelector(site, get("id"));
+export const index = createSelector(site, get("index"));
 
 export const name = createSelector(site, get("name"));
 

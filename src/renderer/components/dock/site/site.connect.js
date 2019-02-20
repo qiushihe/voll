@@ -2,7 +2,7 @@ import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 
 import { showLabelInDock, hideUnreadBadge } from "/renderer/selectors/preferences.selector";
-import { id, name, iconSrc, unreadCount } from "/renderer/selectors/site.selector";
+import { name, iconSrc, unreadCount } from "/renderer/selectors/site.selector";
 import { activeSiteId } from "/renderer/selectors/webviews.selector";
 
 import { activateSite } from "/renderer/actions/webviews.action";
@@ -12,7 +12,6 @@ import Site from "./site";
 
 export default connect(
   createStructuredSelector({
-    id,
     name,
     iconSrc,
     unreadCount,
@@ -30,7 +29,7 @@ export default connect(
     ...ownProps,
     ...stateProps,
     ...dispatchProps,
-    isActive: stateProps.id === stateProps.activeSiteId,
-    activateSite: () => dispatchProps.activateSite({ siteId: stateProps.id })
+    isActive: ownProps.siteId === stateProps.activeSiteId,
+    activateSite: () => dispatchProps.activateSite({ siteId: ownProps.siteId })
   })
 )(Site);

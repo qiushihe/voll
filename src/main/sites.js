@@ -77,8 +77,10 @@ class Sites extends EventEmitter {
             console.log("[Sites] Setup site preload", siteId, site.name, site.url);
 
             return this.preloads.setupPreload({ site }).then((preloadFilePath) => {
-              site.preloadUrl = `file:///${preloadFilePath}`;
-              this.allSites[siteId] = site;
+              this.allSites[siteId] = {
+                ...site,
+                preloadUrl: `file:///${preloadFilePath}`
+              };
             });
           }),
           (promises) => Promise.all(promises)
@@ -95,21 +97,35 @@ class Sites extends EventEmitter {
     return values(this.allSites);
   }
 
-  saveSite(site) {
-    console.log("saveSite", site);
-
-    const { id: siteId } = site;
+  saveSite(siteToSave) {
+    const { id: siteId } = siteToSave;
     const existingSite = getOr({ id: siteId }, siteId)(this.allSites);
 
-    console.log("existingSite", existingSite);
-
     const getPreloadCode = getOr("", "preloadCode");
-    const isPreloadCodeChanged = getPreloadCode(existingSite) !== getPreloadCode(site);
+    const isPreloadCodeChanged = getPreloadCode(existingSite) !== getPreloadCode(siteToSave);
 
-    console.log("isPreloadCodeChanged", isPreloadCodeChanged);
-
+    console.log("[Sites] Save site", siteId);
     return Promise.resolve()
-      .then(() => site);
+      .then(() => {
+        if (isPreloadCodeChanged) {
+          console.log("[Sites] Preload code changed");
+          return this.preloads.setupPreload({ site: siteToSave })
+            .then((preloadFilePath) => {
+              console.log("[Sites] New preload file path", preloadFilePath);
+              return {
+                ...siteToSave,
+                preloadUrl: `file:///${preloadFilePath}`
+              };
+            });
+        } else {
+          console.log("[Sites] Preload code unchanged");
+          return siteToSave;
+        }
+      })
+      .then((site) => {
+        this.allSites[siteId] = site;
+        return site;
+      });
   }
 
   setUnreadCount(siteId, unreadCount) {

@@ -146,12 +146,10 @@ class IpcServer extends EventEmitter {
   handleSaveSite(evt, { messageId, site }) {
     const sendReply = getReplier(evt.sender);
 
-    console.log("[IpcServer] Handle", messageId, site);
+    console.log("[IpcServer] Handle", messageId);
 
     this.sites.ensureReady()
-      .then(() => (
-        this.sites.saveSite(site)
-      ))
+      .then(() => this.sites.saveSite(site))
       .then((savedSite) => {
         sendReply(messageId, { site: savedSite });
       });
