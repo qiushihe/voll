@@ -41,6 +41,9 @@ class MainWindow extends EventEmitter {
       icon: Icon.getIconPath(),
 
       webPreferences: {
+        nodeIntegration: true,
+        webviewTag: true,
+
         // Force overlay scrollbar
         enableBlinkFeatures: "OverlayScrollbars",
 
