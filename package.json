@@ -1,6 +1,10 @@
 {
   "name": "voll",
   "version": "1.6.2",
+  "description": "Voll",
+  "repository": "https://github.com/qiushihe/voll",
+  "license": "UNLICENSED",
+  "private": true,
   "scripts": {
     "clean": "shx rm -fr ./dist/* ./build/*",
     "build-dev": "webpack --mode development",
@@ -29,7 +33,7 @@
     "classnames": "^2.2.6",
     "copy-webpack-plugin": "^4.6.0",
     "css-loader": "^2.1.0",
-    "electron": "^3.0.11",
+    "electron": "^4.0.6",
     "electron-dl": "^1.13.0",
     "electron-packager": "^13.0.0",
     "file-loader": "^3.0.1",
