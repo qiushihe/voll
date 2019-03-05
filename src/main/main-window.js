@@ -110,6 +110,7 @@ class MainWindow extends EventEmitter {
 
     webContents.on("will-navigate", (evt, url) => {
       if (!isUrlInternal(url)) {
+        console.log("[MainWindow] Opening external URL", url);
         evt.preventDefault();
         electronShell.openExternal(url);
       }
