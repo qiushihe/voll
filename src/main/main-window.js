@@ -131,6 +131,7 @@ class MainWindow extends EventEmitter {
 
     webContents.on("new-window", (evt, url) => {
       if (!isUrlInternal(url)) {
+        console.log("[MainWindow] Intercepting external URL from new-window", url);
         evt.preventDefault();
         electronShell.openExternal(url);
       }

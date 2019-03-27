@@ -5,9 +5,9 @@ import { ipcMain as electronIpcMain } from "electron";
 import flow from "lodash/fp/flow";
 import get from "lodash/fp/get";
 import getOr from "lodash/fp/getOr";
-import isEmpty from "lodash/fp/isEmpty";
 import sortBy from "lodash/fp/sortBy";
 import first from "lodash/fp/first";
+import flattenDepth from "lodash/fp/flattenDepth";
 
 const getReplier = (sender) => (...args) => sender.send(...args);
 
@@ -151,10 +151,10 @@ class IpcServer extends EventEmitter {
     sendReply(messageId);
   }
 
-  handleSyncCheckSpell(evt, word) {
-    // Don't log the spell check request because it happens for every single individual words.
-    // console.log("[IpcServer] Handle check-spell", word);
-    evt.returnValue = this.spell.checkSpell(word);
+  handleSyncCheckSpell(evt, words) {
+    // Don't log the spell check request because it happens way too often.
+    // console.log("[IpcServer] Handle check-spell", words);
+    evt.returnValue = this.spell.checkWords(flattenDepth(99)([words]));
   }
 }
 
