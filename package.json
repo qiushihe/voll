@@ -1,17 +1,18 @@
 {
   "name": "voll",
-  "version": "1.7.1",
+  "version": "1.8.0",
   "description": "Voll",
   "repository": "https://github.com/qiushihe/voll",
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
     "clean": "shx rm -fr ./dist/* ./build/*",
-    "build-dev": "webpack --mode development",
-    "build-prod": "webpack -p --mode production",
+    "build-dev": "npm run clean && webpack --mode development",
+    "build-prod": "npm run clean && webpack -p --mode production",
     "build-icons": "node ./scripts/rebuild-icons.js",
-    "start": "electron ./build",
-    "package": "run-script-os",
+    "build-package-json": "node ./scripts/rebuild-package-json.js",
+    "start": "npm run build-dev && npm run build-package-json && npm run build-icons && electron ./build",
+    "package": "npm run build-prod && npm run build-package-json && npm run build-icons && run-script-os",
     "package:linux": "electron-packager ./build --icon=./build/lolgo-512.png --out=./dist",
     "package:darwin": "electron-packager ./build --icon=./build/lolgo.icns --out=./dist",
     "package:win32": "electron-packager ./build --icon=./build/lolgo.ico --out=./dist"

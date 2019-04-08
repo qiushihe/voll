@@ -12,7 +12,7 @@ class Spell {
     console.log("[Spell] language", this.language);
 
     this.dictionary = null;
-    this.dictionaryReady = new Promise((resolve, reject) => {
+    this.readyPromise = new Promise((resolve, reject) => {
       SpellChecker.getDictionary(this.language, this.dictionariesPath, (err, result) => {
         if (err) {
           console.log("[Spell] failed to load dictionary", err);
@@ -31,7 +31,7 @@ class Spell {
   }
 
   ensureReady() {
-    return this.dictionaryReady;
+    return this.readyPromise;
   }
 
   checkSpell(word) {

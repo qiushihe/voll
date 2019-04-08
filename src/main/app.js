@@ -1,3 +1,5 @@
+import { join as joinPath } from "path";
+import { readFileSync } from "fs";
 import debounce from "lodash/fp/debounce";
 
 import {
@@ -6,6 +8,7 @@ import {
 } from "electron";
 
 import contextMenu from "/common/context-menu";
+import combineResult from "/common/combine-results";
 
 import IpcServer from "./ipc-server";
 import Icon from "./icon";
@@ -18,6 +21,7 @@ import Spell from "./spell";
 
 class App {
   constructor() {
+    this.packageJson = null;
     this.mainWindow = null;
     this.trayIcon = null;
 
@@ -59,6 +63,12 @@ class App {
       electronApp.quit();
     }
 
+    this.packageJson = JSON.parse(
+      readFileSync(joinPath(electronApp.getAppPath(), "package.json"), {
+        encoding: "utf8"
+      })
+    );
+
     this.ipcServer.start();
 
     contextMenu({
@@ -77,12 +87,20 @@ class App {
   }
 
   createMainWindow() {
-    return this.settings.ensureReady().then(({
-      localSettings: { posX, posY, width, height }
-    }) => {
+    return combineResult(
+      ({ ipcServer }) => ipcServer.getActiveSiteId(),
+      ({ settings }) => settings.ensureReady().then(({ localSettings }) => localSettings),
+      (activeSiteId, localSettings) => ({ activeSiteId, ...localSettings })
+    )({
+      settings: this.settings,
+      ipcServer: this.ipcServer
+    }).then(({ activeSiteId, posX, posY, width, height }) => {
       this.mainWindow = new MainWindow({
         preventClose: false, // TODO: Read from remote settings
         ipcServer: this.ipcServer,
+        sites: this.sites,
+        appVersion: this.packageJson.version,
+        activeSiteId,
         posX,
         posY,
         width,
@@ -139,12 +157,6 @@ class App {
   }
 
   handleSetTotalUnreadCount({ totalUnreadCount }) {
-    if (totalUnreadCount > 0) {
-      this.mainWindow.setTitle(`Voll (${totalUnreadCount})`);
-    } else {
-      this.mainWindow.setTitle("Voll");
-    }
-
     // Doesn't work on Windows.
     electronApp.setBadgeCount(totalUnreadCount);
   }

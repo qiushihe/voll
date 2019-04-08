@@ -12,23 +12,25 @@ class Settings {
     });
 
     this.remoteSettings = null;
+
+    this.readyPromise = Promise.resolve().then(() => {
+      return this.localSettings.getSettings().then((localSettings) => {
+        this.remoteSettings = new RemoteSettings({
+          settingsJsonUrl: localSettings.settingsJsonUrl
+        });
+        return this.remoteSettings.getSettings();
+      });
+    });
   }
 
   ensureReady() {
-    if (this.remoteSettings) {
+    return this.readyPromise.then(() => {
       return this.localSettings.getSettings().then((localSettings) => {
         return this.remoteSettings.getSettings().then((remoteSettings) => {
           return { localSettings, remoteSettings };
         });
       });
-    } else {
-      return this.localSettings.getSettings().then((localSettings) => {
-        this.remoteSettings = new RemoteSettings({ settingsJsonUrl: localSettings.settingsJsonUrl });
-        return this.remoteSettings.getSettings().then((remoteSettings) => {
-          return { localSettings, remoteSettings };
-        });
-      });
-    }
+    });
   }
 
   updateLocalSettings(updates) {

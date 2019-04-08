@@ -1,3 +1,5 @@
+import isEmpty from "lodash/fp/isEmpty";
+
 import {
   app as electronApp,
   shell as electronShell,
@@ -14,6 +16,9 @@ class MainWindow extends EventEmitter {
   constructor({
     preventClose,
     ipcServer,
+    sites,
+    appVersion,
+    activeSiteId,
     posX,
     posY,
     width,
@@ -23,8 +28,12 @@ class MainWindow extends EventEmitter {
 
     this.preventClose = preventClose; // If window should be hidden instead of closed.
     this.ipcServer = ipcServer;
+    this.sites = sites;
+    this.appVersion = appVersion;
+    this.activeSiteId = activeSiteId;
 
     this.allWebContents = {};
+    this.unreadCounts = {};
 
     this.browserWindow = new ElectronBrowserWindow({
       title: "Voll",
@@ -59,6 +68,8 @@ class MainWindow extends EventEmitter {
 
     this.handleElectronAppWebContentsCreated = this.handleElectronAppWebContentsCreated.bind(this);
     this.handleSetSiteWebContent = this.handleSetSiteWebContent.bind(this);
+    this.handleSetActiveSiteId = this.handleSetActiveSiteId.bind(this);
+    this.handleSiteUnreadCountChanged = this.handleSiteUnreadCountChanged.bind(this);
 
     this.browserWindow.on("page-title-updated", this.handleMainWindowTitleUpdated);
     this.browserWindow.on("resize", this.handleMainWindowResizeMove);
@@ -68,6 +79,8 @@ class MainWindow extends EventEmitter {
 
     electronApp.on("web-contents-created", this.handleElectronAppWebContentsCreated);
     this.ipcServer.on("set-site-web-content", this.handleSetSiteWebContent);
+    this.ipcServer.on("set-active-site-id", this.handleSetActiveSiteId);
+    this.sites.on("site-unread-count-changed", this.handleSiteUnreadCountChanged);
   }
 
   show() {
@@ -78,12 +91,27 @@ class MainWindow extends EventEmitter {
     this.browserWindow.hide();
   }
 
-  setTitle(title) {
-    this.browserWindow.setTitle(title);
-  }
-
   setPreventClose(preventClose) {
     this.preventClose = preventClose;
+  }
+
+  rebuildTitle() {
+    const versionString = !isEmpty(this.appVersion)
+      ? `v${this.appVersion}`
+      : "";
+
+    const unreadCount = this.unreadCounts[this.activeSiteId];
+    const unreadCountString = unreadCount > 0
+      ? `(${unreadCount})`
+      : "";
+
+    const newTitle = [
+      "Voll",
+      versionString,
+      unreadCountString
+    ].join(" ").trim();
+
+    this.browserWindow.setTitle(newTitle);
   }
 
   // This `web-contents-created` event is fired by Electron itself when *any* WebContents object is created.
@@ -119,6 +147,16 @@ class MainWindow extends EventEmitter {
     this.emit("site-web-content-ready", { siteId: site.id, webContentId });
   }
 
+  handleSetActiveSiteId({ activeSiteId }) {
+    this.activeSiteId = activeSiteId;
+    this.rebuildTitle();
+  }
+
+  handleSiteUnreadCountChanged({ siteId, unreadCount }) {
+    this.unreadCounts[siteId] = unreadCount;
+    this.rebuildTitle();
+  }
+
   handleMainWindowTitleUpdated(evt) {
     evt.preventDefault();
   }
@@ -147,6 +185,8 @@ class MainWindow extends EventEmitter {
 
     electronApp.removeListener("web-contents-created", this.handleElectronAppWebContentsCreated);
     this.ipcServer.removeListener("set-site-web-content", this.handleSetSiteWebContent);
+    this.ipcServer.removeListener("set-active-site-id", this.handleSetActiveSiteId);
+    this.sites.removeListener("site-unread-count-changed", this.handleSiteUnreadCountChanged);
 
     this.allWebContents = {};
     this.emit("closed");

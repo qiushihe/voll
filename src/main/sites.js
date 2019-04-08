@@ -24,41 +24,41 @@ class Sites extends EventEmitter {
     this.settings = settings;
     this.spell = spell;
     this.allSites = {};
-  }
 
-  ensureReady() {
-    if (this.preloads) {
-      return new Promise((resolve) => {
-        resolve(values(this.allSites));
-      });
-    } else {
+    this.readyPromise = this.spell.ensureReady().then(() => {
       this.preloads = new Preloads({
         preloadsDirPath: joinPath(electronApp.getPath("userData"), "site-preloads"),
         spellCheckLanguage: this.spell.getLanguage()
       });
 
-      return this.preloads.preparePreloads()
-        .then(() => this.settings.ensureReady())
-        .then(({ remoteSettings }) => {
-          const sitesReady = flow([
-            getOr([], "sites"),
-            uncappedMap((_site, index) => {
-              const siteId = uuidv4();
-              const site = { ..._site, id: siteId, index };
+      return this.preloads.preparePreloads().then(() => (
+        this.settings.ensureReady()
+      )).then(({ remoteSettings }) => {
+        const sitesReady = flow([
+          getOr([], "sites"),
+          uncappedMap((_site, index) => {
+            const siteId = uuidv4();
+            const site = { ..._site, id: siteId, index };
 
-              console.log("[Sites] Setup site", siteId, site.name, site.url);
+            console.log("[Sites] Setup site", siteId, site.name, site.url);
 
-              return this.preloads.setupPreload({ site }).then((preloadFilePath) => {
-                site.preloadUrl = `file:///${preloadFilePath}`;
-                this.allSites[siteId] = site;
-              });
-            }),
-            (promises) => Promise.all(promises)
-          ])(remoteSettings);
+            return this.preloads.setupPreload({ site }).then((preloadFilePath) => {
+              site.preloadUrl = `file:///${preloadFilePath}`;
+              this.allSites[siteId] = site;
+            });
+          }),
+          (promises) => Promise.all(promises)
+        ])(remoteSettings);
 
-          return sitesReady.then(() => values(this.allSites));
-        });
-    }
+        return sitesReady.then(() => values(this.allSites));
+      });
+    });
+  }
+
+  ensureReady() {
+    return this.readyPromise.then(() => {
+      return this.getSitesArray();
+    });
   }
 
   getSiteById(siteId) {
