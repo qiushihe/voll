@@ -24,14 +24,8 @@ class Sites extends EventEmitter {
     this.settings = settings;
     this.spell = spell;
     this.allSites = {};
-  }
 
-  ensureReady() {
-    if (this.preloads) {
-      return new Promise((resolve) => {
-        resolve(values(this.allSites));
-      });
-    } else {
+    this.readyPromise = this.spell.ensureReady().then(() => {
       this.preloads = new Preloads({
         preloadsDirPath: joinPath(electronApp.getPath("userData"), "site-preloads"),
         spellCheckLanguage: this.spell.getLanguage()
@@ -86,7 +80,11 @@ class Sites extends EventEmitter {
           (promises) => Promise.all(promises)
         ]))
         .then(() => this);
-    }
+    });
+  }
+
+  ensureReady() {
+    return this.readyPromise;
   }
 
   getSiteById(siteId) {

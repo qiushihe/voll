@@ -12,10 +12,8 @@ class Settings {
     });
 
     this.remoteSettings = null;
-  }
 
-  ensureReady() {
-    return Promise.resolve()
+    this.readyPromise = Promise.resolve()
       .then(() => this.localSettings.ensureReady())
       .then(() => {
         if (!this.remoteSettings) {
@@ -29,6 +27,10 @@ class Settings {
       })
       .then(() => this.remoteSettings.ensureReady())
       .then(() => this);
+  }
+
+  ensureReady() {
+    return this.readyPromise;
   }
 
   getLocalSettings() {

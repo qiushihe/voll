@@ -190,23 +190,33 @@ class IpcServer extends EventEmitter {
 
     console.log("[IpcServer] Handle", messageId);
 
-    this.settings.ensureReady()
-      .then((settings) => settings.getLocalSettings())
-      .then((localSettings) => localSettings.getSitesStates())
-      .then(({ activeSiteIndex }) => {
-        const activeSiteId = flow([
-          sortBy(get("index")),
-          get(`${activeSiteIndex}.id`)
-        ])(this.sites.getSitesArray());
+    this.getActiveSiteId().then((activeSiteId) => {
+      sendReply(messageId, { activeSiteId });
+    });
+  }
 
-        const defaultActiveSiteId = flow([
-          sortBy(get("index")),
-          first,
-          get("id")
-        ])(this.sites.getSitesArray());
+  getActiveSiteId() {
+    return Promise.all([
+      this.sites.ensureReady().then(() => this.sites.getSitesArray()),
+      this.settings.ensureReady().then((settings) => (
+        settings.getLocalSettings()
+      )).then((localSettings) => (
+        localSettings.getSitesStates()
+      ))
+    ]).then(([sites, { activeSiteIndex }]) => {
+      const activeSiteId = flow([
+        sortBy(get("index")),
+        get(`${activeSiteIndex}.id`)
+      ])(sites);
 
-        sendReply(messageId, { activeSiteId: (activeSiteId || defaultActiveSiteId) });
-      });
+      const defaultActiveSiteId = flow([
+        sortBy(get("index")),
+        first,
+        get("id")
+      ])(sites);
+
+      return activeSiteId || defaultActiveSiteId;
+    });
   }
 
   handleSetActiveSiteId(evt, { messageId, activeSiteId }) {
@@ -217,6 +227,8 @@ class IpcServer extends EventEmitter {
     this.settings.updateLocalSettings({
       activeSiteIndex: getOr(0, "index")(this.sites.getSiteById(activeSiteId))
     });
+
+    this.emit("set-active-site-id", { activeSiteId });
 
     sendReply(messageId);
   }
