@@ -1,3 +1,5 @@
+import { join as joinPath } from "path";
+import { readFileSync } from "fs";
 import debounce from "lodash/fp/debounce";
 
 import {
@@ -19,6 +21,7 @@ import Spell from "./spell";
 
 class App {
   constructor() {
+    this.packageJson = null;
     this.mainWindow = null;
     this.trayIcon = null;
 
@@ -60,6 +63,12 @@ class App {
       electronApp.quit();
     }
 
+    this.packageJson = JSON.parse(
+      readFileSync(joinPath(electronApp.getAppPath(), "package.json"), {
+        encoding: "utf8"
+      })
+    );
+
     this.ipcServer.start();
 
     contextMenu({
@@ -90,6 +99,7 @@ class App {
         preventClose: false, // TODO: Read from remote settings
         ipcServer: this.ipcServer,
         sites: this.sites,
+        appVersion: this.packageJson.version,
         activeSiteId,
         posX,
         posY,

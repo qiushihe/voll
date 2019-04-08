@@ -1,3 +1,5 @@
+import isEmpty from "lodash/fp/isEmpty";
+
 import {
   app as electronApp,
   shell as electronShell,
@@ -15,6 +17,7 @@ class MainWindow extends EventEmitter {
     preventClose,
     ipcServer,
     sites,
+    appVersion,
     activeSiteId,
     posX,
     posY,
@@ -26,6 +29,7 @@ class MainWindow extends EventEmitter {
     this.preventClose = preventClose; // If window should be hidden instead of closed.
     this.ipcServer = ipcServer;
     this.sites = sites;
+    this.appVersion = appVersion;
     this.activeSiteId = activeSiteId;
 
     this.allWebContents = {};
@@ -92,6 +96,10 @@ class MainWindow extends EventEmitter {
   }
 
   rebuildTitle() {
+    const versionString = !isEmpty(this.appVersion)
+      ? `v${this.appVersion}`
+      : "";
+
     const unreadCount = this.unreadCounts[this.activeSiteId];
     const unreadCountString = unreadCount > 0
       ? `(${unreadCount})`
@@ -99,6 +107,7 @@ class MainWindow extends EventEmitter {
 
     const newTitle = [
       "Voll",
+      versionString,
       unreadCountString
     ].join(" ").trim();
 
