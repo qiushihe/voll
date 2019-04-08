@@ -110,21 +110,30 @@ class IpcServer extends EventEmitter {
 
     console.log("[IpcServer] Handle", messageId);
 
-    this.settings.ensureReady().then(({ localSettings }) => {
+    this.getActiveSiteId().then((activeSiteId) => {
+      sendReply(messageId, { activeSiteId });
+    })
+  }
+
+  getActiveSiteId() {
+    return Promise.all([
+      this.sites.ensureReady(),
+      this.settings.ensureReady()
+    ]).then(([sites, { localSettings }]) => {
       const activeSiteIndex = get("activeSiteIndex")(localSettings);
 
       const activeSiteId = flow([
         sortBy(get("index")),
         get(`${activeSiteIndex}.id`)
-      ])(this.sites.getSitesArray());
+      ])(sites);
 
       const defaultActiveSiteId = flow([
         sortBy(get("index")),
         first,
         get("id")
-      ])(this.sites.getSitesArray());
+      ])(sites);
 
-      sendReply(messageId, { activeSiteId: (activeSiteId || defaultActiveSiteId) });
+      return activeSiteId || defaultActiveSiteId;
     });
   }
 
@@ -136,6 +145,8 @@ class IpcServer extends EventEmitter {
     this.settings.updateLocalSettings({
       activeSiteIndex: getOr(0, "index")(this.sites.getSiteById(activeSiteId))
     });
+
+    this.emit("set-active-site-id", { activeSiteId });
 
     sendReply(messageId);
   }
