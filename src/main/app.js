@@ -1,5 +1,5 @@
 import { join as joinPath } from "path";
-import { readFileSync } from "fs";
+import { readFileSync } from "graceful-fs";
 import debounce from "lodash/fp/debounce";
 
 import {

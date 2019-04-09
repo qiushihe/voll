@@ -67,6 +67,7 @@ module.exports = function () {
         template: resolvePath(__dirname, "src", "templates", "index.html")
       }),
       new CopyWebpackPlugin([
+        { from: resolvePath(__dirname, "src", "templates", "preload.js"), to: resolvePath(__dirname, "build") },
         { from: resolvePath(__dirname, "node_modules", "simple-spellchecker", "dict"), to: resolvePath(__dirname, "build", "dictionaries") }
       ])
     ]
