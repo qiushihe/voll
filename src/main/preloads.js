@@ -1,15 +1,40 @@
+import { app as electronApp } from "electron";
 import { join as joinPath } from "path";
-import { lstat, mkdir, writeFile } from "graceful-fs";
+import { lstat, mkdir, writeFile, readFile } from 'graceful-fs';
 import rimraf from "rimraf";
 import md5 from "md5";
 import compact from "lodash/fp/compact";
-
-import PRELOAD_CORE from "raw-loader!/templates/preload.js";
 
 class Preloads {
   constructor({ preloadsDirPath, spellCheckLanguage }) {
     this.preloadsDirPath = preloadsDirPath;
     this.spellCheckLanguage = spellCheckLanguage;
+  }
+
+  promisedReadFile() {
+    const preloadCorePath = joinPath(electronApp.getAppPath(), "preload.js");
+
+    return new Promise((resolve, reject) => {
+      readFile(preloadCorePath, "utf8", (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+  }
+
+  promisedWriteFile(path, content) {
+    return new Promise((resolve, reject) => {
+      writeFile(path, content, "utf8", (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(path);
+        }
+      });
+    });
   }
 
   preparePreloads() {
@@ -37,32 +62,57 @@ class Preloads {
   setupPreload({ site }) {
     const { id: siteId, preloadCode } = site;
 
-    const preloadFileContent = compact([PRELOAD_CORE, preloadCode])
-      .join("\n")
-      .replace("$$$SPELL_CHECK_LANGUAGE$$$", this.spellCheckLanguage);
+    return this.promisedReadFile().then((preloadCore) => {
+      // console.log("[Preload] Got preload core.", preloadCore);
 
-    // TODO: Should delete the previous preload file when a new one with different
-    //       checksum is generated.
-    const preloadFilePath = joinPath(
-      this.preloadsDirPath,
-      `${siteId}--${md5(preloadFileContent)}.js`
-    );
+      const preloadFileContent = compact([preloadCore, preloadCode])
+        .join("\n")
+        .replace("$$$SPELL_CHECK_LANGUAGE$$$", this.spellCheckLanguage);
 
-    return new Promise((resolve, reject) => {
-      writeFile(
-        preloadFilePath,
-        preloadFileContent,
-        "utf8",
-        (err) => {
-          if (err) {
-            console.error("[Preload] Error setting up preload for site", siteId);
-            reject(err);
-          } else {
-            console.log("[Preload] Setup preload for site", siteId);
-            resolve(preloadFilePath);
-          }
-        }
+      return this.promisedWriteFile(preloadFilePath, preloadFileContent).then(() => {
+        console.log("[Preload] Setup preload for site", siteId);
+
+        // This needs to be what this function ultimately resolve to.
+        return preloadFilePath;
+      }).catch((err) => {
+        console.error("[Preload] Error setting up preload for site", siteId, err);
+        throw err;
+      });
+    }).catch((err) => {
+      console.error("[Preload] Error reading preload core.", err);
+      throw err;
+    });
+  }
+
+  setupPreload({ site }) {
+    const { id: siteId, preloadCode } = site;
+
+    return this.promisedReadFile().then((preloadCore) => {
+      // console.log("[Preload] Got preload core.", preloadCore);
+
+      const preloadFileContent = compact([preloadCore, preloadCode])
+        .join("\n")
+        .replace("$$$SPELL_CHECK_LANGUAGE$$$", this.spellCheckLanguage);
+
+      // TODO: Should delete the previous preload file when a new one with different
+      //       checksum is generated.
+      const preloadFilePath = joinPath(
+        this.preloadsDirPath,
+        `${siteId}--${md5(preloadFileContent)}.js`
       );
+
+      return this.promisedWriteFile(preloadFilePath, preloadFileContent).then(() => {
+        console.log("[Preload] Setup preload for site", siteId);
+
+        // This needs to be what this function ultimately resolve to.
+        return preloadFilePath;
+      }).catch((err) => {
+        console.error("[Preload] Error setting up preload for site", siteId, err);
+        throw err;
+      });
+    }).catch((err) => {
+      console.error("[Preload] Error reading preload core.", err);
+      throw err;
     });
   }
 }
