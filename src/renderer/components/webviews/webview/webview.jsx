@@ -38,12 +38,11 @@ class Webview extends PureComponent {
     const { onMount, onIpcAction } = this.props;
 
     const webview = this.webviewRef.current;
-    const webContents = webview.getWebContents();
 
     contextMenu({
       window: webview,
       spellChecker: {
-        checkSpell: (word) => ipcRenderer.sendSync("sync-check-spell", word)
+        checkWords: (word) => ipcRenderer.sendSync("sync-check-spell", word)
       },
       showCopyImageAddress: true,
       showSaveImageAs: true,
@@ -62,7 +61,12 @@ class Webview extends PureComponent {
       onIpcAction({ evtName: evt.channel, evtArgs: evt.args});
     });
 
-    onMount({ webContentId: webContents.id });
+    // TODO: Figure out:
+    //       1. Why we can call `webview.getWebContents` here without having to wait for
+    //          the `webview`'s `dom-ready` event; and ...
+    //       2. Why is it that if we were to wait for the `webview`'s `dom-ready` event
+    //          the `id` of the webContents would be different.
+    onMount({ webContentId: webview.getWebContents().id });
   }
 
   render() {
