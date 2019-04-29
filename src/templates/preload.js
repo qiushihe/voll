@@ -12,13 +12,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
 var webFrame = Electron.webFrame;
 
-webFrame.setSpellCheckProvider("$$$SPELL_CHECK_LANGUAGE$$$", false, {
-  spellCheck: function (word) {
-    var result = ipcRenderer.sendSync("sync-check-spell", word);
-    if (result) {
-      return !result.misspelled;
-    } else {
-      return true;
-    }
+webFrame.setSpellCheckProvider("$$$SPELL_CHECK_LANGUAGE$$$", {
+  spellCheck: function (words, callback) {
+    var misspeltWords = [];
+
+    // TODO: Use __sendToVoll and rely on the renderer process to proxy back
+    //       the response (so we don't have to implement async message handling
+    //       inside the preload code).
+    ipcRenderer.sendSync("sync-check-spell", words).map(({ word, misspelled }) => {
+      if (misspelled) {
+        misspeltWords.push(word);
+      }
+    });
+
+    callback(misspeltWords);
   }
 });

@@ -1,4 +1,7 @@
 import { join as joinPath } from "path";
+import flow from "lodash/fp/flow";
+import map from "lodash/fp/map";
+import flattenDepth from "lodash/fp/flattenDepth";
 
 import { app as electronApp } from "electron";
 import SpellChecker from "simple-spellchecker";
@@ -34,12 +37,19 @@ class Spell {
     return this.readyPromise;
   }
 
-  checkSpell(word) {
-    if (this.dictionary) {
-      return this.dictionary.checkAndSuggest(word, 5, 3);
-    } else {
-      return { misspelled: false, suggestions: [] };
-    }
+  checkWords(words) {
+    const hasDictionary = !!this.dictionary;
+
+    return flow([
+      flattenDepth(99),
+      map((word) => {
+        const result = hasDictionary
+          ? this.dictionary.checkAndSuggest(word, 5, 3)
+          : { misspelled: false, suggestions: [] };
+
+        return { ...result, word };
+      })
+    ])([words]);
   }
 }
 

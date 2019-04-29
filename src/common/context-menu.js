@@ -5,6 +5,7 @@ import flow from "lodash/fp/flow";
 import map from "lodash/fp/map";
 import isEmpty from "lodash/fp/isEmpty";
 import isFunction from "lodash/fp/isFunction";
+import first from "lodash/fp/first";
 
 const getMaybeRemoteBrowserWindow = () => electron.BrowserWindow || electron.remote.BrowserWindow;
 
@@ -19,7 +20,7 @@ const contextMenuCreator = (options) => (win) => {
     ? options.shouldShowMenu
     : () => true;
 
-  const checkSpell = get("spellChecker.checkSpell")(options);
+  const checkWords = get("spellChecker.checkWords")(options);
 
   const windowWebContent = getWindowWebContent(win);
 
@@ -33,8 +34,10 @@ const contextMenuCreator = (options) => (win) => {
     const misspelledWord = props.misspelledWord;
     let misspelledSuggestionItems = [];
 
-    if (!isEmpty(misspelledWord) && checkSpell) {
-      const spellCheckResult = checkSpell(misspelledWord);
+    if (!isEmpty(misspelledWord) && checkWords) {
+      // We're only checking the one word so use `first` to get the result.
+      const spellCheckResult = first(checkWords([misspelledWord]));
+
       if (spellCheckResult.misspelled) {
         misspelledSuggestionItems = flow([
           map((suggestion) => ({
