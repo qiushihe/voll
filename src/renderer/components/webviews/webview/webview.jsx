@@ -73,6 +73,20 @@ class Webview extends PureComponent {
     const { url, isActive, partition, useragent, preloadUrl, showUrl } = this.props;
     const { currentUrl } = this.state;
 
+    const webviewStyles = {
+      display: "flex",
+      width: "100%",
+      height: "100%",
+
+      // By default `webview` would inherit the `visibility: hidden` style from the `Base`
+      // component but that would cause electron to garbage-collect the rendered page (or
+      // something to that affect) which causes the page to have to be completely re-rendered
+      // when switching sites.
+      // So we set `visibility: visible` here to ensure that the site's page re-renders
+      // instantly when switching sites.
+      visibility: "visible"
+    };
+
     return (
       <Base isActive={isActive}>
         {showUrl && (
@@ -80,7 +94,7 @@ class Webview extends PureComponent {
         )}
         <webview
           ref={this.webviewRef}
-          style={{ display: "flex", width: "100%", height: "100%" }}
+          style={webviewStyles}
           src={url}
           partition={partition}
           useragent={useragent}
