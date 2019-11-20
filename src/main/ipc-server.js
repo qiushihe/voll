@@ -21,7 +21,11 @@ class IpcServer extends EventEmitter {
 
     this.handleGetPreferences = this.handleGetPreferences.bind(this);
     this.handleSetPreferences = this.handleSetPreferences.bind(this);
+    this.handleGetSettings = this.handleGetSettings.bind(this);
+    this.handleSetSettings = this.handleSetSettings.bind(this);
     this.handleGetSites = this.handleGetSites.bind(this);
+    this.handleSaveSite = this.handleSaveSite.bind(this);
+    this.handleDeleteSite = this.handleDeleteSite.bind(this);
     this.handleSetSiteWebContent = this.handleSetSiteWebContent.bind(this);
     this.handleSetSiteUnreadCount = this.handleSetSiteUnreadCount.bind(this);
     this.handleGetActiveSiteId = this.handleGetActiveSiteId.bind(this);
@@ -35,7 +39,11 @@ class IpcServer extends EventEmitter {
 
     electronIpcMain.on("get-preferences", this.handleGetPreferences);
     electronIpcMain.on("set-preferences", this.handleSetPreferences);
+    electronIpcMain.on("get-settings", this.handleGetSettings);
+    electronIpcMain.on("set-settings", this.handleSetSettings);
     electronIpcMain.on("get-sites", this.handleGetSites);
+    electronIpcMain.on("save-site", this.handleSaveSite);
+    electronIpcMain.on("delete-site", this.handleDeleteSite);
     electronIpcMain.on("set-site-web-content", this.handleSetSiteWebContent);
     electronIpcMain.on("set-site-unread-count", this.handleSetSiteUnreadCount);
     electronIpcMain.on("get-active-site-id", this.handleGetActiveSiteId);
@@ -49,9 +57,10 @@ class IpcServer extends EventEmitter {
 
     console.log("[IpcServer] Handle", messageId);
 
-    this.settings.ensureReady().then(({ localSettings }) => {
-      sendReply(messageId, { preferences: getOr({}, "preferences")(localSettings) });
-    });
+    this.settings.ensureReady()
+      .then((settings) => settings.getLocalSettings())
+      .then((localSettings) => localSettings.getPreferences())
+      .then((preferences) => sendReply(messageId, { preferences }));
   }
 
   handleSetPreferences(evt, { messageId, preferences }) {
@@ -60,16 +69,65 @@ class IpcServer extends EventEmitter {
     console.log("[IpcServer] Handle", messageId);
 
     this.settings.ensureReady()
-      .then(({ localSettings }) => {
-        const currentPreferences = getOr({}, "preferences")(localSettings);
+      .then((settings) => settings.getLocalSettings())
+      .then((localSettings) => localSettings.getPreferences())
+      .then((currentPreferences) => {
         const newPreferences = {
           ...currentPreferences,
           ...(preferences || {})
         };
         return this.settings.updateLocalSettings({ preferences: newPreferences });
       })
-      .then((updatedLocalSettings) => {
-        sendReply(messageId, { preferences: getOr({}, "preferences")(updatedLocalSettings) });
+      .then((localSettings) => localSettings.getPreferences())
+      .then((updatedPreferences) => {
+        this.emit("set-preferences", { preferences: updatedPreferences });
+        sendReply(messageId, { preferences: updatedPreferences });
+      });
+  }
+
+  handleGetSettings(evt, { messageId }) {
+    const sendReply = getReplier(evt.sender);
+
+    console.log("[IpcServer] Handle", messageId);
+
+    this.settings.ensureReady()
+      .then((settings) => settings.getLocalSettings())
+      .then((localSettings) => localSettings.getRemoteParameters())
+      .then(({ settingsJsonUrl, gistAccessToken }) => {
+        sendReply(messageId, {
+          settings: { settingsJsonUrl,  gistAccessToken }
+        });
+      });
+  }
+
+  handleSetSettings(evt, { messageId, settings }) {
+    const sendReply = getReplier(evt.sender);
+
+    console.log("[IpcServer] Handle", messageId);
+
+    this.settings.ensureReady()
+      .then((settings) => settings.getLocalSettings())
+      .then((localSettings) => localSettings.getRemoteParameters())
+      .then(({
+        settingsJsonUrl: currentSettingsJsonUrl,
+        gistAccessToken: currentGistAccessToken
+      }) => (
+        this.settings.updateLocalSettings({
+          settingsJsonUrl: getOr(currentSettingsJsonUrl, "settingsJsonUrl")(settings),
+          gistAccessToken: getOr(currentGistAccessToken, "gistAccessToken")(settings)
+        })
+      ))
+      .then((localSettings) => localSettings.getRemoteParameters())
+      .then(({
+        settingsJsonUrl: updatedSettingsJsonUrl,
+        gistAccessToken: updatedGistAccessToken
+      }) => {
+        const updatedSettings = {
+          settingsJsonUrl: updatedSettingsJsonUrl,
+          gistAccessToken: updatedGistAccessToken
+        };
+        this.emit("set-settings", updatedSettings);
+        sendReply(messageId, { settings: updatedSettings });
       });
   }
 
@@ -78,9 +136,32 @@ class IpcServer extends EventEmitter {
 
     console.log("[IpcServer] Handle", messageId);
 
-    this.sites.ensureReady().then((sites) => {
-      sendReply(messageId, { sites });
-    });
+    this.sites.ensureReady()
+      .then(() => {
+        sendReply(messageId, {
+          sites: this.sites.getSitesArray()
+        });
+      });
+  }
+
+  handleSaveSite(evt, { messageId, site }) {
+    const sendReply = getReplier(evt.sender);
+
+    console.log("[IpcServer] Handle", messageId);
+
+    this.sites.ensureReady()
+      .then(() => this.sites.saveSite(site))
+      .then((savedSite) => {
+        sendReply(messageId, { site: savedSite });
+      });
+  }
+
+  handleDeleteSite(evt, { messageId, siteId }) {
+    const sendReply = getReplier(evt.sender);
+
+    console.log("[IpcServer] Handle", messageId, siteId);
+
+    sendReply(messageId);
   }
 
   handleSetSiteWebContent(evt, { messageId, siteId, webContentId }) {
@@ -112,16 +193,18 @@ class IpcServer extends EventEmitter {
 
     this.getActiveSiteId().then((activeSiteId) => {
       sendReply(messageId, { activeSiteId });
-    })
+    });
   }
 
   getActiveSiteId() {
     return Promise.all([
-      this.sites.ensureReady(),
-      this.settings.ensureReady()
-    ]).then(([sites, { localSettings }]) => {
-      const activeSiteIndex = get("activeSiteIndex")(localSettings);
-
+      this.sites.ensureReady().then(() => this.sites.getSitesArray()),
+      this.settings.ensureReady().then((settings) => (
+        settings.getLocalSettings()
+      )).then((localSettings) => (
+        localSettings.getSitesStates()
+      ))
+    ]).then(([sites, { activeSiteIndex }]) => {
       const activeSiteId = flow([
         sortBy(get("index")),
         get(`${activeSiteIndex}.id`)

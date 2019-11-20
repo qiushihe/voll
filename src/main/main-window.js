@@ -1,12 +1,12 @@
+import EventEmitter from "events";
 import isEmpty from "lodash/fp/isEmpty";
+import getOr from "lodash/fp/getOr";
 
 import {
   app as electronApp,
   shell as electronShell,
   BrowserWindow as ElectronBrowserWindow
 } from "electron";
-
-import EventEmitter from "events";
 
 import { getInternalUrlChecker } from "/main/url-checker";
 
@@ -26,12 +26,12 @@ class MainWindow extends EventEmitter {
   }) {
     super();
 
-    this.preventClose = preventClose; // If window should be hidden instead of closed.
     this.ipcServer = ipcServer;
     this.sites = sites;
     this.appVersion = appVersion;
     this.activeSiteId = activeSiteId;
 
+    this.preventClose = false; // If window should be hidden instead of closed.
     this.allWebContents = {};
     this.unreadCounts = {};
 
@@ -68,6 +68,7 @@ class MainWindow extends EventEmitter {
 
     this.handleElectronAppWebContentsCreated = this.handleElectronAppWebContentsCreated.bind(this);
     this.handleSetSiteWebContent = this.handleSetSiteWebContent.bind(this);
+    this.handleSetPreferences = this.handleSetPreferences.bind(this);
     this.handleSetActiveSiteId = this.handleSetActiveSiteId.bind(this);
     this.handleSiteUnreadCountChanged = this.handleSiteUnreadCountChanged.bind(this);
 
@@ -79,6 +80,7 @@ class MainWindow extends EventEmitter {
 
     electronApp.on("web-contents-created", this.handleElectronAppWebContentsCreated);
     this.ipcServer.on("set-site-web-content", this.handleSetSiteWebContent);
+    this.ipcServer.on("set-preferences", this.handleSetPreferences);
     this.ipcServer.on("set-active-site-id", this.handleSetActiveSiteId);
     this.sites.on("site-unread-count-changed", this.handleSiteUnreadCountChanged);
   }
@@ -148,6 +150,13 @@ class MainWindow extends EventEmitter {
     this.emit("site-web-content-ready", { siteId: site.id, webContentId });
   }
 
+  handleSetPreferences({ preferences }) {
+    const hideWindowOnClose = getOr(false, "hideWindowOnClose")(preferences);
+    if (hideWindowOnClose !== this.preventClose) {
+      this.setPreventClose(hideWindowOnClose);
+    }
+  }
+
   handleSetActiveSiteId({ activeSiteId }) {
     this.activeSiteId = activeSiteId;
     this.rebuildTitle();
@@ -186,6 +195,7 @@ class MainWindow extends EventEmitter {
 
     electronApp.removeListener("web-contents-created", this.handleElectronAppWebContentsCreated);
     this.ipcServer.removeListener("set-site-web-content", this.handleSetSiteWebContent);
+    this.ipcServer.removeListener("set-preferences", this.handleSetPreferences);
     this.ipcServer.removeListener("set-active-site-id", this.handleSetActiveSiteId);
     this.sites.removeListener("site-unread-count-changed", this.handleSiteUnreadCountChanged);
 

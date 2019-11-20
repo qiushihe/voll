@@ -11,6 +11,7 @@ import setPreferences from "./preferences/set-preferences";
 const initialState = {
   showLabelInDock: false,
   showSiteUrl: false,
+  hideUnreadBadge: false,
   hideWindowOnClose: false
 };
 

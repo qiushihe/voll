@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 
 import contextMenu from "/common/context-menu";
+import {sessionId} from '/renderer/selectors/site.selector';
 
 const Base = styled.div`
   display: flex;
@@ -21,6 +22,7 @@ const StatusBar = styled.div`
   overflow: hidden;
   padding: 3px 6px;
   border-bottom: 1px solid #efefef;
+  font-size: 12px;
 `;
 
 class Webview extends PureComponent {
@@ -70,7 +72,16 @@ class Webview extends PureComponent {
   }
 
   render() {
-    const { url, isActive, partition, useragent, preloadUrl, showUrl } = this.props;
+    const {
+      url,
+      isActive,
+      partition,
+      useragent,
+      preloadUrl,
+      checksum,
+      showUrl
+    } = this.props;
+
     const { currentUrl } = this.state;
 
     const webviewStyles = {
@@ -93,6 +104,7 @@ class Webview extends PureComponent {
           <StatusBar>{currentUrl}</StatusBar>
         )}
         <webview
+          key={checksum}
           ref={this.webviewRef}
           style={webviewStyles}
           src={url}
@@ -112,6 +124,7 @@ Webview.propTypes = {
   partition: PropTypes.string,
   useragent: PropTypes.string,
   preloadUrl: PropTypes.string,
+  checksum: PropTypes.string,
   isActive: PropTypes.bool,
   showUrl: PropTypes.bool,
   onMount: PropTypes.func,
@@ -123,6 +136,7 @@ Webview.defaultProps = {
   partition: null,
   useragent: null,
   preloadUrl: null,
+  checksum: "",
   isActive: false,
   showUrl: false,
   onMount: (() => {}),

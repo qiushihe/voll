@@ -7,8 +7,10 @@ import { withTheme } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
 import CssBaseline from "@material-ui/core/CssBaseline";
 
+import { CONTENT, ASIDE, BLOCKING_OVERLAY } from "/renderer/helpers/z-index.helper";
 import Dock from "/renderer/components/dock";
 import Webviews from "/renderer/components/webviews";
+import Settings from "/renderer/components/settings";
 
 const Base = styled.div`
   position: relative;
@@ -26,7 +28,7 @@ const StyledDrawer = styled((props) => (
   display: flex;
   flex-shrink: 0;
   width: ${get("width")}px;
-  z-index: 1;
+  z-index: ${CONTENT};
   
   & .paper {
     width: ${get("width")}px;
@@ -41,7 +43,7 @@ const MainContent = styled.main`
   width: 100%;
   height: 100%;
   background-color: ${get("theme.palette.background.default")};
-  z-index: 2;
+  z-index: ${ASIDE};
 `;
 
 const LoadingBackdrop = styled.div`
@@ -56,7 +58,7 @@ const LoadingBackdrop = styled.div`
   background: white;
   font-size: 24px;
   letter-spacing: 10px;
-  z-index: 3;
+  z-index: ${BLOCKING_OVERLAY};
 `;
 
 const DrawerWidth = {
@@ -70,7 +72,7 @@ class App extends PureComponent {
   }
 
   render() {
-    const { theme, isAppReady, isDockExpanded } = this.props;
+    const { theme, isAppReady, isDockExpanded, isSettingsVisible } = this.props;
 
     return (
       <Base>
@@ -95,6 +97,9 @@ class App extends PureComponent {
             ... Loading ...
           </LoadingBackdrop>
         )}
+        {isSettingsVisible && (
+          <Settings />
+        )}
       </Base>
     );
   }
@@ -104,6 +109,7 @@ App.propTypes = {
   theme: PropTypes.object,
   isAppReady: PropTypes.bool,
   isDockExpanded: PropTypes.bool,
+  isSettingsVisible: PropTypes.bool,
   onMount: PropTypes.func
 };
 
@@ -111,6 +117,7 @@ App.defaultProps = {
   theme: {},
   isAppReady: false,
   isDockExpanded: false,
+  isSettingsVisible: false,
   onMount: (() => {})
 };
 

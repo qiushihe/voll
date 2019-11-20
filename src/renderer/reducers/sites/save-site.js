@@ -4,11 +4,14 @@ import pick from "lodash/fp/pick";
 import { siteAttributes } from "/renderer/actions/sites.action";
 
 export default (state = {}, { site }) => {
-  const attrs = pick(siteAttributes)(site);
-  const id = attrs.id || uuidv4();
+  const siteAttrs = pick(siteAttributes)(site);
+  const siteId = siteAttrs.id || uuidv4();
 
   return {
     ...state,
-    [id]: { id, ...attrs }
+    [siteId]: {
+      id: siteId,
+      ...siteAttrs
+    }
   };
 };

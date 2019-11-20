@@ -31,34 +31,60 @@ class Sites extends EventEmitter {
         spellCheckLanguage: this.spell.getLanguage()
       });
 
-      return this.preloads.preparePreloads().then(() => (
-        this.settings.ensureReady()
-      )).then(({ remoteSettings }) => {
-        const sitesReady = flow([
-          getOr([], "sites"),
+      return this.preloads.preparePreloads()
+        .then(() => this.settings.ensureReady())
+        .then((settings) => Promise.all([
+          settings,
+          settings.getLocalSettings(),
+          settings.getRemoteSettings()
+        ]))
+        .then(([
+          settings,
+          localSettings,
+          remoteSettings
+        ]) => Promise.all([
+          settings,
+          localSettings.getSites(),
+          remoteSettings.getSites(),
+          remoteSettings.isValid(),
+        ]))
+        .then(([
+          settings,
+          localSites,
+          remoteSites,
+          isRemoteValid
+        ]) => {
+          if (isRemoteValid) {
+            console.log("[Sites] Remote valid; Overriding local sites");
+            return settings.updateLocalSettings({ sites: remoteSites })
+              .then((localSettings) => localSettings.getSites())
+          } else {
+            console.log("[Sites] Remote invalid; Using local sites");
+            return localSites;
+          }
+        })
+        .then(flow([
           uncappedMap((_site, index) => {
             const siteId = uuidv4();
             const site = { ..._site, id: siteId, index };
 
-            console.log("[Sites] Setup site", siteId, site.name, site.url);
+            console.log("[Sites] Setup site preload", siteId, site.name, site.url);
 
             return this.preloads.setupPreload({ site }).then((preloadFilePath) => {
-              site.preloadUrl = `file:///${preloadFilePath}`;
-              this.allSites[siteId] = site;
+              this.allSites[siteId] = {
+                ...site,
+                preloadUrl: `file:///${preloadFilePath}`
+              };
             });
           }),
           (promises) => Promise.all(promises)
-        ])(remoteSettings);
-
-        return sitesReady.then(() => values(this.allSites));
-      });
+        ]))
+        .then(() => this);
     });
   }
 
   ensureReady() {
-    return this.readyPromise.then(() => {
-      return this.getSitesArray();
-    });
+    return this.readyPromise;
   }
 
   getSiteById(siteId) {
@@ -67,6 +93,37 @@ class Sites extends EventEmitter {
 
   getSitesArray() {
     return values(this.allSites);
+  }
+
+  saveSite(siteToSave) {
+    const { id: siteId } = siteToSave;
+    const existingSite = getOr({ id: siteId }, siteId)(this.allSites);
+
+    const getPreloadCode = getOr("", "preloadCode");
+    const isPreloadCodeChanged = getPreloadCode(existingSite) !== getPreloadCode(siteToSave);
+
+    console.log("[Sites] Save site", siteId);
+    return Promise.resolve()
+      .then(() => {
+        if (isPreloadCodeChanged) {
+          console.log("[Sites] Preload code changed");
+          return this.preloads.setupPreload({ site: siteToSave })
+            .then((preloadFilePath) => {
+              console.log("[Sites] New preload file path", preloadFilePath);
+              return {
+                ...siteToSave,
+                preloadUrl: `file:///${preloadFilePath}`
+              };
+            });
+        } else {
+          console.log("[Sites] Preload code unchanged");
+          return siteToSave;
+        }
+      })
+      .then((site) => {
+        this.allSites[siteId] = site;
+        return site;
+      });
   }
 
   setUnreadCount(siteId, unreadCount) {

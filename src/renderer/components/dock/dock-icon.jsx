@@ -18,6 +18,7 @@ const Base = styled((props) => (
   background-color: transparent;
   border-right: none;
   box-shadow: none;
+  flex-shrink: 0;
 
   &.selected {
     color: black;
@@ -36,6 +37,21 @@ const Icon = styled.div`
   margin: 0 8px;
   cursor: pointer;
   user-select: none;
+`;
+
+const IconInner = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  flex: 1 1 auto;
+  font-size: 42px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  overflow: hidden;
 `;
 
 const overrideDenseTextStyles = () => (`
@@ -88,10 +104,12 @@ class DockIcon extends PureComponent {
         onMouseLeave={this.handleMouseLeave}
       >
         <Icon>
-          {renderIcon({
-            isActive,
-            isHover
-          })}
+          <IconInner>
+            {renderIcon({
+              isActive,
+              isHover
+            })}
+          </IconInner>
         </Icon>
         {showLabel && (
           <Label disableTypography={true}>

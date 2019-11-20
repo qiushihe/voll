@@ -4,11 +4,11 @@ import isEmpty from "lodash/fp/isEmpty";
 import UA from "useragent-generator";
 
 import {
-  id,
   url,
   sessionId,
   transientSession,
-  preloadUrl
+  preloadUrl,
+  checksum
 } from "/renderer/selectors/site.selector";
 
 import { activeSiteId } from "/renderer/selectors/webviews.selector";
@@ -33,11 +33,11 @@ const getPartition = ({ sessionId, transientSession }) => {
 
 export default connect(
   createStructuredSelector({
-    id,
     url,
     sessionId,
     transientSession,
     preloadUrl,
+    checksum,
     activeSiteId,
     showUrl: showSiteUrl
   }),
@@ -54,15 +54,15 @@ export default connect(
       transientSession: stateProps.transientSession
     }),
     useragent: UA.chrome(71), // TODO: Implement component width detection and switch to a mobile device's UA
-    isActive: stateProps.id === stateProps.activeSiteId,
+    isActive: ownProps.siteId === stateProps.activeSiteId,
     onIpcAction: ({ evtName, evtArgs }) => dispatchProps.onIpcAction({
-      siteId: stateProps.id,
+      siteId: ownProps.siteId,
       evtName,
       evtArgs
     }),
     onMount: ({ webContentId }) => {
       dispatchProps.updateSiteWebContent({
-        siteId: stateProps.id,
+        siteId: ownProps.siteId,
         webContentId
       });
     }

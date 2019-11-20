@@ -1,6 +1,7 @@
 import { join as joinPath } from "path";
 import { readFileSync } from "graceful-fs";
 import debounce from "lodash/fp/debounce";
+import getOr from "lodash/fp/getOr";
 
 import {
   app as electronApp,
@@ -89,14 +90,28 @@ class App {
   createMainWindow() {
     return combineResult(
       ({ ipcServer }) => ipcServer.getActiveSiteId(),
-      ({ settings }) => settings.ensureReady().then(({ localSettings }) => localSettings),
-      (activeSiteId, localSettings) => ({ activeSiteId, ...localSettings })
+      ({ settings }) => settings.ensureReady().then((settings) => (
+        settings.getLocalSettings()
+      )).then((localSettings) => (
+        Promise.all([
+          localSettings.getMainWindowStates(),
+          localSettings.getPreferences()
+        ])
+      )),
+      (activeSiteId, [mainWindowStates, preferences]) => ({
+        activeSiteId,
+        mainWindowStates,
+        preferences
+      })
     )({
       settings: this.settings,
       ipcServer: this.ipcServer
-    }).then(({ activeSiteId, posX, posY, width, height }) => {
+    }).then(({
+      activeSiteId,
+      mainWindowStates: { posX, posY, width, height },
+      preferences
+    }) => {
       this.mainWindow = new MainWindow({
-        preventClose: false, // TODO: Read from remote settings
         ipcServer: this.ipcServer,
         sites: this.sites,
         appVersion: this.packageJson.version,
@@ -106,6 +121,8 @@ class App {
         width,
         height
       });
+
+      this.mainWindow.setPreventClose(getOr(false, "hideWindowOnClose")(preferences));
 
       this.mainWindow.on("site-web-content-ready", this.handleMainWindowSiteWebContentReady);
       this.mainWindow.on("close-prevented", this.handleMainWindowClosePrevented);

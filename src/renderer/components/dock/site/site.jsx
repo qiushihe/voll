@@ -1,4 +1,4 @@
-import { PureComponent } from "react";
+import { PureComponent, Children } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import isEmpty from "lodash/fp/isEmpty";
@@ -6,21 +6,6 @@ import isEmpty from "lodash/fp/isEmpty";
 import { Explore as ExploreIcon } from "@material-ui/icons";
 
 import DockIcon from "../dock-icon";
-
-const IconContainer = styled.div`
-  box-sizing: border-box;
-  display: flex;
-  position: relative;
-  flex-direction: column;
-  flex: 1 1 auto;
-  font-size: 42px;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  border-radius: 6px;
-  overflow: hidden;
-`;
 
 const IconImage = styled.img`
   width: 100%;
@@ -61,23 +46,21 @@ class Site extends PureComponent {
     this.renderIcon = this.renderIcon.bind(this);
   }
 
-  renderIcon({ isActive, isHover }) {
-    const { iconSrc, unreadCount } = this.props;
+  renderIcon() {
+    const { hideBadge, iconSrc, unreadCount } = this.props;
 
-    return (
-      <IconContainer isActive={isActive} isHover={isHover}>
-        {isEmpty(iconSrc) ? (
-          <IconPlaceholder />
-        ) : (
-          <IconImage src={iconSrc} />
-        )}
-        {unreadCount > 0 ? (
-          <IconBadge>
-            {unreadCount > 999 ? "999+" : unreadCount}
-          </IconBadge>
-        ) : null}
-      </IconContainer>
-    );
+    return Children.toArray([
+      isEmpty(iconSrc) ? (
+        <IconPlaceholder />
+      ) : (
+        <IconImage src={iconSrc} />
+      ),
+      (unreadCount > 0 && !hideBadge) ? (
+        <IconBadge>
+          {unreadCount > 999 ? "999+" : unreadCount}
+        </IconBadge>
+      ) : null
+    ]);
   }
 
   render() {
@@ -100,6 +83,7 @@ Site.propTypes = {
   iconSrc: PropTypes.string,
   unreadCount: PropTypes.number,
   showLabel: PropTypes.bool,
+  hideBadge: PropTypes.bool,
   isActive: PropTypes.bool,
   activateSite: PropTypes.func
 };
@@ -109,6 +93,7 @@ Site.defaultProps = {
   iconSrc: null,
   unreadCount: 0,
   showLabel: false,
+  hideBadge: false,
   isActive: false,
   activateSite: (() => {})
 };

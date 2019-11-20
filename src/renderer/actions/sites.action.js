@@ -1,17 +1,19 @@
 import { createAction } from "redux-actions";
-import map from "lodash/fp/map";
 
 import {
   fetchSites as fetchSitesRequest,
+  saveSite as saveSiteRequest,
   updateSiteWebContent as updateSiteWebContentRequest,
   updateSiteUnreadCount as updateSiteUnreadCountRequest,
   fetchActiveSiteId as fetchActiveSiteIdRequest,
   updateActiveSiteId as updateActiveSiteIdRequest
 } from "/renderer/api/sites.api";
 
-import { pickObjectWithAttributes } from "/renderer/helpers/pick.helper";
+import { pickArrayObjectWithAttributes } from "/renderer/helpers/pick.helper";
 
-export const SITES_ADD_SITE = "SITES_ADD_SITE";
+export const SITES_CLEAR_SITES = "SITES_CLEAR_SITES";
+export const SITES_ADD_SITES = "SITES_ADD_SITES";
+export const SITES_SAVE_SITE = "SITES_SAVE_SITE";
 
 export const siteAttributes = [
   "id",
@@ -23,13 +25,34 @@ export const siteAttributes = [
   "transientSession",
   "externalUrlPatterns",
   "internalUrlPatterns",
-  "preloadUrl"
+  "preloadUrl",
+  "preloadCode"
 ];
+
+export const clearSites = createAction(SITES_CLEAR_SITES);
+
+export const addSites = createAction(
+  SITES_ADD_SITES,
+  pickArrayObjectWithAttributes("sites", siteAttributes)
+);
 
 export const fetchSites = () => (dispatch) => {
   return fetchSitesRequest().then(({ sites }) => {
-    map((site) => dispatch(addSite({ site })))(sites);
+    dispatch(clearSites());
+    dispatch(addSites({ sites }));
   });
+};
+
+export const saveSite = ({ site, onSuccess, onError }) => (dispatch) => {
+  return saveSiteRequest({ site })
+    .then(({ site: savedSite }) => {
+      dispatch({
+        type: SITES_SAVE_SITE,
+        payload: { site: savedSite }
+      });
+    })
+    .then(onSuccess)
+    .catch(onError);
 };
 
 export const updateSiteWebContent = ({ siteId, webContentId }) => () => {
@@ -47,8 +70,3 @@ export const fetchActiveSiteId = () => () => {
 export const updateActiveSiteId = ({ activeSiteId }) => () => {
   return updateActiveSiteIdRequest({ activeSiteId });
 };
-
-export const addSite = createAction(
-  SITES_ADD_SITE,
-  pickObjectWithAttributes("site", siteAttributes)
-);

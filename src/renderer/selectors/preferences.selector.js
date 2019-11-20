@@ -13,6 +13,11 @@ export const showSiteUrl = createSelector(
   get("showSiteUrl")
 );
 
+export const hideUnreadBadge = createSelector(
+  preferences,
+  get("hideUnreadBadge")
+);
+
 export const hideWindowOnClose = createSelector(
   preferences,
   get("hideWindowOnClose")

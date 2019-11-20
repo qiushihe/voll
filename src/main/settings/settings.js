@@ -13,28 +13,40 @@ class Settings {
 
     this.remoteSettings = null;
 
-    this.readyPromise = Promise.resolve().then(() => {
-      return this.localSettings.getSettings().then((localSettings) => {
-        this.remoteSettings = new RemoteSettings({
-          settingsJsonUrl: localSettings.settingsJsonUrl
-        });
-        return this.remoteSettings.getSettings();
-      });
-    });
+    this.readyPromise = Promise.resolve()
+      .then(() => this.localSettings.ensureReady())
+      .then(() => {
+        if (!this.remoteSettings) {
+          return this.localSettings.getRemoteParameters().then(({ settingsJsonUrl }) => {
+            this.remoteSettings = new RemoteSettings({ settingsJsonUrl });
+            return this.remoteSettings;
+          });
+        } else {
+          return this.remoteSettings;
+        }
+      })
+      .then(() => this.remoteSettings.ensureReady())
+      .then(() => this);
   }
 
   ensureReady() {
-    return this.readyPromise.then(() => {
-      return this.localSettings.getSettings().then((localSettings) => {
-        return this.remoteSettings.getSettings().then((remoteSettings) => {
-          return { localSettings, remoteSettings };
-        });
-      });
-    });
+    return this.readyPromise;
+  }
+
+  getLocalSettings() {
+    return this.localSettings;
   }
 
   updateLocalSettings(updates) {
     return this.localSettings.updateSettings(updates);
+  }
+
+  getRemoteSettings() {
+    return this.remoteSettings;
+  }
+
+  updateRemoteSettings(updates) {
+    return this.remoteSettings.updateSettings(updates);
   }
 }
 
