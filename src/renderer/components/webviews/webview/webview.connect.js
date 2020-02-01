@@ -53,7 +53,7 @@ export default connect(
       sessionId: stateProps.sessionId,
       transientSession: stateProps.transientSession
     }),
-    useragent: UA.chrome(71), // TODO: Implement component width detection and switch to a mobile device's UA
+    useragent: UA.firefox(71), // TODO: Implement component width detection and switch to a mobile device's UA
     isActive: ownProps.siteId === stateProps.activeSiteId,
     onIpcAction: ({ evtName, evtArgs }) => dispatchProps.onIpcAction({
       siteId: ownProps.siteId,
