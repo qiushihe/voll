@@ -64,35 +64,12 @@ class Preloads {
 
     return this.promisedReadFile().then((preloadCore) => {
       // console.log("[Preload] Got preload core.", preloadCore);
+      console.log("[Preload] Got preload core.");
 
       const preloadFileContent = compact([preloadCore, preloadCode])
         .join("\n")
         .replace("$$$SPELL_CHECK_LANGUAGE$$$", this.spellCheckLanguage);
-
-      return this.promisedWriteFile(preloadFilePath, preloadFileContent).then(() => {
-        console.log("[Preload] Setup preload for site", siteId);
-
-        // This needs to be what this function ultimately resolve to.
-        return preloadFilePath;
-      }).catch((err) => {
-        console.error("[Preload] Error setting up preload for site", siteId, err);
-        throw err;
-      });
-    }).catch((err) => {
-      console.error("[Preload] Error reading preload core.", err);
-      throw err;
-    });
-  }
-
-  setupPreload({ site }) {
-    const { id: siteId, preloadCode } = site;
-
-    return this.promisedReadFile().then((preloadCore) => {
-      // console.log("[Preload] Got preload core.", preloadCore);
-
-      const preloadFileContent = compact([preloadCore, preloadCode])
-        .join("\n")
-        .replace("$$$SPELL_CHECK_LANGUAGE$$$", this.spellCheckLanguage);
+      console.log("[Preload] Set speel check language to:", this.spellCheckLanguage);
 
       // TODO: Should delete the previous preload file when a new one with different
       //       checksum is generated.
@@ -102,7 +79,8 @@ class Preloads {
       );
 
       return this.promisedWriteFile(preloadFilePath, preloadFileContent).then(() => {
-        console.log("[Preload] Setup preload for site", siteId);
+        // console.log("[Preload] Setup preload for site", siteId, preloadFilePath, preloadFileContent);
+        console.log("[Preload] Setup preload for site", siteId, preloadFilePath);
 
         // This needs to be what this function ultimately resolve to.
         return preloadFilePath;

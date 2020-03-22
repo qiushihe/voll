@@ -12,6 +12,8 @@ import { getInternalUrlChecker } from "/main/url-checker";
 
 import Icon from "./icon";
 
+const ABOUT_BLANK_REGEXP = new RegExp("^about:blank");
+
 class MainWindow extends EventEmitter {
   constructor({
     preventClose,
@@ -131,11 +133,28 @@ class MainWindow extends EventEmitter {
       internalUrlPatterns: site.internalUrlPatterns
     });
 
+
+
     webContents.on("new-window", (evt, url) => {
       if (!isUrlInternal(url)) {
         console.log("[MainWindow] Intercepting external URL from new-window", url);
-        evt.preventDefault();
-        electronShell.openExternal(url);
+
+        // Because some sites (i.e. Gmail) uses this strategy where it:
+        // * Hijack the "click" event on links in email messages
+        // * When links is clicked, first open a "about:blank" new window
+        // * Then from the parent window, the hijacking code then instruct the new window to
+        //   navigate to the URL the link was linking to
+        // ... instead of just letting that link operate normally as ... oh I don't know
+        // ... A FUCKING LINK? YOU FUCKING PIECE OF SHIT!
+        //
+        // Therefore we have to not try to call `electronShell.openExternal` here and let
+        // the new-window with the "about:blank" URL open.
+        if (url.match(ABOUT_BLANK_REGEXP)) {
+          console.log("[MainWindow] Intercepted external URL is about:blank, abort interception");
+        } else {
+          evt.preventDefault();
+          electronShell.openExternal(url);
+        }
       }
     });
 
