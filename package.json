@@ -6,7 +6,7 @@
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
-    "clean": "shx rm -fr ./dist/* ./build/*",
+    "clean": "shx rm -fr ./dist/* ./build/* ./dist.zip",
     "build-dev": "npm run clean && webpack --mode development",
     "build-prod": "npm run clean && webpack -p --mode production",
     "build-icons": "node ./scripts/rebuild-icons.js",
@@ -15,7 +15,8 @@
     "package": "npm run build-prod && npm run build-package-json && npm run build-icons && run-script-os",
     "package:linux": "electron-packager ./build --icon=./build/lolgo-512.png --out=./dist",
     "package:darwin": "electron-packager ./build --icon=./build/lolgo.icns --out=./dist",
-    "package:win32": "electron-packager ./build --icon=./build/lolgo.ico --out=./dist"
+    "package:win32": "electron-packager ./build --icon=./build/lolgo.ico --out=./dist",
+    "zip-package": "npm run package && cd ./dist && bestzip ../dist.zip *"
   },
   "dependencies": {},
   "devDependencies": {
@@ -31,6 +32,7 @@
     "babel-plugin-module-resolver": "^3.1.1",
     "babel-plugin-provide-modules": "^1.0.3",
     "babel-plugin-styled-components": "^1.10.0",
+    "bestzip": "^2.1.5",
     "classnames": "^2.2.6",
     "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^2.1.0",

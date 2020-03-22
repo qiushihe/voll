@@ -14,14 +14,11 @@ jobs:
         with:
           node-version: 10.x
       - run: npm install
-      - run: npm run package
-      - uses: montudor/action-zip@v0.1.0
-        with:
-          args: zip -qq -r ./voll-windows.zip ./dist
+      - run: npm run zip-package
       - uses: actions/upload-artifact@v1
         with:
           name: voll-windows.zip
-          path: ./voll-windows.zip
+          path: ./dist.zip
 
   build-macos:
     runs-on: macos-latest
@@ -31,14 +28,11 @@ jobs:
         with:
           node-version: 10.x
       - run: npm install
-      - run: npm run package
-      - uses: montudor/action-zip@v0.1.0
-        with:
-          args: zip -qq -r ./voll-macos.zip ./dist
+      - run: npm run zip-package
       - uses: actions/upload-artifact@v1
         with:
           name: voll-macos.zip
-          path: ./voll-macos.zip
+          path: ./dist.zip
 
   build-linux:
     runs-on: ubuntu-latest
@@ -48,14 +42,11 @@ jobs:
         with:
           node-version: 10.x
       - run: npm install
-      - run: npm run package
-      - uses: montudor/action-zip@v0.1.0
-        with:
-          args: zip -qq -r ./voll-linux.zip ./dist
+      - run: npm run zip-package
       - uses: actions/upload-artifact@v1
         with:
           name: voll-linux.zip
-          path: ./voll-linux.zip
+          path: ./dist.zip
 
   release:
     needs: [build-windows, build-macos, build-linux]
