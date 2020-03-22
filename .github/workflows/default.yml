@@ -14,11 +14,11 @@ jobs:
         with:
           node-version: 10.x
       - run: npm install
-      - run: npm run zip-package
+      - run: npm run package
       - uses: actions/upload-artifact@v1
         with:
           name: voll-windows.zip
-          path: ./dist.zip
+          path: ./dist
 
   build-macos:
     runs-on: macos-latest
@@ -28,11 +28,11 @@ jobs:
         with:
           node-version: 10.x
       - run: npm install
-      - run: npm run zip-package
+      - run: npm run package
       - uses: actions/upload-artifact@v1
         with:
           name: voll-macos.zip
-          path: ./dist.zip
+          path: ./dist
 
   build-linux:
     runs-on: ubuntu-latest
@@ -42,11 +42,11 @@ jobs:
         with:
           node-version: 10.x
       - run: npm install
-      - run: npm run zip-package
+      - run: npm run package
       - uses: actions/upload-artifact@v1
         with:
           name: voll-linux.zip
-          path: ./dist.zip
+          path: ./dist
 
   release:
     needs: [build-windows, build-macos, build-linux]
