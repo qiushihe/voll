@@ -1,0 +1,111 @@
+name: Default Workflow
+
+on:
+  push:
+    tags:
+      - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 10.x
+      - run: npm install
+      - run: npm run package
+      - run: npm run zip-dist
+      - run: mv ./dist.zip ./voll-windows.zip
+      - uses: actions/upload-artifact@v1
+        with:
+          name: voll-windows-artifact
+          path: ./voll-windows.zip
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 10.x
+      - run: npm install
+      - run: npm run package
+      - run: npm run zip-dist
+      - run: mv ./dist.zip ./voll-macos.zip
+      - uses: actions/upload-artifact@v1
+        with:
+          name: voll-macos-artifact
+          path: ./voll-macos.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 10.x
+      - run: npm install
+      - run: npm run package
+      - run: npm run zip-dist
+      - run: mv ./dist.zip ./voll-linux.zip
+      - uses: actions/upload-artifact@v1
+        with:
+          name: voll-linux-artifact
+          path: ./voll-linux.zip
+
+  release:
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v1
+        with:
+          name: voll-windows-artifact
+          path: ./artifacts
+      - uses: actions/download-artifact@v1
+        with:
+          name: voll-macos-artifact
+          path: ./artifacts
+      - uses: actions/download-artifact@v1
+        with:
+          name: voll-linux-artifact
+          path: ./artifacts
+      - run: ls ./artifacts
+      - name: Create Release
+        id: create-release
+        uses: actions/create-release@latest
+        env:
+          # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Windows Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./artifacts/voll-windows.zip
+          asset_name: voll-windows.zip
+          asset_content_type: application/zip
+      - name: Upload macOS Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./artifacts/voll-macos.zip
+          asset_name: voll-macos.zip
+          asset_content_type: application/zip
+      - name: Upload Linux Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./artifacts/voll-linux.zip
+          asset_name: voll-linux.zip
+          asset_content_type: application/zip
