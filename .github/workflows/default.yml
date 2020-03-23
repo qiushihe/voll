@@ -55,15 +55,16 @@ jobs:
       - uses: actions/download-artifact@v1
         with:
           name: voll-windows.zip
-          path: ./voll-windows.zip
+          path: ./artifacts
       - uses: actions/download-artifact@v1
         with:
           name: voll-macos.zip
-          path: ./voll-macos.zip
+          path: ./artifacts
       - uses: actions/download-artifact@v1
         with:
           name: voll-linux.zip
-          path: ./voll-linux.zip
+          path: ./artifacts
+      - run: ls ./artifacts
       - name: Create Release
         id: create-release
         uses: actions/create-release@latest
@@ -81,7 +82,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ./voll-windows.zip
+          asset_path: ./artifacts/voll-windows.zip
           asset_name: voll-windows.zip
           asset_content_type: application/zip
       - name: Upload macOS Asset
@@ -90,7 +91,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ./voll-macos.zip
+          asset_path: ./artifacts/voll-macos.zip
           asset_name: voll-macos.zip
           asset_content_type: application/zip
       - name: Upload Linux Asset
@@ -99,6 +100,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ./voll-linux.zip
+          asset_path: ./artifacts/voll-linux.zip
           asset_name: voll-linux.zip
           asset_content_type: application/zip
