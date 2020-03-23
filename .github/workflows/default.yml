@@ -15,10 +15,12 @@ jobs:
           node-version: 10.x
       - run: npm install
       - run: npm run package
+      - run: npm run zip-dist
+      - run: mv ./dist.zip ./voll-windows.zip
       - uses: actions/upload-artifact@v1
         with:
-          name: voll-windows.zip
-          path: ./dist
+          name: voll-windows-artifact
+          path: ./voll-windows.zip
 
   build-macos:
     runs-on: macos-latest
@@ -29,10 +31,12 @@ jobs:
           node-version: 10.x
       - run: npm install
       - run: npm run package
+      - run: npm run zip-dist
+      - run: mv ./dist.zip ./voll-macos.zip
       - uses: actions/upload-artifact@v1
         with:
-          name: voll-macos.zip
-          path: ./dist
+          name: voll-macos-artifact
+          path: ./voll-macos.zip
 
   build-linux:
     runs-on: ubuntu-latest
@@ -43,10 +47,12 @@ jobs:
           node-version: 10.x
       - run: npm install
       - run: npm run package
+      - run: npm run zip-dist
+      - run: mv ./dist.zip ./voll-linux.zip
       - uses: actions/upload-artifact@v1
         with:
-          name: voll-linux.zip
-          path: ./dist
+          name: voll-linux-artifact
+          path: ./voll-linux.zip
 
   release:
     needs: [build-windows, build-macos, build-linux]
@@ -54,15 +60,15 @@ jobs:
     steps:
       - uses: actions/download-artifact@v1
         with:
-          name: voll-windows.zip
+          name: voll-windows-artifact
           path: ./artifacts
       - uses: actions/download-artifact@v1
         with:
-          name: voll-macos.zip
+          name: voll-macos-artifact
           path: ./artifacts
       - uses: actions/download-artifact@v1
         with:
-          name: voll-linux.zip
+          name: voll-linux-artifact
           path: ./artifacts
       - run: ls ./artifacts
       - name: Create Release
