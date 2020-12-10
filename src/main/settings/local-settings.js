@@ -14,12 +14,17 @@ class LocalSettings {
       console.log("[LocalSettings] Reading local settings from", this.settingsFilePath);
       readFile(this.settingsFilePath, "utf8", (err, data) => {
         if (err) {
-          console.error("[LocalSettings] Error reading app settings.", err);
+          console.error("[LocalSettings] Error reading app settings:", err);
           reject(err);
         } else {
-          const settings = JSON.parse(data);
-          // console.log("[LocalSettings] Got local settings", JSON.stringify(settings, null, 2));
-          resolve(settings);
+          try {
+            const settings = JSON.parse(data);
+            // console.log("[LocalSettings] Got local settings", JSON.stringify(settings, null, 2));
+            resolve(settings);
+          } catch (err) {
+            console.error("[LocalSettings] Error parsing app settings:", err);
+            reject(err);
+          }
         }
       });
     });

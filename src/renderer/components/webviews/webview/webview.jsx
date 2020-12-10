@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 
 import contextMenu from "/common/context-menu";
-import {sessionId} from '/renderer/selectors/site.selector';
 
 const Base = styled.div`
   display: flex;
@@ -41,16 +40,6 @@ class Webview extends PureComponent {
 
     const webview = this.webviewRef.current;
 
-    contextMenu({
-      window: webview,
-      spellChecker: {
-        checkWords: (word) => ipcRenderer.sendSync("sync-check-spell", word)
-      },
-      showCopyImageAddress: true,
-      showSaveImageAs: true,
-      showInspectElement: true
-    });
-
     webview.addEventListener("did-navigate", (evt) => {
       this.setState({ currentUrl: evt.url });
     });
@@ -63,12 +52,22 @@ class Webview extends PureComponent {
       onIpcAction({ evtName: evt.channel, evtArgs: evt.args});
     });
 
-    // TODO: Figure out:
-    //       1. Why we can call `webview.getWebContents` here without having to wait for
-    //          the `webview`'s `dom-ready` event; and ...
-    //       2. Why is it that if we were to wait for the `webview`'s `dom-ready` event
-    //          the `id` of the webContents would be different.
-    onMount({ webContentId: webview.getWebContents().id });
+    // After the webview is mounted and ready ...
+    webview.addEventListener("dom-ready", () => {
+      // Setup context menu
+      contextMenu({
+        window: webview,
+        spellChecker: {
+          checkWords: (word) => ipcRenderer.sendSync("sync-check-spell", word)
+        },
+        showCopyImageAddress: true,
+        showSaveImageAs: true,
+        showInspectElement: true
+      });
+
+      // Notify main process of the webview's webcontent ID
+      onMount({ webContentId: webview.getWebContentsId() });
+    });
   }
 
   render() {

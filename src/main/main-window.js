@@ -53,6 +53,9 @@ class MainWindow extends EventEmitter {
         nodeIntegration: true,
         webviewTag: true,
 
+        // Enable access to the electron.remote module
+        enableRemoteModule: true,
+
         // Force overlay scrollbar
         enableBlinkFeatures: "OverlayScrollbars",
 

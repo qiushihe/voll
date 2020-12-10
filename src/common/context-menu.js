@@ -6,19 +6,27 @@ import map from "lodash/fp/map";
 import isEmpty from "lodash/fp/isEmpty";
 import isFunction from "lodash/fp/isFunction";
 import first from "lodash/fp/first";
+import constant from "lodash/fp/constant";
+import cond from "lodash/fp/cond";
+import identity from "lodash/fp/identity";
+import stubTrue from "lodash/fp/stubTrue";
 
 const getMaybeRemoteBrowserWindow = () => electron.BrowserWindow || electron.remote.BrowserWindow;
 
 const getMaybeRemoteApp = () => electron.app || electron.remote.app;
 
-const getWindowWebContent = win => win.webContents || win.getWebContents();
+const getWindowWebContent = win => win.webContents || electron.remote.webContents.fromId(win.getWebContentsId());
 
 const withSecondArg = (func) => (_, secondArg) => func(secondArg);
 
 const contextMenuCreator = (options) => (win) => {
-  const shouldShowMenu = isFunction(options.shouldShowMenu)
-    ? options.shouldShowMenu
-    : () => true;
+  const shouldShowMenu = flow([
+    get("shouldShowMenu"),
+    cond([
+      [isFunction, identity],
+      [stubTrue, constant(constant(true))]
+    ])
+  ])(options);
 
   const checkWords = get("spellChecker.checkWords")(options);
 
@@ -230,15 +238,7 @@ export default (options = {}) => {
   const createContextMenu = contextMenuCreator(options);
 
   if (options.window) {
-    const _window = options.window;
-    const webContent = getWindowWebContent(_window);
-
-    // When window is a webview that has not yet finished loading webContents is not available
-    if (webContent === undefined) {
-      _window.addEventListener("dom-ready", () => createContextMenu(_window), { once: true });
-    } else {
-      createContextMenu(_window);
-    }
+    createContextMenu(options.window);
   } else {
     map(createContextMenu)(getMaybeRemoteBrowserWindow().getAllWindows());
 
